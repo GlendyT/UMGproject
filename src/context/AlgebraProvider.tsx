@@ -1,12 +1,12 @@
 "use client";
 
-import { AlgebraContextType, AlgebraProps, FractionMatrix } from "@/types";
+import { AlgebraContextType, FractionMatrix, ProviderProps } from "@/types";
 import Fraction from "fraction.js";
 import { createContext, useState } from "react";
 
 const AlgebraContext = createContext<AlgebraContextType>(null!);
 
-const AlgebraProvider = ({ children }: AlgebraProps) => {
+const AlgebraProvider = ({ children }: ProviderProps) => {
   const [size, setSize] = useState(3);
   const [matrix, setMatrix] = useState<string[][]>(
     Array.from({ length: 3 }, () => Array(4).fill("0"))
