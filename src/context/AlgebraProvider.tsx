@@ -1,12 +1,12 @@
 "use client";
 
-import { AlgoritmoContextType, AlgoritmosProps, FractionMatrix } from "@/types";
+import { AlgebraContextType, AlgebraProps, FractionMatrix } from "@/types";
 import Fraction from "fraction.js";
 import { createContext, useState } from "react";
 
-const AlgoritmosContext = createContext<AlgoritmoContextType>(null!);
+const AlgebraContext = createContext<AlgebraContextType>(null!);
 
-const AlgoritmosProvider = ({ children }: AlgoritmosProps) => {
+const AlgebraProvider = ({ children }: AlgebraProps) => {
   const [size, setSize] = useState(3);
   const [matrix, setMatrix] = useState<string[][]>(
     Array.from({ length: 3 }, () => Array(4).fill("0"))
@@ -130,8 +130,15 @@ const AlgoritmosProvider = ({ children }: AlgoritmosProps) => {
       )
       .join("\n");
   };
+
+  const nuevo = () => {
+    setSize(3);
+    setMatrix(Array.from({ length: 3 }, () => Array(4).fill("0")));
+    setSteps([]);
+    setSolution(null);
+  };
   return (
-    <AlgoritmosContext.Provider
+    <AlgebraContext.Provider
       value={{
         size,
         setSize,
@@ -146,12 +153,13 @@ const AlgoritmosProvider = ({ children }: AlgoritmosProps) => {
         solve,
         formatNumber,
         printMatrix,
+        nuevo
       }}
     >
       {children}
-    </AlgoritmosContext.Provider>
+    </AlgebraContext.Provider>
   );
 };
 
-export { AlgoritmosProvider };
-export default AlgoritmosContext;
+export { AlgebraProvider };
+export default AlgebraContext;
