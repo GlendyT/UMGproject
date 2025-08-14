@@ -1,10 +1,9 @@
-"use client"
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { AlgebraProvider } from "@/context/AlgebraProvider";
 import { MatematicaDiscretaProvider } from "@/context/MatematicaDiscretaProvider";
-import { GoogleAnalytics } from "@next/third-parties/google";
-import { GoogleTagManager } from '@next/third-parties/google'
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 
 export const metadata: Metadata = {
   title: "UMG Programms",

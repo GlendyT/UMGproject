@@ -1,4 +1,5 @@
-import { routetype, slugstype } from "@/types";
+import { routetype, slugstype } from "@/types/index";
+
 
 export const LinkRoutes: routetype[] = [
   {
