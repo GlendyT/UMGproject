@@ -21,8 +21,8 @@ export default function RootLayout({
         <AlgebraProvider>
           <MatematicaDiscretaProvider>{children}
 
-            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
-            <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
+            <GoogleAnalytics gaId="G-4DQL7T0JLJ" />
+            <GoogleTagManager gtmId="GTM-TG63XJCB"/>
           </MatematicaDiscretaProvider>
         </AlgebraProvider>
       </body>
