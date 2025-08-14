@@ -1,32 +1,39 @@
-export const LinkRoutes = [
+import { routetype, slugstype } from "@/types";
+
+export const LinkRoutes: routetype[] = [
   {
     id: 1,
     name: "Algoritmos",
     href: "/algoritmos",
+    bgColor: "bg-amber-200",
   },
   {
     id: 2,
     name: "Precalculo",
     href: "/precalculo",
+    bgColor: "bg-teal-200",
   },
   {
     id: 3,
     name: "Algebra Lineal",
     href: "/algebralineal",
+    bgColor: "bg-red-200",
   },
   {
     id: 4,
     name: "Contabilidad II",
     href: "/contabilidad",
+    bgColor: "bg-blue-200",
   },
   {
     id: 5,
     name: "Matematica Discreta",
     href: "/matematicadiscreta",
+    bgColor: "bg-purple-200",
   },
 ];
 
-export const MatematicaDiscretaSlugs = [
+export const MatematicaDiscretaSlugs: slugstype[] = [
   {
     id: 1,
     name: "Conversion de binario",
@@ -36,5 +43,13 @@ export const MatematicaDiscretaSlugs = [
     id: 2,
     name: "Compuertas logicas",
     href: "/matematicadiscreta/compuertas-logicas",
+  },
+];
+
+export const AlgebraLinealSlugs: slugstype[] = [
+  {
+    id: 1,
+    name: "Metodo de Gauss",
+    href: "/algebralineal/metodo-gauss",
   },
 ];

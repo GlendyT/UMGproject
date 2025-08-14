@@ -1,14 +1,16 @@
 "use client";
 
+import BotonBack from "@/utils/BotonBack";
 import useMatematicaDiscreta from "@/hooks/useMatematicaDiscreta";
-import { GateType } from "@/types";
+import { GateType } from "@/types/index";
 
 const CompuertasLogicas: React.FC = () => {
   const { expr, setExpr, vars, table, gate, setGate, GateSymbol } =
     useMatematicaDiscreta();
 
   return (
-    <div className="p-6">
+    <section className="flex flex-col gap-2  min-h-screen bg-gray-100 p-4 ">
+      <BotonBack />
       <h1 className="text-2xl font-semibold mb-4">
         Conversor de Compuertas y Expresiones Lógicas
       </h1>
@@ -31,7 +33,7 @@ const CompuertasLogicas: React.FC = () => {
         <table className="border-collapse border w-full text-center">
           <thead>
             <tr>
-              {vars.map((v) => (
+              {vars.map((v: string) => (
                 <th key={v} className="border px-3 py-1">
                   {v}
                 </th>
@@ -75,7 +77,7 @@ const CompuertasLogicas: React.FC = () => {
           <GateSymbol gate={gate} a={0} b={0} />
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 

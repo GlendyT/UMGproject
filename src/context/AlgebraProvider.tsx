@@ -1,8 +1,8 @@
 "use client";
 
-import { AlgebraContextType, FractionMatrix, ProviderProps } from "@/types";
 import Fraction from "fraction.js";
 import { createContext, useState } from "react";
+import { AlgebraContextType, FractionMatrix, ProviderProps } from "../types";
 
 const AlgebraContext = createContext<AlgebraContextType>(null!);
 
@@ -38,7 +38,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
     // Eliminación hacia adelante (Gauss sin normalizar pivotes)
     for (let k = 0; k < n - 1; k++) {
-      // 🔹 Si el pivote es cero, intercambiar filas
+      // Si el pivote es cero, intercambiar filas
       if (m[k][k].equals(0)) {
         let swapRow = -1;
         for (let r = k + 1; r < n; r++) {
@@ -47,23 +47,16 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
             break;
           }
         }
-        if (swapRow === -1) {
-          stepLog.push(
-            `Error: pivote en columna ${
-              k + 1
-            } es cero y no se encontró fila para intercambiar.`
-          );
-          setSteps(stepLog);
-          return;
+        if (swapRow !== -1) {
+          [m[k], m[swapRow]] = [m[swapRow], m[k]];
+          stepLog.push(`Intercambiando fila ${k + 1} con fila ${swapRow + 1}`);
+          stepLog.push(printMatrix(m));
         }
-        [m[k], m[swapRow]] = [m[swapRow], m[k]];
-        stepLog.push(`Intercambiando fila ${k + 1} con fila ${swapRow + 1}`);
-        stepLog.push(printMatrix(m));
       }
 
-      // 🔹 Eliminación hacia abajo
+      // Eliminación hacia abajo
       for (let i = k + 1; i < n; i++) {
-        if (m[i][k].equals(0)) continue; // Nada que eliminar
+        if (m[i][k].equals(0)) continue;
         const factorA = m[k][k];
         const factorB = m[i][k];
         m[i] = m[i].map((_, j) =>
@@ -78,36 +71,102 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       }
     }
 
-    // Sustitución hacia atrás
-    const x: Fraction[] = Array(n).fill(new Fraction(0));
-    for (let i = n - 1; i >= 0; i--) {
-      let sum = new Fraction(0);
-      for (let j = i + 1; j < n; j++) {
-        sum = sum.add(m[i][j].mul(x[j]));
-      }
-
-      if (m[i][i].equals(0)) {
+    // Verificar contradicciones
+    for (let i = 0; i < n; i++) {
+      const allZeroCoeffs = m[i].slice(0, n).every((val) => val.equals(0));
+      if (allZeroCoeffs && !m[i][n].equals(0)) {
         stepLog.push(
-          `Error: coeficiente en posición (${i + 1},${
-            i + 1
-          }) es cero. Sistema sin solución única.`
+          `El sistema no tiene solución (fila ${i + 1} contradictoria).`
         );
         setSolution(null);
         setSteps(stepLog);
         return;
       }
-
-      x[i] = m[i][n].sub(sum).div(m[i][i]);
-      stepLog.push(
-        `De la ecuación ${i + 1}: x${i + 1} = ${formatNumber(x[i])}`
-      );
     }
 
-    setSolution(x);
+    // Calcular rango
+    let rank = 0;
+    for (let i = 0; i < n; i++) {
+      const notAllZero = m[i].slice(0, n).some((val) => !val.equals(0));
+      if (notAllZero) rank++;
+    }
+    const infiniteSolutions = rank < n;
+
+    // Variables para la solución
+    const paramNames = infiniteSolutions
+      ? Array.from({ length: n - rank }, (_, idx) => `t${idx + 1}`)
+      : [];
+    const x: (string | Fraction)[] = Array(n).fill(new Fraction(0));
+
+    // Sustitución hacia atrás
+    for (let i = n - 1; i >= 0; i--) {
+      const pivotCol = m[i].findIndex((val, idx) => idx < n && !val.equals(0));
+
+      if (pivotCol === -1) continue; // fila nula
+
+      let sum = new Fraction(0);
+      for (let j = pivotCol + 1; j < n; j++) {
+        if (typeof x[j] === "string") {
+          // Variable libre, no la sumamos como fracción
+          continue;
+        }
+        sum = sum.add(m[i][j].mul(x[j] as Fraction));
+      }
+
+      // Determinar si hay variables libres en esta ecuación
+      const hasFreeVar = m[i]
+        .slice(pivotCol + 1, n)
+        .some((_, j) => typeof x[pivotCol + 1 + j] === "string");
+
+      if (hasFreeVar) {
+        // Representar con parámetros
+        let expr = `${m[i][n].sub(sum).div(m[i][pivotCol]).toFraction(false)}`;
+        for (let j = pivotCol + 1; j < n; j++) {
+          if (typeof x[j] === "string" && !m[i][j].equals(0)) {
+            const coeff = m[i][j].neg().div(m[i][pivotCol]);
+            expr +=
+              coeff.s < 0
+                ? ` - ${coeff.abs().toFraction(false)}·${x[j]}`
+                : ` + ${coeff.toFraction(false)}·${x[j]}`;
+          }
+        }
+        x[pivotCol] = expr;
+      } else {
+        x[pivotCol] = m[i][n].sub(sum).div(m[i][pivotCol]);
+      }
+    }
+
+    // Asignar variables libres
+    if (infiniteSolutions) {
+      let pIndex = 0;
+      for (let i = 0; i < n; i++) {
+        if (
+          typeof x[i] === "object" &&
+          (x[i] as Fraction).equals(0) &&
+          m.every((row) => row[i].equals(0))
+        ) {
+          x[i] = paramNames[pIndex++];
+        }
+      }
+      stepLog.push("El sistema tiene infinitas soluciones.");
+    }
+
+    // Mostrar la solución
+    stepLog.push("Solución:");
+    x.forEach((val, idx) => {
+      if (typeof val === "string") {
+        stepLog.push(`x${idx + 1} = ${val}`);
+      } else {
+        stepLog.push(`x${idx + 1} = ${formatNumber(val)}`);
+      }
+    });
+
+    setSolution([]); // para no romper tu estado original
     setSteps(stepLog);
   };
 
   const formatNumber = (val: Fraction) => {
+    if (val === null) return "t";
     if (val.mod(1).equals(0)) {
       // Es un número entero, mostrar como entero
       return val.valueOf().toString();
@@ -153,7 +212,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         solve,
         formatNumber,
         printMatrix,
-        nuevo
+        nuevo,
       }}
     >
       {children}

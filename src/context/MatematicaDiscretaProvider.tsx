@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo, useState } from "react";
-
+import { createContext } from "react";
 import {
   BinTerm,
   DivRow,
@@ -8,8 +8,7 @@ import {
   MatematicaDiscretaContextType,
   Mode,
   ProviderProps,
-} from "@/types";
-import { createContext } from "react";
+} from "../types";
 
 const MatematicaDiscretaContext = createContext<MatematicaDiscretaContextType>(
   null!
@@ -265,7 +264,7 @@ const MatematicaDiscretaProvider = ({ children }: ProviderProps) => {
     );
   };
 
-    const [gate, setGate] = useState<GateType>("AND");
+  const [gate, setGate] = useState<GateType>("AND");
   const [expr, setExpr] = useState("¬A·B·C·¬(A + D)");
   const { vars, table } = useMemo(
     () => generateTruthTableFromExpression(expr),
