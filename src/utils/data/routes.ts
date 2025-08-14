@@ -25,3 +25,16 @@ export const LinkRoutes = [
     href: "/matematicadiscreta",
   },
 ];
+
+export const MatematicaDiscretaSlugs = [
+  {
+    id: 1,
+    name: "Conversion de binario",
+    href: "/matematicadiscreta/conversion-binario",
+  },
+  {
+    id: 2,
+    name: "Compuertas logicas",
+    href: "/matematicadiscreta/compuertas-logicas",
+  },
+];

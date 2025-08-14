@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AlgebraProvider } from "@/context/AlgebraProvider";
+import { MatematicaDiscretaProvider } from "@/context/MatematicaDiscretaProvider";
 
 export const metadata: Metadata = {
   title: "UMG Programms",
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <AlgebraProvider>{children}</AlgebraProvider>
+        <AlgebraProvider>
+          <MatematicaDiscretaProvider>{children}</MatematicaDiscretaProvider>
+        </AlgebraProvider>
       </body>
     </html>
   );
