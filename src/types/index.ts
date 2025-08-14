@@ -1,11 +1,11 @@
 import { ReactNode } from "react";
 import Fraction from "fraction.js";
 
-export interface AlgoritmosProps {
+export interface AlgebraProps {
   children: ReactNode;
 }
 
-export interface AlgoritmoContextType {
+export interface AlgebraContextType {
   size: number;
   matrix: string[][];
   steps: string[];
@@ -20,6 +20,15 @@ export interface AlgoritmoContextType {
   solve: () => void;
   formatNumber: (val: Fraction) => string;
   printMatrix: (m: FractionMatrix) => string;
+  nuevo: () => void;
 }
 
 export type FractionMatrix = Fraction[][];
+
+
+export interface BotonUtilProps {
+  className: string;
+  label: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
