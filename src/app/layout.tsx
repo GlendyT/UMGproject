@@ -1,7 +1,10 @@
+"use client"
 import type { Metadata } from "next";
 import "./globals.css";
 import { AlgebraProvider } from "@/context/AlgebraProvider";
 import { MatematicaDiscretaProvider } from "@/context/MatematicaDiscretaProvider";
+import { GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleTagManager } from '@next/third-parties/google'
 
 export const metadata: Metadata = {
   title: "UMG Programms",
@@ -17,7 +20,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <AlgebraProvider>
-          <MatematicaDiscretaProvider>{children}</MatematicaDiscretaProvider>
+          <MatematicaDiscretaProvider>{children}
+
+            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
+            <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID || ""} />
+          </MatematicaDiscretaProvider>
         </AlgebraProvider>
       </body>
     </html>

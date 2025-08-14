@@ -1,5 +1,6 @@
 "use client";
 
+import BotonBack from "@/utils/BotonBack";
 import useMatematicaDiscreta from "@/hooks/useMatematicaDiscreta";
 
 const Binario = () => {
@@ -17,15 +18,13 @@ const Binario = () => {
   } = useMatematicaDiscreta();
 
   return (
-    <div className="min-h-screen w-full bg-gray-50 text-gray-900 flex items-start justify-center p-6">
+    <div className="flex flex-col gap-2  min-h-screen bg-gray-100 p-4">
+      <BotonBack />
       <div className="w-full max-w-4xl">
         <header className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
             Conversor Binario ⇄ Decimal
           </h1>
-          <p className="text-sm text-gray-600 mt-1">
-            TSX • Cálculo paso a paso con BigInt
-          </p>
         </header>
 
         {/* Controles de modo */}

@@ -27,9 +27,10 @@ export type FractionMatrix = Fraction[][];
 
 export interface BotonUtilProps {
   className: string;
-  label: string;
+  label?: string;
   onClick: () => void;
   disabled?: boolean;
+  icon?: ReactNode;
 }
 
 export type Mode = "bin2dec" | "dec2bin";
@@ -96,3 +97,16 @@ export interface MatematicaDiscretaContextType {
 }
 
 export type GateType = "AND" | "OR" | "NOT" | "XOR" | "NAND" | "NOR" | "XNOR";
+
+export interface routetype {
+  id: number;
+  name: string;
+  href: string;
+  bgColor?: string;
+}
+
+export interface slugstype {
+  id: number;
+  name: string;
+  href: string;
+}
