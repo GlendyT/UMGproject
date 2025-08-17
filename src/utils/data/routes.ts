@@ -54,3 +54,17 @@ export const AlgebraLinealSlugs: slugstype[] = [
     href: "/algebralineal/metodo-gauss",
   },
 ];
+
+export const PrecalculoSlugs: slugstype[] = [
+  {
+    id: 1,
+    name: "Ecuaciones",
+    href: "/precalculo/ecuaciones",
+  },
+  {
+    id: 2,
+    name: "Integral",
+    href: "/precalculo/geometria-analitica",
+  },
+];
+
