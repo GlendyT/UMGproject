@@ -10,9 +10,14 @@ const Precalculo = () => {
       <div className="flex flex-col gap-4 items-center justify-center text-4xl font-extrabold">
         <h1>Precalculo</h1>
         {PrecalculoSlugs.map((slug) => (
-          <Link key={slug.id} href={slug.href}>
-            {slug.name}
-          </Link>
+          <div key={slug.id} className="text-center">
+            <Link
+              href={slug.href}
+              className="text-lg font-semibold text-blue-600 hover:underline"
+            >
+              {slug.name}
+            </Link>
+          </div>
         ))}
       </div>
     </section>

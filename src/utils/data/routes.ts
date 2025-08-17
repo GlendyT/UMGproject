@@ -1,6 +1,5 @@
 import { routetype, slugstype } from "@/types/index";
 
-
 export const LinkRoutes: routetype[] = [
   {
     id: 1,
@@ -63,8 +62,17 @@ export const PrecalculoSlugs: slugstype[] = [
   },
   {
     id: 2,
-    name: "Integral",
+    name: "Geometraia Analitica",
     href: "/precalculo/geometria-analitica",
   },
+  {
+    id: 3,
+    name: "Polinomios",
+    href: "/precalculo/polinomios",
+  },
+  {
+    id: 4,
+    name: "Graficas de polinomios",
+    href: "/precalculo/graficaspolionmios",
+  }
 ];
-
