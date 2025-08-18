@@ -1,6 +1,4 @@
 "use client";
-
-import React, { useState } from "react";
 import { BlockMath } from "react-katex";
 import {
   LineChart,
@@ -11,50 +9,38 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import Fraction from "fraction.js";
 import "katex/dist/katex.min.css";
+import usePrecalculo from "@/hooks/usePrecalculo";
+import BotonBack from "@/utils/BotonBack";
 
-const QuadraticSolver: React.FC = () => {
-  const [a, setA] = useState(-1);
-  const [b, setB] = useState(1);
-  const [c, setC] = useState(2);
-  const [useFractions, setUseFractions] = useState(false);
-
-  // Vértice
-  const h = -b / (2 * a);
-  const k = a * h * h + b * h + c;
-
-  // Fracciones si el toggle está activado
-  const formatNumber = (num: number) => {
-    if (useFractions) {
-      return new Fraction(num).toFraction(true); // forma simplificada
-    }
-    return num.toFixed(2);
-  };
-
-  // Forma normal paso a paso
-  // f(x) = ax^2 + bx + c
-  // completando el cuadrado
-  const paso1 = `f(x) = ${a}x^2 + ${b}x + ${c}`;
-  const paso2 = `f(x) = ${a}\\left(x^2 + \\frac{${b}}{${a}}x\\right) + ${c}`;
-  const paso3 = `f(x) = ${a}\\left(x^2 + ${formatNumber(
-    b / a
-  )}x + \\left(\\frac{${b}}{2${a}}\\right)^2 - \\left(\\frac{${b}}{2${a}}\\right)^2\\right) + ${c}`;
-  const paso4 = `f(x) = ${a}\\left((x + \\frac{${b}}{2${a}})^2 - \\left(\\frac{${b}}{2${a}}\\right)^2\\right) + ${c}`;
-  const paso5 = `f(x) = ${a}(x - (${formatNumber(h)}))^2 + ${formatNumber(k)}`;
-
-  // Máximo o mínimo
-  const extremo = a > 0 ? "mínimo" : "máximo";
-
-  // Generar datos para graficar
-  const data = Array.from({ length: 41 }, (_, i) => {
-    const x = h - 5 + i * 0.25;
-    return { x, y: a * x * x + b * x + c };
-  });
+const QuadraticSolver = () => {
+  const {
+    a,
+    b,
+    c,
+    setA,
+    setB,
+    setC,
+    useFractions,
+    setUseFractions,
+    paso1,
+    paso2,
+    paso3,
+    paso4,
+    paso5,
+    extremo,
+    h,
+    k,
+    formatNumber,
+    data,
+  } = usePrecalculo();
 
   return (
     <div className="p-6 space-y-8 font-mono">
-      <h2 className="text-xl font-bold">Ejemplo: f(x) = {a}x² + {b}x + {c}</h2>
+      <BotonBack/>
+      <h2 className="text-xl font-bold">
+        Ejemplo: f(x) = {a}x² + {b}x + {c}
+      </h2>
 
       {/* Toggle */}
       <button
@@ -97,25 +83,31 @@ const QuadraticSolver: React.FC = () => {
 
       {/* Paso 1: Forma normal */}
       <div>
-        <h3 className="font-bold text-lg">1. Expresar f(x) en su forma normal</h3>
+        <h3 className="font-bold text-lg">
+          1. Expresar f(x) en su forma normal
+        </h3>
         <BlockMath math={paso1} />
         <BlockMath math={paso2} />
         <BlockMath math={paso3} />
         <BlockMath math={paso4} />
         <BlockMath math={paso5} />
-        <BlockMath math={`\\text{Vértice: } (${formatNumber(h)}, ${formatNumber(k)})`} />
+        <BlockMath
+          math={`\\text{Vértice: } (${formatNumber(h)}, ${formatNumber(k)})`}
+        />
       </div>
 
       {/* Paso 2: Máximo o mínimo */}
       <div>
-        <h3 className="font-bold text-lg">2. Encontrar valores máximos y/o mínimos</h3>
+        <h3 className="font-bold text-lg">
+          2. Encontrar valores máximos y/o mínimos
+        </h3>
         <BlockMath math={`x = -\\frac{b}{2a}`} />
         <BlockMath math={`x = -\\frac{${b}}{2(${a})} = ${formatNumber(h)}`} />
+        <BlockMath math={`f(${formatNumber(h)}) = ${formatNumber(k)}`} />
         <BlockMath
-          math={`f(${formatNumber(h)}) = ${formatNumber(k)}`}
-        />
-        <BlockMath
-          math={`\\text{Dado que } a = ${a} \\; ${a > 0 ? ">" : "<"} \\; 0, \\text{ se tiene un ${extremo} en } f(${formatNumber(
+          math={`\\text{Dado que } a = ${a} \\; ${
+            a > 0 ? ">" : "<"
+          } \\; 0, \\text{ se tiene un ${extremo} en } f(${formatNumber(
             h
           )}) = ${formatNumber(k)}`}
         />

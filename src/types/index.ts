@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, JSX } from "react";
 import Fraction from "fraction.js";
 
 export interface ProviderProps {
@@ -10,7 +10,6 @@ export interface AlgebraContextType {
   matrix: string[][];
   steps: string[];
   solution: Fraction[] | null;
-
   setSize: (n: number) => void;
   setMatrix: (m: string[][]) => void;
   setSteps: (s: string[]) => void;
@@ -110,3 +109,90 @@ export interface slugstype {
   name: string;
   href: string;
 }
+
+export interface PrecalculoContextType {
+  //TODO: ECUACIONES
+  equation: string;
+  setEquation: (e: string) => void;
+  steps: JSX.Element | null;
+
+  //TODO: GEOMETRIA ANALITICA
+  setPuntoP: (p: { x: number; y: number }) => void;
+  puntoP: { x: number; y: number };
+  round2: (v: number) => number;
+  x1: number;
+  y1: number;
+  puntoQ: { x: number; y: number };
+  setPuntoQ: (q: { x: number; y: number }) => void;
+  x2: number;
+  y2: number;
+  distancia: number;
+  puntoMedio: { x: number; y: number };
+  pendiente: number;
+  ecuacionPasos: string[];
+
+  //TODO: POLIONOMIOS
+  a: number;
+  b: number;
+  c: number;
+  setA: (a: number) => void;
+  setB: (b: number) => void;
+  setC: (c: number) => void;
+  useFractions: boolean;
+  setUseFractions: (f: boolean) => void;
+  paso1: string;
+  paso2: string;
+  paso3: string;
+  paso4: string;
+  paso5: string;
+  extremo: "mínimo" | "máximo";
+  h: number;
+  k: number;
+  formatNumber: (value: number) => string;
+  data: { x: number; y: number }[];
+
+  //TODO: GRAFICOS DE POLINOMIOS
+  gLatex: string;
+  polynomialExpr: string;
+  handlePolynomialChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  factorization: {
+    expandedForm: string;
+    factorsForm: string;
+    equationForm: string;
+    rootsForm: string;
+    hasMultipleRoots: boolean;
+    multipleRootValue?: number;
+  };
+  roots: { x: number; y: number }[];
+  criticalPoints: {
+    x: number;
+    y: number;
+    type: "max" | "min" | "inflection";
+    label?: string;
+  }[];
+  data2: { x: number; y: number }[];
+  xMin: number;
+  xMax: number;
+}
+
+export type StepsPrecalculoProps = {
+  a: number;
+  b: number;
+  c: number;
+  b2: number;
+  fourac: number;
+  disc: number;
+  sqrtDiscR: number;
+  twoA: number;
+  x1R: number;
+  x2R: number;
+  w1R: number;
+  w2R: number;
+  x3R: number;
+  round2: (value: number) => number;
+};
+
+export type Steps2PrecalculoProps = Omit<
+  StepsPrecalculoProps,
+  "w1R" | "x3R" | "w2R"
+>;
