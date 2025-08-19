@@ -11,7 +11,7 @@ export default function Home() {
             <div className={` flex flex-col ${route.bgColor} p-6 `}>
               <h1 className="text-xl font-bold text-black hover:underline">{route.name}</h1>
             </div>
-            <div className="bg-red-300 h-full w-full"></div>
+            
           </Link>
         ))}
       </div>
