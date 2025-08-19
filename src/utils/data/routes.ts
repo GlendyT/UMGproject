@@ -5,31 +5,36 @@ export const LinkRoutes: routetype[] = [
     id: 1,
     name: "Algoritmos",
     href: "/algoritmos",
-    bgColor: "bg-amber-200",
+    bgColor: "bg-blue-300",
+    image: "/Algoritmos.webp",
   },
   {
     id: 2,
     name: "Precalculo",
     href: "/precalculo",
-    bgColor: "bg-teal-200",
+    bgColor: "bg-teal-300",
+    image: "/precalculo.webp",
   },
   {
     id: 3,
     name: "Algebra Lineal",
     href: "/algebralineal",
-    bgColor: "bg-red-200",
+    bgColor: "bg-green-300",
+    image: "/algebra.webp",
   },
   {
     id: 4,
     name: "Contabilidad II",
     href: "/contabilidad",
-    bgColor: "bg-blue-200",
+    bgColor: "bg-green-100",
+    image: "/contabilidad.webp",
   },
   {
     id: 5,
     name: "Matematica Discreta",
     href: "/matematicadiscreta",
-    bgColor: "bg-purple-200",
+    bgColor: "bg-amber-300",
+    image: "/matematicaDiscreta1.webp",
   },
 ];
 
@@ -62,7 +67,7 @@ export const PrecalculoSlugs: slugstype[] = [
   },
   {
     id: 2,
-    name: "Geometraia Analitica",
+    name: "Geometraia Analítica",
     href: "/precalculo/geometria-analitica",
   },
   {
@@ -72,7 +77,7 @@ export const PrecalculoSlugs: slugstype[] = [
   },
   {
     id: 4,
-    name: "Graficas de polinomios",
+    name: "Gráficas de polinomios",
     href: "/precalculo/graficaspolionmios",
-  }
+  },
 ];

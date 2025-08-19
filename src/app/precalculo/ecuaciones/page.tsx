@@ -7,34 +7,28 @@ export default function EquationSolverImagenStyle() {
   const { equation, setEquation, steps } = usePrecalculo();
 
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-6">
-      <header>
+    <div className="min-h-screen px-4 py-2 bg-gray-100 flex flex-col gap-2 ">
+      <div className="flex flex-row items-center">
         <BotonBack />
-        <h1 className="text-2xl font-bold">
-          Resolutor (estilo de pasos de la imagen)
-        </h1>
-        <p className="text-sm text-gray-600">
-          Escribe una ecuación y verás los 4 pasos con los mismos formatos y
-          redondeos.
-        </p>
-      </header>
-      <form className="space-y-4">
-        <div>
-          <label className="block font-semibold">Ecuación</label>
-          <input
-            type="text"
-            value={equation}
-            onChange={(e) => setEquation(e.target.value)}
-            className="border p-2 w-full rounded-xl"
-            placeholder="Ej.: x^4-8x^2+2=0 o 2x^2+3x-1=0"
-          />
+        <div className="flex flex-row gap-2 items-center justify-center w-full">
+          <h1 className="text-2xl max-sm:text-base font-bold text-gray-800 text-center">
+            Ecuaciones de la forma cuadrática
+          </h1>
+          <form className="flex flex-col gap-0 w-auto">
+            <label className="text-xs font-semibold">Ecuación</label>
+            <input
+              type="text"
+              value={equation}
+              onChange={(e) => setEquation(e.target.value)}
+              className="border p-2 w-full rounded-xl"
+              placeholder="Ej.: x^4-8x^2+2=0 o 2x^2+3x-1=0"
+            />
+          </form>
         </div>
-      </form>
-      {steps}
-      <footer className="text-xs text-gray-500">
-        * Todos los valores aproximados usan redondeo a 2 decimales para
-        replicar el estilo del ejemplo.
-      </footer>
+      </div>
+      <div className="flex flex-row gap-2  justify-center max-sm:flex-col">
+        {steps}
+      </div>
     </div>
   );
 }

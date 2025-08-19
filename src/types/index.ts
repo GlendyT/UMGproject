@@ -97,18 +97,15 @@ export interface MatematicaDiscretaContextType {
 
 export type GateType = "AND" | "OR" | "NOT" | "XOR" | "NAND" | "NOR" | "XNOR";
 
-export interface routetype {
+export type routetype = {
   id: number;
   name: string;
   href: string;
-  bgColor?: string;
-}
+  bgColor: string;
+  image: string;
+};
 
-export interface slugstype {
-  id: number;
-  name: string;
-  href: string;
-}
+export type slugstype = Omit<routetype, "bgColor" | "image">;
 
 export interface PrecalculoContextType {
   //TODO: ECUACIONES

@@ -265,7 +265,7 @@ const MatematicaDiscretaProvider = ({ children }: ProviderProps) => {
   };
 
   const [gate, setGate] = useState<GateType>("AND");
-  const [expr, setExpr] = useState("¬A·B·C·¬(A + D)");
+  const [expr, setExpr] = useState("");
   const { vars, table } = useMemo(
     () => generateTruthTableFromExpression(expr),
     [expr]
