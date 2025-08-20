@@ -13,16 +13,19 @@ const Algebralineal = () => {
         <h1 className="text-2xl font-bold text-center mb-6">
           Temas de Algebra Lineal
         </h1>
-        <div className="space-y-4">
+        <div className="flex flex-row max-sm:flex-col items-center gap-2 justify-center">
           {AlgebraLinealSlugs.map((slug) => (
-            <div key={slug.id} className="text-center">
-              <Link
-                href={slug.href}
-                className="text-lg font-semibold text-blue-600 hover:underline"
-              >
-                {slug.name}
-              </Link>
-            </div>
+            <Link
+              href={slug.href}
+              key={slug.id}
+              className="w-auto max-sm:w-full h-auto text-center"
+            >
+              <div className={` flex flex-col  p-6 bg-violet-300 `}>
+                <h1 className="text-xl font-bold text-black hover:underline">
+                  {slug.name}
+                </h1>
+              </div>
+            </Link>
           ))}
         </div>
       </div>

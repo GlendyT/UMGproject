@@ -30,26 +30,28 @@ const PolynomialGX = () => {
   } = usePrecalculo();
 
   return (
-    <div className="p-6 flex flex-col">
-      <BotonBack />
-      <h2 className="text-2xl font-bold">Gráfica de f(x) = {gLatex}</h2>
-
-      <div className="flex flex-col gap-2 my-4">
-        <label className="font-medium">Ingrese el polinomio:</label>
-        <div className="flex gap-2 items-center">
-          <span>f(x) =</span>
-          <input
-            type="text"
-            value={polynomialExpr}
-            onChange={handlePolynomialChange}
-            className="border rounded px-2 py-1 flex-grow"
-            placeholder="Ejemplo: x^3-2x^2-3x"
-          />
+    <div className="p-6 flex flex-col min-h-screen">
+      <div className="flex flex-row gap-4 max-sm:flex-col w-full py-1">
+        <BotonBack />
+        <div className="flex w-full flex-col  justify-center items-center">
+          <h2 className="text-2xl font-bold">Gráfica de f(x) = {gLatex}</h2>
+          <div className="flex flex-row max-sm:flex-col  items-center justify-center gap-2 my-4">
+            <label className="font-medium">Ingrese el polinomio:</label>
+            <div className="flex gap-2 items-center">
+              <span>f(x) =</span>
+              <input
+                type="text"
+                value={polynomialExpr}
+                onChange={handlePolynomialChange}
+                className="border rounded px-2 py-1 flex-grow"
+                placeholder="Ejemplo: x^3-2x^2-3x"
+              />
+            </div>
+          </div>
         </div>
       </div>
-
       {/* PASO A PASO con react-katex */}
-      <div className="flex flex-row gap-2">
+      <div className="flex flex-row max-sm:flex-col  gap-2">
         <div className="rounded-2xl border p-4 w-full">
           <div className="cursor-pointer font-semibold text-lg">
             Paso a paso (factorización y ceros)
