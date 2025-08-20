@@ -11,7 +11,7 @@ import {
   ReferenceLine,
   ResponsiveContainer,
 } from "recharts";
-import { BlockMath } from "react-katex";
+import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import BotonBack from "@/utils/BotonBack";
 import usePrecalculo from "@/hooks/usePrecalculo";
@@ -34,7 +34,9 @@ const PolynomialGX = () => {
       <div className="flex flex-row gap-4 max-sm:flex-col w-full py-1">
         <BotonBack />
         <div className="flex w-full flex-col  justify-center items-center">
-          <h2 className="text-2xl font-bold">Gráfica de f(x) = {gLatex}</h2>
+          <h2 className="text-xl font-bold">
+            Gráfica de <InlineMath math={`f(x) = ${gLatex}`} />
+          </h2>
           <div className="flex flex-row max-sm:flex-col  items-center justify-center gap-2 my-4">
             <label className="font-medium">Ingrese el polinomio:</label>
             <div className="flex gap-2 items-center">
