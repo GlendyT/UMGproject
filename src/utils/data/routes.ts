@@ -34,7 +34,7 @@ export const LinkRoutes: routetype[] = [
     name: "Matematica Discreta",
     href: "/matematicadiscreta",
     bgColor: "bg-amber-300",
-    image: "/matematicaDiscreta1.webp",
+    image: "/matematicadiscreta1.webp",
   },
 ];
 

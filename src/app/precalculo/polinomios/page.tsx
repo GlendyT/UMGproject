@@ -46,7 +46,7 @@ const QuadraticSolver = () => {
             Ecuaciones de segundo grado con gráficas
           </h1>
           <h2 className="text-xl font-bold max-sm:text-xs">
-            Ejemplo: f(x) = {a}x² + {b}x + {c}
+            <BlockMath math={paso1} />
           </h2>
           <div className="flex flex-row items-center gap-4">
             <label>

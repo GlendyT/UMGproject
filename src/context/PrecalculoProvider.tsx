@@ -168,17 +168,40 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
     }
     return num.toFixed(2);
   };
+  const formatTerm = (coef: number, variable: string = "") => {
+    if (coef === 0) return "";
+    if (coef > 0) return `+ ${coef}${variable}`;
+    return `- ${Math.abs(coef)}${variable}`;
+  };
 
   // Forma normal paso a paso
   // f(x) = ax^2 + bx + c
   // completando el cuadrado
-  const paso1 = `f(x) = ${a}x^2 + ${b}x + ${c}`;
-  const paso2 = `f(x) = ${a}\\left(x^2 + \\frac{${b}}{${a}}x\\right) + ${c}`;
-  const paso3 = `f(x) = ${a}\\left(x^2 + ${formatNumber(
-    b / a
-  )}x + \\left(\\frac{${b}}{2${a}}\\right)^2 - \\left(\\frac{${b}}{2${a}}\\right)^2\\right) + ${c}`;
-  const paso4 = `f(x) = ${a}\\left((x + \\frac{${b}}{2${a}})^2 - \\left(\\frac{${b}}{2${a}}\\right)^2\\right) + ${c}`;
-  const paso5 = `f(x) = ${a}(x - (${formatNumber(h)}))^2 + ${formatNumber(k)}`;
+  const paso1 = `f(x) = ${a}x^2 ${formatTerm(b, "x")} ${formatTerm(c)}`;
+
+  // Paso 2: factor común de "a"
+  const paso2 = `f(x) = ${a}\\left(x^2 ${formatTerm(
+    b / a,
+    "x"
+  )}\\right) ${formatTerm(c)}`;
+
+  // Paso 3: completar cuadrado
+  const paso3 = `f(x) = ${a}\\left(x^2 ${formatTerm(
+    b / a,
+    "x"
+  )} + \\left(\\frac{${b}}{2${a}}\\right)^2 - \\left(\\frac{${b}}{2${a}}\\right)^2\\right) ${formatTerm(
+    c
+  )}`;
+
+  // Paso 4: agrupando en binomio cuadrado
+  const paso4 = `f(x) = ${a}\\left((x + \\frac{${b}}{2${a}})^2 - \\left(\\frac{${b}}{2${a}}\\right)^2\\right) ${formatTerm(
+    c
+  )}`;
+
+  // Paso 5: forma normal (con vértice)
+  const paso5 = `f(x) = ${a}(x - (${formatNumber(h)}))^2 ${formatTerm(
+    Number(formatNumber(k))
+  )}`;
 
   // Máximo o mínimo
   const extremo = a > 0 ? "mínimo" : "máximo";
@@ -290,7 +313,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
       ) {
         return {
           factored: "x(x-3)(x+1)",
-          expandedForm: "x^3-2x^2-3x = x(x^2-2x-3)",
+          expandedForm: " x(x^2-2x-3)",
           factorsForm: "x(x-3)(x+1) = 0",
           equationForm:
             "x = 0 \\quad \\lor \\quad x-3=0 \\quad \\lor \\quad x+1=0",
