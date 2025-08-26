@@ -80,4 +80,9 @@ export const PrecalculoSlugs: slugstype[] = [
     name: "Gráficas de polinomios",
     href: "/precalculo/graficaspolionmios",
   },
+  {
+    id: 5,
+    name: "Division de polinomios",
+    href: "/precalculo/division-de-polinomios",
+  }
 ];
