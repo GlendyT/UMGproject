@@ -75,23 +75,17 @@ export interface MatematicaDiscretaContextType {
   > | null;
 
   //TODO: CONVERSOR DE COMPUERTAS LOGICAS
-  gatesLogic: Record<GateType, (a: number, b?: number) => number>;
-  evaluateExpression: (expr: string, values: Record<string, number>) => number;
-  getVariablesFromExpression: (expr: string) => string[];
-  generateTruthTableFromExpression: (
-    expr: string,
-    vars: string[]
-  ) => { table: Record<string, number>[]; vars: string[] };
-  GateSymbol: React.FC<{
-    gate: GateType;
-    a: number;
-    b?: number;
-  }>;
-  gate: GateType;
-  setGate: (g: GateType) => void;
+  generateTruthTableWithSteps: (expr: string) => {
+    vars: string[];
+    exprToLatex: (expr: string) => string;
+    terms: string[];
+    table: Record<string, number>[];
+  };
+  exprToLatex: (expr: string) => string;
   expr: string;
   setExpr: (e: string) => void;
   vars: string[];
+  terms: string[];
   table: Record<string, number>[];
 }
 

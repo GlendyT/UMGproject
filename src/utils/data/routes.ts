@@ -57,6 +57,21 @@ export const AlgebraLinealSlugs: slugstype[] = [
     name: "Metodo de Gauss",
     href: "/algebralineal/metodo-gauss",
   },
+  {
+    id: 2,
+    name: "Metodo de Saruss",
+    href: "/algebralineal/metodo-de-saruss",
+  },
+  {
+    id: 3,
+    name: "Metodo de Laplace",
+    href: "/algebralineal/metodo-de-laplace",
+  } /*
+  {
+    id: 4,
+    name: "Vectores",
+    href: "/algebralineal/vectores",
+  },*/,
 ];
 
 export const PrecalculoSlugs: slugstype[] = [
@@ -84,5 +99,5 @@ export const PrecalculoSlugs: slugstype[] = [
     id: 5,
     name: "Division de polinomios",
     href: "/precalculo/division-de-polinomios",
-  }
+  },
 ];
