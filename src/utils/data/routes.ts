@@ -100,4 +100,14 @@ export const PrecalculoSlugs: slugstype[] = [
     name: "Division de polinomios",
     href: "/precalculo/division-de-polinomios",
   },
+  {
+    id: 6,
+    name: "Descarte de Signos",
+    href: "/precalculo/descarte-de-signos",
+  },
+  {
+    id:7,
+    name: "Limites Superiores e Inferiores",
+    href: "/precalculo/limites-superiores-e-inferiores",
+  }
 ];
