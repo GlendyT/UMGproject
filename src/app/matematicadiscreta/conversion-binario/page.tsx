@@ -3,7 +3,7 @@
 import BotonBack from "@/utils/BotonBack";
 import useMatematicaDiscreta from "@/hooks/useMatematicaDiscreta";
 import BotonUtil from "@/utils/BotonUtil";
-import { BlockMath, InlineMath } from "react-katex";
+import {  InlineMath } from "react-katex";
 
 const Binario = () => {
   const {
