@@ -10,7 +10,7 @@ export const LinkRoutes: routetype[] = [
   },
   {
     id: 2,
-    name: "Precalculo",
+    name: "Precálculo",
     href: "/precalculo",
     bgColor: "bg-teal-300",
     image: "/precalculo.webp",
@@ -31,7 +31,7 @@ export const LinkRoutes: routetype[] = [
   },
   {
     id: 5,
-    name: "Matematica Discreta",
+    name: "Matemática Discreta",
     href: "/matematicadiscreta",
     bgColor: "bg-amber-300",
     image: "/matematicadiscreta1.webp",
@@ -41,12 +41,12 @@ export const LinkRoutes: routetype[] = [
 export const MatematicaDiscretaSlugs: slugstype[] = [
   {
     id: 1,
-    name: "Conversion de binario",
+    name: "Conversión de binario",
     href: "/matematicadiscreta/conversion-binario",
   },
   {
     id: 2,
-    name: "Compuertas logicas",
+    name: "Compuertas lógicas",
     href: "/matematicadiscreta/compuertas-logicas",
   },
 ];
@@ -54,17 +54,17 @@ export const MatematicaDiscretaSlugs: slugstype[] = [
 export const AlgebraLinealSlugs: slugstype[] = [
   {
     id: 1,
-    name: "Metodo de Gauss",
+    name: "Método de Gauss",
     href: "/algebralineal/metodo-gauss",
   },
   {
     id: 2,
-    name: "Metodo de Saruss",
+    name: "Método de Saruss",
     href: "/algebralineal/metodo-de-saruss",
   },
   {
     id: 3,
-    name: "Metodo de Laplace",
+    name: "Método de Laplace",
     href: "/algebralineal/metodo-de-laplace",
   } /*
   {
@@ -82,7 +82,7 @@ export const PrecalculoSlugs: slugstype[] = [
   },
   {
     id: 2,
-    name: "Geometraia Analítica",
+    name: "Geometraía Analítica",
     href: "/precalculo/geometria-analitica",
   },
   {
@@ -97,7 +97,7 @@ export const PrecalculoSlugs: slugstype[] = [
   },
   {
     id: 5,
-    name: "Division de polinomios",
+    name: "División de polinomios",
     href: "/precalculo/division-de-polinomios",
   },
   {
@@ -107,7 +107,7 @@ export const PrecalculoSlugs: slugstype[] = [
   },
   {
     id:7,
-    name: "Limites Superiores e Inferiores",
+    name: "Límites Superiores e Inferiores",
     href: "/precalculo/limites-superiores-e-inferiores",
   }
 ];

@@ -1,4 +1,5 @@
 import { LinkRoutes } from "@/utils/data/routes";
+
 import Image from "next/image";
 import Link from "next/link";
 

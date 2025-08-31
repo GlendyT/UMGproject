@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import "./globals.css";
 import { AlgebraProvider } from "@/context/AlgebraProvider";
 import { MatematicaDiscretaProvider } from "@/context/MatematicaDiscretaProvider";
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { PrecalculoProvider } from "@/context/PrecalculoProvider";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "UMG Programms",
