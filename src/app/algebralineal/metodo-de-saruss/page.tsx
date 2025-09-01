@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
+import BotonBack from "../../../utils/BotonBack";
 
 type Matrix3x3 = number[][];
 
@@ -38,13 +39,12 @@ const SarrusCalculator: React.FC = () => {
   ];
 
   const det =
-    main.reduce((s, x) => s + x.val, 0) -
-    sec.reduce((s, x) => s + x.val, 0);
+    main.reduce((s, x) => s + x.val, 0) - sec.reduce((s, x) => s + x.val, 0);
 
   const expr = `
     \\text{Det} =
-    (${main.map((m) => m.val >= 0 ? `+${m.val}` : m.val).join(" ")})
-    - (${sec.map((m) => m.val >= 0 ? `+${m.val}` : m.val).join(" ")})
+    (${main.map((m) => (m.val >= 0 ? `+${m.val}` : m.val)).join(" ")})
+    - (${sec.map((m) => (m.val >= 0 ? `+${m.val}` : m.val)).join(" ")})
     = ${det}
   `;
 
@@ -72,6 +72,7 @@ const SarrusCalculator: React.FC = () => {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen flex flex-col items-center">
+      <BotonBack />
       <h1 className="text-2xl font-bold mb-6">Método de Sarrus</h1>
 
       {/* INPUT MATRIZ */}
