@@ -183,7 +183,7 @@ export default function Laplace3x3() {
     );
 
   return (
-    <div className="min-h-screen flex flex-col gap-2 items-center w-full  px-4 mb-2">
+    <div className="min-h-screen flex flex-col gap-2 items-center w-full p-4 bg-gray-100">
       <div className="flex flex-row w-full">
         <BotonBack />
         <div className="flex w-full items-center justify-center">
@@ -193,9 +193,9 @@ export default function Laplace3x3() {
         </div>
       </div>
       <div className="flex flex-wrap items-center justify-center gap-10">
-        <div className="flex flex-col bg-gray-100 p-2 ">
+        <div className="flex flex-col items-center justify-between h-full  p-2 shadow-xl rounded-2xl ">
           <h2 className="text-xl text-center font-bold ">
-            ({mode === "col" ? "columna" : "fila"} {index + 1})
+            {mode === "col" ? "columna" : "fila"} {index + 1}
           </h2>
 
           <div
@@ -217,8 +217,8 @@ export default function Laplace3x3() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-between h-full bg-gray-200 px-2">
-          <h3 className="text-lg font-semibold mb-2">Matriz de signos:</h3>
+        <div className="flex flex-col items-center justify-between h-full p-2 shadow-xl rounded-2xl">
+          <h3 className="text-lg font-semibold">Matriz de signos:</h3>
           <div
             className={`grid ${
               size === 3 ? "grid-cols-3" : "grid-cols-4"
@@ -237,8 +237,8 @@ export default function Laplace3x3() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center gap-6">
-          <div className="mb-4 flex items-center gap-4 bg-gray-100 p-2">
+        <div className="flex flex-col items-center justify-center gap-6 ">
+          <div className=" flex items-center gap-4  shadow-xl rounded-xl p-2">
             <label className="font-semibold">Expandir por:</label>
             <select
               value={mode}
@@ -246,7 +246,7 @@ export default function Laplace3x3() {
                 setMode(e.target.value);
                 setIndex(0);
               }}
-              className="border p-2"
+              className="border p-2 rounded-md"
             >
               <option value="col">Columna</option>
               <option value="row">Fila</option>
@@ -256,7 +256,7 @@ export default function Laplace3x3() {
             <select
               value={index}
               onChange={(e) => setIndex(parseInt(e.target.value))}
-              className="border p-2"
+              className="border p-2 rounded-md"
             >
               {Array(size)
                 .fill(0)
@@ -267,12 +267,12 @@ export default function Laplace3x3() {
                 ))}
             </select>
           </div>
-          <div className="mb-4 bg-gray-200 p-2">
+          <div className=" shadow-xl rounded-xl  p-2">
             <label className="font-semibold mr-2">Tamaño:</label>
             <select
               value={size}
               onChange={(e) => handleSizeChange(parseInt(e.target.value))}
-              className="border p-2"
+              className="border rounded-md p-2"
             >
               <option value={3}>3x3</option>
               <option value={4}>4x4</option>
@@ -283,22 +283,21 @@ export default function Laplace3x3() {
 
       <div className="flex flex-col items-center w-full px-8 ">
         <div className="w-full">
-          <h3 className="text-lg text-center font-semibold">
+          <h3 className="text-lg text-center font-extrabold">
             Expansión paso a paso:
           </h3>
-          <div className="flex flex-wrap items-center justify-center w-full gap-2">
+          <div className="flex flex-wrap items-center justify-center w-full  gap-2">
             {steps.map((s, idx) => (
               <div
                 key={idx}
-                className={`border p-4 flex rounded bg-gray-100 ${
+                className={` p-4 flex rounded bg-gray-100 shadow-xl  ${
                   s.minor.length === 2 ? "flex-row " : "flex-col"
                 }`}
               >
-                <div className="flex items-center gap-2 mb-3 ">
-                  <span className="font-semibold">
-                    {s.sign > 0 ? "+" : "-"}
+                <div className="flex justify-center items-center gap-2  ">
+                  <span>
+                    {s.sign > 0 ? "+" : "-"}({s.element})
                   </span>
-                  <span>({s.element})</span>
                   <span>·</span>
                   <div
                     className={`inline-grid ${
@@ -332,7 +331,7 @@ export default function Laplace3x3() {
                       <div className="mt-1">= {s.minorValue}</div>
                     </>
                   ) : s.minor.length === 3 && s.minorSteps ? (
-                    <>
+                    <div className="flex flex-col gap-2 p-2 items-center justify-center">
                       <div className="font-semibold">
                         Cálculo del determinante 3x3:
                       </div>
@@ -340,11 +339,13 @@ export default function Laplace3x3() {
                         s.minorSteps.map((step: MinorStep, stepIdx: number) => (
                           <div
                             key={stepIdx}
-                            className="mt-2 p-2 bg-gray-100 rounded"
+                            className=" rounded flex flex-col w-full gap-2 border p-2"
                           >
-                            <div className="text-xs bg-green-700">
-                              <span>{step.sign > 0 ? "+" : "-"}</span>
-                              <span> ({step.element}) </span> <span>·</span>
+                            <div className="flex  gap-2 items-center justify-center   ">
+                              <span>
+                                {step.sign > 0 ? "+" : "-"} ({step.element}){" "}
+                              </span>{" "}
+                              <span>·</span>
                               <span
                                 className={`inline-grid ${
                                   s.minor.length === 2
@@ -356,7 +357,7 @@ export default function Laplace3x3() {
                                   row.map((val: number, j: number) => (
                                     <span
                                       key={`${i}-${j}`}
-                                      className="w-8 h-8 flex items-center justify-center text-sm"
+                                      className="w-8 h-8 flex items-center justify-center text-sm "
                                     >
                                       {val}
                                     </span>
@@ -364,13 +365,16 @@ export default function Laplace3x3() {
                                 )}
                               </span>
                             </div>
-                            <div className="text-xs mt-1">
+                            <div className="text-xs mt-1 ">
                               = {step.sign > 0 ? "+" : "-"} ({step.element}) × (
-                              {step.minorSteps})
+                              {step.minorSteps}
                             </div>
-                            <div className="text-xs mt-1">
+                            <div className="text-xs mt-1 ">
                               = {step.sign > 0 ? "+" : "-"} ({step.element}) × (
-                              {step.minorValue}) = {step.term}
+                              {step.minorValue}) ={" "}
+                              <span className="text-blue-600 font-extrabold">
+                                {step.term}
+                              </span>
                             </div>
                           </div>
                         ))}
@@ -384,11 +388,11 @@ export default function Laplace3x3() {
                           : ""}{" "}
                         = {s.minorValue}
                       </div>
-                    </>
+                    </div>
                   ) : (
                     <div>Determinante 3x3 = {s.minorValue}</div>
                   )}
-                  <div className="mt-2 font-semibold text-green-600">
+                  <div className=" font-semibold text-green-600 text-center">
                     Resultado: {s.sign > 0 ? "+" : "-"} ({s.element}) × (
                     {s.minorValue}) = {s.term}
                   </div>
@@ -398,36 +402,27 @@ export default function Laplace3x3() {
           </div>
         </div>
 
-        {size === 4 && (
-          <div className="w-full mt-6 p-4 bg-blue-50 rounded">
-            <h3 className="text-lg font-semibold mb-3">
-              Cálculo final del determinante 4x4:
-            </h3>
-            <div className="text-sm">
-              <div className="mb-2">
-                Det ={" "}
-                {steps
-                  .map(
-                    (s, idx) =>
-                      `${s.sign > 0 && idx > 0 ? "+" : ""}${
-                        s.sign < 0 ? "-" : ""
-                      }(${s.element}) × (${s.minorValue})`
-                  )
-                  .join(" ")}
+        <div className="w-auto flex flex-col items-center justify-center mt-4 p-2 shadow-2xl rounded-xl ">
+          {size === 4 ? (
+            <>
+              <h3 className="text-lg font-extrabold">
+                Cálculo final del determinante 4x4:
+              </h3>
+              <div className="text-sm flex items-center flex-col gap-2">
+                <div className="">
+                  {" "}
+                  {steps
+                    .map((s) => s.term)
+                    .join(" + ")
+                    .replace(/\+ -/g, " - ")}
+                </div>
+                <div className="font-bold text-lg">Determinante = {det}</div>
               </div>
-              <div className="mb-2">
-                ={" "}
-                {steps
-                  .map((s) => s.term)
-                  .join(" + ")
-                  .replace(/\+ -/g, " - ")}
-              </div>
-              <div className="font-bold text-lg">= {det}</div>
-            </div>
-          </div>
-        )}
-
-        <h2 className="text-xl font-bold mt-4">Determinante = {det}</h2>
+            </>
+          ) : (
+            <h2 className="text-xl font-bold ">Determinante = {det}</h2>
+          )}
+        </div>
       </div>
     </div>
   );

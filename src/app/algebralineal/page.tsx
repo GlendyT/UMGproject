@@ -13,7 +13,7 @@ const Algebralineal = () => {
         <h1 className="text-2xl font-bold text-center mb-6">
           Temas de Algebra Lineal
         </h1>
-        <div className="flex flex-row max-sm:flex-col items-center gap-2 justify-center">
+        <div className="flex flex-wrap max-sm:flex-col items-center gap-2 justify-center">
           {AlgebraLinealSlugs.map((slug) => (
             <Link
               href={slug.href}
