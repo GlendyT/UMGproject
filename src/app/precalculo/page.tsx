@@ -8,8 +8,8 @@ const Precalculo = () => {
     <section className="flex flex-col gap-2  min-h-screen bg-gray-100 p-4">
       <BotonBack />
       <div className="flex flex-col gap-4 items-center justify-center text-4xl font-extrabold">
-        <h1> Precalculo</h1>
-        <div className="flex flex-row max-sm:flex-col gap-4 text-2xl font-semibold">
+        <h1> Precálculo</h1>
+        <div className="flex flex-wrap items-center justify-center gap-4 text-2xl font-semibold">
           {PrecalculoSlugs.map((slug) => (
             <Link
               key={slug.id}

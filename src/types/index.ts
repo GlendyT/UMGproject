@@ -164,7 +164,107 @@ export interface PrecalculoContextType {
   data2: { x: number; y: number }[];
   xMin: number;
   xMax: number;
+
+  //TODO: LIMITES SUPERIORES E INFERIORES
+  hornerEval: (coeffs: number[], x: number) => number;
+  gcdArray: (arr: number[]) => number;
+  toFracLatex: (value: number) => string;
+  candidatesByRRT: (
+    constant: number,
+    leading: number
+  ) => { p: number[]; q: number[]; list: number[] };
+  syntheticDivision: (
+    coeffs: number[],
+    r: number
+  ) => {
+    divisor: number;
+    top: number[];
+    middle: number[];
+    bottom: number[];
+    remainder: number;
+  };
+  polyToLatex: (coeffs: number[]) => string;
+  linFactorLatex: (root: number) => string;
+  factorQuadraticInt: (
+    a: number,
+    b: number,
+    c: number
+  ) => [number, number] | null;
+  abs: (value: number) => number;
+  reduceFraction: (numerator: number, denominator: number) => [number, number];
+  input: string;
+  setInput: (s: string) => void;
+  run: number;
+  setRun: (r: number) => void;
+  parsePolynomial2: (s: string) => number[];
+  data3: {
+    coeffs0: number[];
+    p: number[];
+    q: number[];
+    list: number[];
+    upperBoundNoteIndex: number | null;
+    partials: string[];
+    quadBox: { eqLine: string; factLine?: string } | null;
+    finalLatex: string;
+    synSteps: SynStep[];
+  };
+
+  //TODO: DIVISION DE POLINOMIOS
+  parsePolynomialDescending: (s: string) => number[];
+  coeffsToLatexDESC: (coeffs: number[]) => string;
+  longDivisionDESC: (
+    dividend: number[],
+    divisor: number[]
+  ) => {
+    quotient: number[];
+    remainder: number[];
+    steps2: Step[];
+  };
+  subtractDESC: (a: number[], b: number[]) => number[];
+  scaleDESC: (poly: number[], scalar: number) => number[];
+  shiftDESC: (poly: number[], places: number) => number[];
+  EPS: number;
+  P: string;
+  setP: (s: string) => void;
+  D: string;
+  setD: (s: string) => void;
+  dividend: number[];
+  divisor: number[];
+  result: {
+    quotient: number[];
+    remainder: number[];
+    steps2: Step[];
+  } | null;
+  quotientLatex: string;
+  remainderLatex: string;
+  error: string | null;
+  VISIBLE_STEPS: number;
+
+  //TODO: DESCARTE DE SIGNOS
+  getCoeffsFromPolynomial: (s: string) => { coeffs: number[]; degree: number };
+  posiblesCerosRacionales: (coeffs: number[]) => {
+    latexListRaw: string;
+    latexSimplified: string;
+  };
+  coloredLatexForTerms: (terms: Term[]) => string;
+  buildSubstitutionLatex: (terms: Term[]) => string;
+  buildReducedNegLatex: (terms: Term[]) => string;
+  gcd2: (a: number, b: number) => number;
+  signOf: (n: number) => 1 | -1 | 0;
+  input2: string;
+  setInput2: (s: string) => void;
+  resultado: Resultado | null;
+  handleResolver: () => void;
+  setResultado: (r: Resultado | null) => void;
 }
+
+export type SynStep = {
+  divisor: number; // r
+  top: number[]; // coeficientes de entrada
+  middle: number[]; // productos acumulados
+  bottom: number[]; // fila resultado (sin el residuo)
+  remainder: number; // debe ser 0 si es raíz
+};
 
 export type StepsPrecalculoProps = {
   a: number;
@@ -187,3 +287,25 @@ export type Steps2PrecalculoProps = Omit<
   StepsPrecalculoProps,
   "w1R" | "x3R" | "w2R"
 >;
+
+export type Step = {
+  subtrahend: number[]; // divisor*c, desplazado
+  remainder: number[]; // resto tras la resta
+};
+
+export type Term = { exp: number; coef: number };
+
+
+  export type Resultado = {
+    coeffs: number[];
+    degree: number;
+    terms: Term[];
+    latexListRaw: string;
+    latexSimplified: string;
+    latexPx: string;
+    latexPxColored: string;
+    latexPminusRaw: string;
+    latexPminusReduced: string;
+    cambiosPos: number;
+    cambiosNeg: number;
+  };

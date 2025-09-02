@@ -30,35 +30,36 @@ const PolynomialGX = () => {
   } = usePrecalculo();
 
   return (
-    <div className="p-6 flex flex-col min-h-screen">
-      <div className="flex flex-row gap-4 max-sm:flex-col w-full py-1">
+    <div className="p-6 flex flex-col items-center justify-center min-h-screen">
+      <div className="flex flex-row gap-4  w-full py-1">
         <BotonBack />
         <div className="flex w-full flex-col  justify-center items-center">
-          <h2 className="text-xl font-bold">
-            Gráfica de <InlineMath math={`f(x) = ${gLatex}`} />
-          </h2>
-          <div className="flex flex-row max-sm:flex-col  items-center justify-center gap-2 my-4">
+          <h2 className="text-xl font-bold">Gráfica de Polinomios</h2>
+          <div className="flex flex-col max-sm:flex-col  items-center justify-center gap-2 my-4">
             <label className="font-medium">Ingrese el polinomio:</label>
-            <div className="flex gap-2 items-center">
-              <span>f(x) =</span>
-              <input
-                type="text"
-                value={polynomialExpr}
-                onChange={handlePolynomialChange}
-                className="border rounded px-2 py-1 flex-grow"
-                placeholder="Ejemplo: x^3-2x^2-3x"
-              />
+            <div className="flex flex-col gap-2 items-center">
+              <div className="flex items-center gap-2">
+                <span>f(x) =</span>
+                <input
+                  type="text"
+                  value={polynomialExpr}
+                  onChange={handlePolynomialChange}
+                  className="border rounded px-2 py-1 flex-grow"
+                  placeholder="Ejemplo: x^3-2x^2-3x"
+                />{" "}
+              </div>
+              <InlineMath math={`f(x) = ${gLatex}`} />
             </div>
           </div>
         </div>
       </div>
       {/* PASO A PASO con react-katex */}
-      <div className="flex flex-row max-sm:flex-col  gap-2">
-        <div className="rounded-2xl border p-4 w-full">
-          <div className="cursor-pointer font-semibold text-lg">
+      <div className="flex flex-row max-sm:flex-col w-full  gap-2">
+        <div className=" w-auto">
+          <h1 className=" font-semibold text-lg">
             Paso a paso (factorización y ceros)
-          </div>
-          <div className="mt-3 space-y-2 text-sm">
+          </h1>
+          <div className="flex flex-col h-auto text-sm border-2 p-4 rounded-md">
             <BlockMath math={`f(x) = ${gLatex}`} />
             <BlockMath math={`f(x) = ${gLatex} = 0`} />
             <BlockMath math={`${factorization.expandedForm}`} />
