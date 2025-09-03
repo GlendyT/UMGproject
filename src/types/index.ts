@@ -20,9 +20,27 @@ export interface AlgebraContextType {
   formatNumber: (val: Fraction) => string;
   printMatrix: (m: FractionMatrix) => string;
   nuevo: () => void;
+  matrix2: Matrix3x3;
+  handleChange2: (i: number, j: number, value: string) => void;
+  setMatrix2: (m: Matrix3x3) => void;
+  extended: Matrix3x3;
+  expr: string;
+  redLines: { i: number; j: number; text: number }[];
+  blueLines: { i: number; j: number; text: number }[];
+  cell: number;
+  gap: number;
+  rows: number;
+  cols: number;
+  W: number;
+  H: number;
+  cx: (j: number) => number;
+  cy: (i: number) => number;
+  
 }
 
 export type FractionMatrix = Fraction[][];
+
+export type Matrix3x3 = number[][];
 
 export interface BotonUtilProps {
   className: string;
@@ -295,17 +313,16 @@ export type Step = {
 
 export type Term = { exp: number; coef: number };
 
-
-  export type Resultado = {
-    coeffs: number[];
-    degree: number;
-    terms: Term[];
-    latexListRaw: string;
-    latexSimplified: string;
-    latexPx: string;
-    latexPxColored: string;
-    latexPminusRaw: string;
-    latexPminusReduced: string;
-    cambiosPos: number;
-    cambiosNeg: number;
-  };
+export type Resultado = {
+  coeffs: number[];
+  degree: number;
+  terms: Term[];
+  latexListRaw: string;
+  latexSimplified: string;
+  latexPx: string;
+  latexPxColored: string;
+  latexPminusRaw: string;
+  latexPminusReduced: string;
+  cambiosPos: number;
+  cambiosNeg: number;
+};

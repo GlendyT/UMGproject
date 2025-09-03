@@ -2,7 +2,12 @@
 
 import Fraction from "fraction.js";
 import { createContext, useState } from "react";
-import { AlgebraContextType, FractionMatrix, ProviderProps } from "../types";
+import {
+  AlgebraContextType,
+  FractionMatrix,
+  Matrix3x3,
+  ProviderProps,
+} from "../types";
 
 const AlgebraContext = createContext<AlgebraContextType>(null!);
 
@@ -196,6 +201,69 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     setSteps([]);
     setSolution(null);
   };
+
+  // ---------------- STATE ----------------
+  const [matrix2, setMatrix2] = useState<Matrix3x3>([
+    [-3, 4, 2],
+    [2, -1, -3],
+    [4, -6, 5],
+  ]);
+
+  // Update matrix value
+  const handleChange2 = (i: number, j: number, value: string) => {
+    const newMatrix = matrix2.map((row) => [...row]);
+    newMatrix[i][j] = parseFloat(value) || 0;
+    setMatrix2(newMatrix);
+  };
+
+  // ---------------- CÁLCULOS ----------------
+  const [[a, b, c], [d, e, f], [g, h, i]] = matrix2;
+  const extended = [...matrix2, ...matrix2.slice(0, 2)];
+
+  // Productos diagonales (principales ↘ y secundarias ↙)
+  const main = [
+    { expr: `${a}·${e}·${i}`, val: a * e * i },
+    { expr: `${b}·${f}·${g}`, val: b * f * g },
+    { expr: `${c}·${d}·${h}`, val: c * d * h },
+  ];
+  const sec = [
+    { expr: `${c}·${e}·${g}`, val: c * e * g },
+    { expr: `${a}·${f}·${h}`, val: a * f * h },
+    { expr: `${b}·${d}·${i}`, val: b * d * i },
+  ];
+
+  const det =
+    main.reduce((s, x) => s + x.val, 0) - sec.reduce((s, x) => s + x.val, 0);
+
+  const expr = `
+    \\text{Det} =
+    (${main.map((m) => (m.val >= 0 ? `+${m.val}` : m.val)).join(" ")})
+    - (${sec.map((m) => (m.val >= 0 ? `+${m.val}` : m.val)).join(" ")})
+    = ${det}
+  `;
+
+  // ---------------- DIBUJO ----------------
+  const cell = 50;
+  const gap = 12;
+  const rows = 5;
+  const cols = 3;
+  const W = cols * cell + (cols - 1) * gap;
+  const H = rows * cell + (rows - 1) * gap;
+
+  const cx = (j: number) => j * (cell + gap) + cell / 2;
+  const cy = (i: number) => i * (cell + gap) + cell / 2;
+
+  const redLines = [
+    { i: 0, j: 0, text: main[0].val },
+    { i: 1, j: 0, text: main[1].val },
+    { i: 2, j: 0, text: main[2].val },
+  ];
+  const blueLines = [
+    { i: 0, j: 2, text: sec[0].val },
+    { i: 1, j: 2, text: sec[1].val },
+    { i: 2, j: 2, text: sec[2].val },
+  ];
+
   return (
     <AlgebraContext.Provider
       value={{
@@ -213,6 +281,21 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         formatNumber,
         printMatrix,
         nuevo,
+        matrix2,
+        setMatrix2,
+        handleChange2,
+        extended,
+        expr,
+        redLines,
+        blueLines,
+        cell,
+        gap,
+        rows,
+        cols,
+        W,
+        H,
+        cx,
+        cy,
       }}
     >
       {children}

@@ -1,218 +1,188 @@
 "use client";
 
 import React, { useState } from "react";
-import { BlockMath } from "react-katex";
+import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import BotonBack from "../../../utils/BotonBack";
+import useAlgoritmos from "@/hooks/useAlgebra";
 
-type Matrix3x3 = number[][];
-
-const SarrusCalculator: React.FC = () => {
-  // ---------------- STATE ----------------
-  const [matrix, setMatrix] = useState<Matrix3x3>([
-    [-3, 4, 2],
-    [2, -1, -3],
-    [4, -6, 5],
-  ]);
-
-  // Update matrix value
-  const handleChange = (i: number, j: number, value: string) => {
-    const newMatrix = matrix.map((row) => [...row]);
-    newMatrix[i][j] = parseFloat(value) || 0;
-    setMatrix(newMatrix);
-  };
-
-  // ---------------- CÁLCULOS ----------------
-  const [[a, b, c], [d, e, f], [g, h, i]] = matrix;
-  const extended = [...matrix, ...matrix.slice(0, 2)];
-
-  // Productos diagonales (principales ↘ y secundarias ↙)
-  const main = [
-    { expr: `${a}·${e}·${i}`, val: a * e * i },
-    { expr: `${b}·${f}·${g}`, val: b * f * g },
-    { expr: `${c}·${d}·${h}`, val: c * d * h },
-  ];
-  const sec = [
-    { expr: `${c}·${e}·${g}`, val: c * e * g },
-    { expr: `${a}·${f}·${h}`, val: a * f * h },
-    { expr: `${b}·${d}·${i}`, val: b * d * i },
-  ];
-
-  const det =
-    main.reduce((s, x) => s + x.val, 0) - sec.reduce((s, x) => s + x.val, 0);
-
-  const expr = `
-    \\text{Det} =
-    (${main.map((m) => (m.val >= 0 ? `+${m.val}` : m.val)).join(" ")})
-    - (${sec.map((m) => (m.val >= 0 ? `+${m.val}` : m.val)).join(" ")})
-    = ${det}
-  `;
-
-  // ---------------- DIBUJO ----------------
-  const cell = 50;
-  const gap = 12;
-  const rows = 5;
-  const cols = 3;
-  const W = cols * cell + (cols - 1) * gap;
-  const H = rows * cell + (rows - 1) * gap;
-
-  const cx = (j: number) => j * (cell + gap) + cell / 2;
-  const cy = (i: number) => i * (cell + gap) + cell / 2;
-
-  const redLines = [
-    { i: 0, j: 0, text: main[0] },
-    { i: 1, j: 0, text: main[1] },
-    { i: 2, j: 0, text: main[2] },
-  ];
-  const blueLines = [
-    { i: 0, j: 2, text: sec[0] },
-    { i: 1, j: 2, text: sec[1] },
-    { i: 2, j: 2, text: sec[2] },
-  ];
+const SarrusCalculator = () => {
+  const {
+    matrix2,
+    handleChange2,
+    cell,
+    gap,
+    W,
+    H,
+    cx,
+    cy,
+    extended,
+    redLines,
+    blueLines,
+    expr,
+  } = useAlgoritmos();
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen flex flex-col items-center">
-      <BotonBack />
-      <h1 className="text-2xl font-bold mb-6">Método de Sarrus</h1>
-
-      {/* INPUT MATRIZ */}
-      <div className="grid grid-cols-3 gap-2 mb-8">
-        {matrix.map((row, i) =>
-          row.map((val, j) => (
-            <input
-              key={`${i}-${j}`}
-              type="number"
-              value={val}
-              onChange={(e) => handleChange(i, j, e.target.value)}
-              className="w-16 h-12 text-center border rounded"
-            />
-          ))
-        )}
+    <div className="p-6 min-h-screen flex flex-col gap-2 items-center bg-gray-100">
+      <div className="w-full flex flex-row">
+        <BotonBack />
+        <h1 className="text-3xl font-bold text-gray-800 text-center w-full">
+          Método de Sarrus
+        </h1>
       </div>
 
-      <div className="flex gap-12">
-        {/* MATRIZ ORIGINAL */}
-        <div>
-          <h2 className="text-lg font-semibold text-center mb-2">
-            Matriz Original
-          </h2>
-          <div
-            className="grid text-xl font-mono"
-            style={{
-              gridTemplateColumns: `repeat(3, ${cell}px)`,
-              gridTemplateRows: `repeat(3, ${cell}px)`,
-              gap: `${gap}px`,
-              placeItems: "center",
-            }}
-          >
-            {matrix.flat().map((val, k) => (
-              <div key={k}>{val}</div>
-            ))}
+      <div className="w-full flex flex-wrap justify-center gap-2">
+        {/* INPUT MATRIZ */}
+        <div className=" bg-white p-6 rounded-lg shadow-lg w-auto max-sm:w-full flex flex-col items-center justify-center">
+          <h3 className="text-lg font-semibold text-center mb-4 text-gray-700">
+            Ingrese los valores de la matriz 3x3
+          </h3>
+          <div className="grid grid-cols-3 gap-3">
+            {matrix2.map((row, i) =>
+              row.map((val, j) => (
+                <input
+                  key={`${i}-${j}`}
+                  type="number"
+                  value={val}
+                  onChange={(e) => handleChange2(i, j, e.target.value)}
+                  className="w-20 h-14 text-center border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg font-semibold transition-colors"
+                />
+              ))
+            )}
           </div>
         </div>
 
-        {/* MATRIZ EXTENDIDA CON FLECHAS */}
-        <div>
-          <h2 className="text-lg font-semibold text-center mb-2">
-            Extensión de Sarrus
-          </h2>
-          <div className="relative" style={{ width: W, height: H }}>
-            <div
-              className="absolute inset-0 grid text-xl font-mono select-none"
-              style={{
-                gridTemplateColumns: `repeat(3, ${cell}px)`,
-                gridTemplateRows: `repeat(5, ${cell}px)`,
-                gap: `${gap}px`,
-                placeItems: "center",
-              }}
-            >
-              {extended.flat().map((val, k) => (
-                <div key={k}>{val}</div>
-              ))}
+        <div className=" bg-white w-auto max-sm:w-full">
+          {/* MATRIZ EXTENDIDA CON FLECHAS */}
+          <div className="bg-white p-6 rounded-lg shadow-lg flex-1">
+            <h2 className="text-xl font-semibold text-center mb-4 text-gray-700">
+              Extensión de Sarrus
+            </h2>
+            <div className="flex justify-center">
+              <div className="relative" style={{ width: W, height: H }}>
+                <div
+                  className="absolute inset-0 grid text-xl font-mono select-none"
+                  style={{
+                    gridTemplateColumns: `repeat(3, ${cell}px)`,
+                    gridTemplateRows: `repeat(5, ${cell}px)`,
+                    gap: `${gap}px`,
+                    placeItems: "center",
+                  }}
+                >
+                  {extended.flat().map((val, k) => (
+                    <div key={k} className="text-gray-700 font-semibold">
+                      {val}
+                    </div>
+                  ))}
+                </div>
+
+                <svg
+                  className="absolute inset-0 pointer-events-none"
+                  width={W}
+                  height={H}
+                  viewBox={`0 0 ${W} ${H}`}
+                >
+                  <defs>
+                    <marker
+                      id="arrowRed"
+                      markerWidth="12"
+                      markerHeight="12"
+                      refX="16"
+                      refY="6"
+                      orient="auto"
+                    >
+                      <path d="M0,0 L0,12 L12,6 z" fill="pink" />
+                    </marker>
+                    <marker
+                      id="arrowBlue"
+                      markerWidth="12"
+                      markerHeight="12"
+                      refX="16"
+                      refY="6"
+                      orient="auto"
+                    >
+                      <path d="M0,0 L0,12 L12,6 z" fill="#cfd8e9" />
+                    </marker>
+                  </defs>
+
+                  {/* Rojas ↘ */}
+                  {redLines.map((r, k) => (
+                    <g key={`r${k}`}>
+                      <line
+                        x1={cx(r.j)}
+                        y1={cy(r.i)}
+                        x2={cx(r.j + 2)}
+                        y2={cy(r.i + 2)}
+                        stroke="#fca5a5"
+                        strokeWidth={2}
+                        markerEnd="url(#arrowRed)"
+                      />
+                    </g>
+                  ))}
+
+                  {/* Azules ↙ */}
+                  {blueLines.map((b, k) => (
+                    <g key={`b${k}`}>
+                      <line
+                        x1={cx(b.j)}
+                        y1={cy(b.i)}
+                        x2={cx(b.j - 2)}
+                        y2={cy(b.i + 2)}
+                        stroke="#93c5fd"
+                        strokeWidth={2}
+                        markerEnd="url(#arrowBlue)"
+                      />
+                    </g>
+                  ))}
+                </svg>
+              </div>
             </div>
-
-            <svg
-              className="absolute inset-0 pointer-events-none"
-              width={W}
-              height={H}
-              viewBox={`0 0 ${W} ${H}`}
-            >
-              <defs>
-                <marker
-                  id="arrowRed"
-                  markerWidth="12"
-                  markerHeight="12"
-                  refX="10"
-                  refY="6"
-                  orient="auto"
-                >
-                  <path d="M0,0 L0,12 L12,6 z" fill="red" />
-                </marker>
-                <marker
-                  id="arrowBlue"
-                  markerWidth="12"
-                  markerHeight="12"
-                  refX="10"
-                  refY="6"
-                  orient="auto"
-                >
-                  <path d="M0,0 L0,12 L12,6 z" fill="blue" />
-                </marker>
-              </defs>
-
-              {/* Rojas ↘ */}
-              {redLines.map((r, k) => (
-                <g key={`r${k}`}>
-                  <line
-                    x1={cx(r.j)}
-                    y1={cy(r.i)}
-                    x2={cx(r.j + 2)}
-                    y2={cy(r.i + 2)}
-                    stroke="red"
-                    strokeWidth={2.5}
-                    markerEnd="url(#arrowRed)"
-                  />
-                  <text
-                    x={cx(r.j + 2) + 15}
-                    y={cy(r.i + 2)}
-                    fontSize="14"
-                    fill="red"
-                  >
-                    {`${r.text.expr}=${r.text.val}`}
-                  </text>
-                </g>
-              ))}
-
-              {/* Azules ↙ */}
-              {blueLines.map((b, k) => (
-                <g key={`b${k}`}>
-                  <line
-                    x1={cx(b.j)}
-                    y1={cy(b.i)}
-                    x2={cx(b.j - 2)}
-                    y2={cy(b.i + 2)}
-                    stroke="blue"
-                    strokeWidth={2.5}
-                    markerEnd="url(#arrowBlue)"
-                  />
-                  <text
-                    x={cx(b.j - 2) - 80}
-                    y={cy(b.i + 2)}
-                    fontSize="14"
-                    fill="blue"
-                  >
-                    {`${b.text.expr}=${b.text.val}`}
-                  </text>
-                </g>
-              ))}
-            </svg>
           </div>
         </div>
-      </div>
 
-      {/* RESULTADO */}
-      <div className="mt-8 text-center">
-        <BlockMath math={expr} />
+        {/* RESULTADO */}
+        <div className="mt-8 p-8 rounded-lg shadow-lg w-auto max-sm:w-full bg-white">
+          <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
+            Cálculo del Determinante
+          </h2>
+          <div className="text-center max-sm:text-xs">
+            <BlockMath math={expr} />
+          </div>
+          <div className="mt-6 flex flex-wrap gap-2 text-sm items-center justify-center">
+            <div className="bg-red-50 p-4 rounded-lg">
+              <h3 className="font-extrabold text-red-800 mb-2 flex items-center">
+                Diagonales Principales
+              </h3>
+              <div className="space-y-1 text-red-700">
+                {redLines.map((r, k) => (
+                  <div key={k}>
+                    <InlineMath
+                      math={`${matrix2[k][0]} \\times ${
+                        matrix2[(k + 1) % 3][1]
+                      } \\times ${matrix2[(k + 2) % 3][2]} = ${r.text}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-extrabold text-blue-800 mb-2 flex items-center ">
+                Diagonales Secundarias
+              </h3>
+              <div className="space-y-1 text-blue-700">
+                {blueLines.map((b, k) => (
+                  <div key={k}>
+                    <InlineMath
+                      math={`${matrix2[k][2]} \\times ${
+                        matrix2[(k + 1) % 3][1]
+                      } \\times ${matrix2[(k + 2) % 3][0]} = ${b.text}`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
