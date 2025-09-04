@@ -106,8 +106,13 @@ export const PrecalculoSlugs: slugstype[] = [
     href: "/precalculo/descarte-de-signos",
   },
   {
-    id:7,
+    id: 7,
     name: "Límites Superiores e Inferiores",
     href: "/precalculo/limites-superiores-e-inferiores",
-  }
+  },
+  {
+    id: 8,
+    name: "Números Complejos",
+    href: "/precalculo/numeros-complejos",
+  },
 ];
