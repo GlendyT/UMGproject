@@ -291,28 +291,6 @@ export type SynStep = {
   remainder: number; // debe ser 0 si es raíz
 };
 
-export type StepsPrecalculoProps = {
-  a: number;
-  b: number;
-  c: number;
-  b2: number;
-  fourac: number;
-  disc: number;
-  sqrtDiscR: number;
-  twoA: number;
-  x1R: number;
-  x2R: number;
-  w1R: number;
-  w2R: number;
-  x3R: number;
-  round2: (value: number) => number;
-};
-
-export type Steps2PrecalculoProps = Omit<
-  StepsPrecalculoProps,
-  "w1R" | "x3R" | "w2R"
->;
-
 export type Step = {
   subtrahend: number[]; // divisor*c, desplazado
   remainder: number[]; // resto tras la resta
@@ -333,3 +311,17 @@ export type Resultado = {
   cambiosPos: number;
   cambiosNeg: number;
 };
+
+export type BiquadraticSolverProps  = {
+  equation: string;
+  a: number;
+  b: number;
+  c: number;
+  factorSquare: (n: number) => [number, number];
+  sqrtDecompLatex: (n: number) => string;
+  fracSimplifyLatex: (num: number, den: number) => string;
+  isPerfectSquare: (n: number) => boolean;
+  round2: (n: number) => number;
+};
+
+export type QuadraticSolverProps = Omit<BiquadraticSolverProps, "round2">;
