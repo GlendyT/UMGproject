@@ -35,7 +35,6 @@ export interface AlgebraContextType {
   H: number;
   cx: (j: number) => number;
   cy: (i: number) => number;
-  
 }
 
 export type FractionMatrix = Fraction[][];
@@ -123,7 +122,15 @@ export interface PrecalculoContextType {
   //TODO: ECUACIONES
   equation: string;
   setEquation: (e: string) => void;
-  steps: JSX.Element | null;
+  steps: JSX.Element[];
+  setSteps: (s: JSX.Element[]) => void;
+  parseCoeff: (raw: string | undefined, defOne?: number) => number;
+  fracSimplifyLatex: (num: number, den: number) => string;
+  isPerfectSquare: (n: number) => boolean;
+  factorSquare: (n: number) => [number, number]; // [outside, inside], n>=0
+  sqrtDecompLatex: (n: number) => string;
+  gcd3: (a: number, b: number, c: number) => number;
+  solve: () => void;
 
   //TODO: GEOMETRIA ANALITICA
   setPuntoP: (p: { x: number; y: number }) => void;

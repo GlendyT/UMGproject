@@ -1,77 +1,109 @@
 "use client";
 import "katex/dist/katex.min.css";
 import { createContext, useState, JSX, useMemo, useCallback } from "react";
-import { PrecalculoContextType, ProviderProps, Resultado, Step, SynStep, Term } from "../types";
-import StepsPrecalculo from "@/components/StepsPrecalculo";
-import Steps2Precalculo from "@/components/Steps2Precalculo";
+import {
+  PrecalculoContextType,
+  ProviderProps,
+  Resultado,
+  Step,
+  SynStep,
+  Term,
+} from "../types";
 import Fraction from "fraction.js";
+import { QuadraticSolver } from "@/components/QuadraticSolver";
+import { BiquadraticSolver } from "@/components/BiquadraticSolver";
 
 const PrecalculoContext = createContext<PrecalculoContextType>(null!);
 
 const PrecalculoProvider = ({ children }: ProviderProps) => {
   //TODO: Ecuaciones
-  function parseCoeff(raw: string, defOne = 1) {
+  const [equation, setEquation] = useState("x^2-4x+5=0");
+  const [steps, setSteps] = useState<JSX.Element[]>([]);
+  const parseCoeff = (raw: string | undefined, defOne = 1) => {
     if (raw === undefined) return NaN;
     if (raw === "" || raw === "+") return defOne;
     if (raw === "-") return -defOne;
     return Number(raw);
-  }
-  const [equation, setEquation] = useState("1x^4-8x^2+2=0");
-  const round2 = (v: number) => Number(v.toFixed(2));
-  let steps: JSX.Element | null = null;
-  try {
-    const cleaned = equation.replace(/\s+/g, "").replace(/=0$/, "");
-    // --- INTENTO 1: forma bicuadrada EXACTA de la imagen: a x^4 + b x^2 + c = 0 ---
-    const biquadExact = cleaned.match(
-      /^([+-]?\d*)x\^4([+-]?\d*)x\^2([+-]?\d+)$/i
-    );
-    if (biquadExact) {
-      const a = parseCoeff(biquadExact[1], 1);
-      const b = parseCoeff(biquadExact[2], 1);
-      const c = parseCoeff(biquadExact[3], 0);
-
-      if (!isFinite(a) || !isFinite(b) || !isFinite(c) || a === 0) {
-        steps = <p className="text-red-500">Coeficientes inválidos.</p>;
-      } else {
-        // Sustitución w = x^2 → a w^2 + b w + c = 0
-        const b2 = b * b;
-        const fourac = 4 * a * c;
-        const disc = b2 - fourac;
-        const sqrtDisc = Math.sqrt(Math.max(0, disc));
-        const sqrtDiscR = round2(sqrtDisc);
-        const twoA = 2 * a;
-
-        // Para replicar el estilo de la imagen, usamos la raíz redondeada para los siguientes cocientes
-        const w1_disp = (-b + sqrtDiscR) / twoA;
-        const w2_disp = (-b - sqrtDiscR) / twoA;
-        const w1R = round2(w1_disp);
-        const w2R = round2(w2_disp);
-
-        // Paso 3: volver a x (x^2 = w)
-        const x1R = w1R >= 0 ? round2(Math.sqrt(w1R)) : NaN;
-        const x2R = w1R >= 0 ? -x1R : NaN;
-        const x3R = w2R >= 0 ? round2(Math.sqrt(w2R)) : NaN;
-        steps = (
-          <StepsPrecalculo
-            a={a}
-            b={b}
-            c={c}
-            b2={b2}
-            fourac={fourac}
-            disc={disc}
-            sqrtDiscR={sqrtDiscR}
-            twoA={twoA}
-            w1R={w1R}
-            w2R={w2R}
-            x1R={x1R}
-            x2R={x2R}
-            x3R={x3R}
-            round2={round2}
-          />
-        );
+  };
+  const gcd3 = (a: number, b: number) => {
+    a = Math.trunc(Math.abs(a));
+    b = Math.trunc(Math.abs(b));
+    while (b) [a, b] = [b, a % b];
+    return a || 1;
+  };
+  const fracSimplifyLatex = (num: number, den: number) => {
+    if (den === 0) return "\\text{indeterminado}";
+    const sign = num < 0 !== den < 0 ? "-" : "";
+    const n = Math.trunc(Math.abs(num));
+    const d = Math.trunc(Math.abs(den));
+    const g = gcd3(n, d);
+    const nn = n / g;
+    const dd = d / g;
+    if (dd === 1) return `${sign}${nn}`;
+    return `${sign}\\frac{${nn}}{${dd}}`;
+  };
+  const isPerfectSquare = (n: number) =>
+    n >= 0 && Number.isInteger(Math.sqrt(n));
+  /** descompone n = s^2 * r, con r libre de cuadrados; retorna [s, r] */
+  const factorSquare = (n: number): [number, number] => {
+    if (n <= 0) return [0, 0];
+    let outside = 1;
+    let inside = n;
+    for (let k = 2; k * k <= inside; k++) {
+      while (inside % (k * k) === 0) {
+        outside *= k;
+        inside /= k * k;
       }
-    } else {
-      // --- INTENTO 2: cuadrática estándar a x^2 + b x + c = 0 ---
+    }
+    return [outside, inside];
+  };
+  /** √n en LaTeX con extracción de cuadrados perfectos */
+  const sqrtDecompLatex = (n: number): string => {
+    if (n < 0) return `i\\,${sqrtDecompLatex(-n)}`; // no se usa aquí directamente
+    if (n === 0) return "0";
+    if (isPerfectSquare(n)) return String(Math.sqrt(n));
+    const [s, r] = factorSquare(n);
+    return r === 1 ? String(s) : `${s}\\sqrt{${r}}`;
+  };
+  const round2 = (v: number) => Number(v.toFixed(2));
+
+  const solve = () => {
+    try {
+      const cleaned = equation.replace(/\s+/g, "").replace(/=0$/, "");
+
+      /** ---------- Caso 1: BICUADRADA  ax^4 + bx^2 + c = 0 ---------- */
+      const biquad = cleaned.match(/^([+-]?\d*)x\^4([+-]?\d*)x\^2([+-]?\d+)$/i);
+      if (biquad) {
+        const a = parseCoeff(biquad[1], 1);
+        const b = parseCoeff(biquad[2], 1);
+        const c = parseCoeff(biquad[3], 0);
+
+        if (!isFinite(a) || !isFinite(b) || !isFinite(c) || a === 0) {
+          setSteps([
+            <p key="err1" className="text-red-500">
+              Coeficientes inválidos.
+            </p>,
+          ]);
+          return;
+        }
+
+        const steps = BiquadraticSolver({
+          equation,
+          a,
+          b,
+          c,
+          factorSquare,
+          sqrtDecompLatex,
+          fracSimplifyLatex,
+          isPerfectSquare,
+          round2,
+        });
+
+        setSteps(steps);
+        return;
+      }
+
+      /** ---------- Caso 2: CUADRÁTICA  ax^2 + bx + c = 0 ---------- */
       const quad = cleaned.match(/^([+-]?\d*)x\^2([+-]?\d*)x([+-]?\d+)$/i);
       if (quad) {
         const a = parseCoeff(quad[1], 1);
@@ -79,49 +111,44 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
         const c = parseCoeff(quad[3], 0);
 
         if (!isFinite(a) || !isFinite(b) || !isFinite(c) || a === 0) {
-          steps = <p className="text-red-500">Coeficientes inválidos.</p>;
-        } else {
-          const b2 = b * b;
-          const fourac = 4 * a * c;
-          const disc = b2 - fourac;
-          const sqrtDisc = Math.sqrt(Math.max(0, disc));
-          const sqrtDiscR = round2(sqrtDisc);
-          const twoA = 2 * a;
-
-          const x1_disp = (-b + sqrtDiscR) / twoA;
-          const x2_disp = (-b - sqrtDiscR) / twoA;
-          const x1R = round2(x1_disp);
-          const x2R = round2(x2_disp);
-
-          steps = (
-            <Steps2Precalculo
-              a={a}
-              b={b}
-              c={c}
-              b2={b2}
-              fourac={fourac}
-              disc={disc}
-              sqrtDiscR={sqrtDiscR}
-              twoA={twoA}
-              x1R={x1R}
-              x2R={x2R}
-              round2={round2}
-            />
-          );
+          setSteps([
+            <p key="err2" className="text-red-500">
+              Coeficientes inválidos.
+            </p>,
+          ]);
+          return;
         }
-      } else {
-        steps = (
-          <p className="text-red-500">
-            Formato no reconocido. Ejemplos:{" "}
-            <span className="font-mono">x^4-8x^2+2=0</span>,{" "}
-            <span className="font-mono">2x^2+3x-1=0</span>
-          </p>
-        );
+
+        const steps = QuadraticSolver({
+          equation,
+          a,
+          b,
+          c,
+          factorSquare,
+          sqrtDecompLatex,
+          fracSimplifyLatex,
+          isPerfectSquare,
+        });
+
+        setSteps(steps);
+        return;
       }
+
+      /** ---------- Caso no reconocido ---------- */
+      setSteps([
+        <p key="no" className="text-red-500">
+          Formato no reconocido. Ejemplos: <code>x^4-8x^2+2=0</code>,{" "}
+          <code>2x^2+3x-1=0</code>, <code>x^2+4x+5=0</code>
+        </p>,
+      ]);
+    } catch {
+      setSteps([
+        <p key="err" className="text-red-500">
+          Error al procesar la ecuación.
+        </p>,
+      ]);
     }
-  } catch (err) {
-    steps = <p className="text-red-500">Error al procesar la ecuación.</p>;
-  }
+  };
 
   //TODO: Geometria Analitica
   const [puntoP, setPuntoP] = useState({ x: -2, y: 2 });
@@ -1109,280 +1136,291 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
   const quotientLatex = result ? coeffsToLatexDESC(result.quotient) : "0";
   const remainderLatex = result ? coeffsToLatexDESC(result.remainder) : "0";
 
+  //TODO: DESCARTE DE SIGNOS
 
-  //TODO: DESCARTE DE SIGNOS 
-
-function parseNumber(raw: string): number {
-  const s = raw.replace(/[()]/g, "").replace(/\+/g, "");
-  if (s === "" || s === "+") return 1;
-  if (s === "-") return -1;
-  if (s.includes("/")) {
-    const [a, b] = s.split("/");
-    return Number(a) / Number(b);
-  }
-  return Number(s);
-}
-
-function getCoeffsFromPolynomial(input: string) {
-  // Normalizar entrada
-  let s = input.replace(/\s+/g, "");
-  if (s === "") return { coeffs: [0], degree: 0 };
-
-  // Asegurarnos que empieza con + o - para parsear más fácil
-  if (!/^\+|^-/.test(s)) s = "+" + s;
-
-  const re = /([+-])([^+-]+)/g;
-  let m: RegExpExecArray | null;
-  const map = new Map<number, number>();
-
-  while ((m = re.exec(s)) !== null) {
-    const sign = m[1];
-    let term = m[2];
-    // eliminar multiplicaciones explícitas
-    term = term.replace(/\*/g, "");
-
-    if (term.includes("x") || term.includes("X")) {
-      // término con x
-      // encontrar posición de x (normalizamos a minúscula)
-      term = term.replace(/X/g, "x");
-      const idx = term.indexOf("x");
-      let coefStr = term.substring(0, idx);
-      if (coefStr === "" || coefStr === "+") coefStr = "1";
-      if (coefStr === "-") coefStr = "1"; // el signo lo tomamos desde `sign`
-
-      // potencia
-      let exp = 1;
-      const powIdx = term.indexOf("^");
-      if (powIdx !== -1) {
-        exp = parseInt(term.substring(powIdx + 1), 10);
-      }
-
-      const coef = parseNumber(coefStr) * (sign === "-" ? -1 : 1);
-      map.set(exp, (map.get(exp) || 0) + coef);
-    } else {
-      // término independiente
-      const val = parseNumber(term) * (sign === "-" ? -1 : 1);
-      map.set(0, (map.get(0) || 0) + val);
+  function parseNumber(raw: string): number {
+    const s = raw.replace(/[()]/g, "").replace(/\+/g, "");
+    if (s === "" || s === "+") return 1;
+    if (s === "-") return -1;
+    if (s.includes("/")) {
+      const [a, b] = s.split("/");
+      return Number(a) / Number(b);
     }
+    return Number(s);
   }
 
-  const exps = Array.from(map.keys());
-  const degree = exps.length ? Math.max(...exps) : 0;
-  const coeffs: number[] = [];
-  for (let e = degree; e >= 0; e--) {
-    coeffs.push(map.get(e) || 0);
-  }
+  function getCoeffsFromPolynomial(input: string) {
+    // Normalizar entrada
+    let s = input.replace(/\s+/g, "");
+    if (s === "") return { coeffs: [0], degree: 0 };
 
-  return { coeffs, degree };
-}
+    // Asegurarnos que empieza con + o - para parsear más fácil
+    if (!/^\+|^-/.test(s)) s = "+" + s;
 
-function divisors(n: number) {
-  const absN = Math.abs(Math.trunc(n));
-  const res: number[] = [];
-  if (absN === 0) return [0]; // divisor especial
-  for (let i = 1; i <= absN; i++) {
-    if (absN % i === 0) {
-      res.push(i);
-    }
-  }
-  return Array.from(new Set(res)).sort((a, b) => a - b);
-}
+    const re = /([+-])([^+-]+)/g;
+    let m: RegExpExecArray | null;
+    const map = new Map<number, number>();
 
-function posiblesCerosRacionales(coeffs: number[]) {
-  // a_n = coeficiente líder (first element), a_0 = término independiente (last element)
-  const an = coeffs[0];
-  const a0 = coeffs[coeffs.length - 1];
-  const p = divisors(a0); // divisores de p (término independiente)
-  const q = divisors(an); // divisores de q (coeficiente líder)
+    while ((m = re.exec(s)) !== null) {
+      const sign = m[1];
+      let term = m[2];
+      term = term.replace(/\*/g, "").replace(/X/g, "x"); // normaliza ANTES
+      if (term.includes("x")) {
+        const idx = term.indexOf("x");
+        let coefStr = term.substring(0, idx);
+        if (coefStr === "" || coefStr === "+") coefStr = "1";
+        if (coefStr === "-") coefStr = "1";
 
-  // Formamos la lista sin simplificar: ± p/q para cada p en {1,3,...} y q en {1,3,...}
-  const combos: string[] = [];
-  for (const pi of p) {
-    for (const qi of q) {
-      // mostramos en forma no simplificada: \pm \frac{pi}{qi}
-      combos.push(`\\frac{${pi}}{${qi}}`);
-    }
-  }
+        // si no hay número explícito, es 1
+        if (coefStr === "" || coefStr === "+") coefStr = "1";
+        if (coefStr === "-") coefStr = "1"; // el signo lo manejamos aparte
 
-  // Eliminamos duplicados (por ejemplo si p contiene 1 y -1, usamos valores absolutos y luego anteponemos ±)
-  const uniqueRaw = Array.from(new Set(combos.map((c) => c)));
-
-  // Construimos la presentación: \pm 1/1, \pm 1/3, ... (mostrando solo las formas positivas en el numerador/denominador pero con ± delante)
-  const positivePairs: string[] = [];
-  for (const pi of p) {
-    for (const qi of q) {
-      positivePairs.push(`\\frac{${Math.abs(pi)}}{${Math.abs(qi)}}`);
-    }
-  }
-  const positiveUnique = Array.from(new Set(positivePairs));
-
-  // Construcción de texto LaTeX: \pm \frac{1}{1}, \pm \frac{1}{3}, ...
-  const latexListRaw = positiveUnique.map((f) => `\\pm ${f}`).join(', ');
-
-  // Lista simplificada: calculamos todas las fracciones y luego las simplificamos numéricamente (ej: 3/3 -> 1)
-  const simplifiedSet = new Set<string>();
-  for (const pi of p) {
-    for (const qi of q) {
-      if (qi === 0) continue;
-      const val = pi / qi;
-      // expresarlo como fracción simplificada posible o entero
-      if (Number.isInteger(val)) {
-        simplifiedSet.add(`\\pm ${val}`);
-      } else {
-        // simplificar fracción manual
-        const g = gcd(Math.abs(pi), Math.abs(qi));
-        const np = Math.abs(pi) / g;
-        const nq = Math.abs(qi) / g;
-        simplifiedSet.add(`\\pm \\tfrac{${np}}{${nq}}`);
-      }
-    }
-  }
-
-  const latexSimplified = Array.from(simplifiedSet).join(', ');
-
-  return { latexListRaw, latexSimplified };
-}
-
-function gcd2(a: number, b: number): number {
-  if (!b) return a;
-  return gcd(b, a % b);
-}
-
-function signOf(n: number) {
-  if (n > 0) return 1;
-  if (n < 0) return -1;
-  return 0;
-}
-
-function buildColoredTerm(coef: number, exp: number) {
-  const sign = coef >= 0 ? '+' : '-';
-  const abs = Math.abs(coef);
-  const coefStr = exp === 0 ? String(abs) : abs === 1 ? '' : String(abs);
-  const varPart = exp === 0 ? '' : exp === 1 ? 'x' : `x^{${exp}}`;
-  return `${sign}${coefStr}${varPart}`;
-}
-
-function coloredLatexForTerms(terms: Term[]) {
-  // Devuelve una cadena LaTeX con términos coloreados y flechas en los cambios de signo
-  // terms ya están en orden descendente de expo
-  const parts: string[] = [];
-  for (let i = 0; i < terms.length; i++) {
-    const t = terms[i];
-    const termLatex = buildColoredTerm(t.coef, t.exp);
-    const colored = t.coef >= 0 ? `\\textcolor{green}{${termLatex}}` : `\\textcolor{red}{${termLatex}}`;
-    parts.push(colored);
-
-    // mirar siguiente término no nulo para decidir flecha
-    const next = terms.slice(i + 1).find((x) => x.coef !== 0);
-    if (next) {
-      const signNow = signOf(t.coef);
-      const signNext = signOf(next.coef);
-      if (signNow !== 0 && signNext !== 0 && signNow !== signNext) {
-        // cambio de signo -> mostrar flecha azul
-        parts.push('\\; \\xrightarrow{\\textcolor{blue}{\\text{ cambio }}} \\;');
-      } else {
-        parts.push('\\; \\;');
-      }
-    }
-  }
-  return parts.join(' ');
-}
-
-function buildSubstitutionLatex(terms: Term[]) {
-  // Ejemplo: 3(-x)^6 + 4(-x)^5 + 3(-x)^3 - (-x) - 3
-  const parts: string[] = [];
-  for (const t of terms) {
-    const sign = t.coef >= 0 ? '+' : '-';
-    const abs = Math.abs(t.coef);
-    if (t.exp === 0) {
-      parts.push(`${sign}${abs}`);
-    } else if (t.exp === 1) {
-      // caso -x
-      parts.push(`${sign}${abs}(-x)`);
-    } else {
-      parts.push(`${sign}${abs}(-x)^{${t.exp}}`);
-    }
-  }
-  // quitar posible + inicial y devolver limpio
-  const s = parts.join(' \\; ');
-  return s.replace(/^\+/, '');
-}
-
-function buildReducedNegLatex(terms: Term[]) {
-  // Aplica (-x)^k => (-1)^k x^k y multiplica coef
-  const reduced: Term[] = terms.map((t) => ({ exp: t.exp, coef: t.coef * (t.exp % 2 === 0 ? 1 : -1) }));
-  return coloredLatexForTerms(reduced);
-}
-
-  const [input2, setInput2] = useState("3x^6 + 4x^5 + 3x^3 - x - 3");
-
-    const [resultado, setResultado] = useState<Resultado | null>(null);
-  
-    function handleResolver() {
-      try {
-        const { coeffs, degree } = getCoeffsFromPolynomial(input);
-  
-        // construir lista de términos no nulos en orden decreciente de expo
-        const terms: Term[] = [];
-        for (let i = 0; i <= degree; i++) {
-          const exp = degree - i;
-          const coef = coeffs[i] || 0;
-          if (coef !== 0) terms.push({ exp, coef });
+        let exp = 1;
+        const powIdx = term.indexOf("^");
+        if (powIdx !== -1) {
+          exp = parseInt(term.substring(powIdx + 1), 10);
         }
-  
-        // Posibles ceros racionales (p/q)
-        const { latexListRaw, latexSimplified } = posiblesCerosRacionales(coeffs);
-  
-        // Cambios de signo para P(x)
-        const cambiosPos = (() => {
-          let cnt = 0;
-          let lastSign = 0;
-          for (const c of coeffs) {
-            if (c === 0) continue;
-            const s = signOf(c);
-            if (lastSign === 0) {
+
+        const coef = parseNumber(coefStr) * (sign === "-" ? -1 : 1);
+        map.set(exp, (map.get(exp) || 0) + coef);
+      } else {
+        // término independiente
+        const val = parseNumber(term) * (sign === "-" ? -1 : 1);
+        map.set(0, (map.get(0) || 0) + val);
+      }
+    }
+
+    // Ahora construimos arreglo denso desde degree hasta 0
+    const exps = Array.from(map.keys());
+    const degree = exps.length ? Math.max(...exps) : 0;
+    const coeffs: number[] = [];
+    for (let e = degree; e >= 0; e--) {
+      coeffs.push(map.get(e) || 0);
+    }
+
+    return { coeffs, degree };
+  }
+
+  function divisors(n: number) {
+    const absN = Math.abs(Math.trunc(n));
+    const res: number[] = [];
+    if (absN === 0) return [0]; // divisor especial
+    for (let i = 1; i <= absN; i++) {
+      if (absN % i === 0) {
+        res.push(i);
+      }
+    }
+    return Array.from(new Set(res)).sort((a, b) => a - b);
+  }
+
+  function posiblesCerosRacionales(coeffs: number[]) {
+    // a_n = coeficiente líder (first element), a_0 = término independiente (last element)
+    const an = coeffs[0];
+    const a0 = coeffs[coeffs.length - 1];
+    const p = divisors(a0); // divisores de p (término independiente)
+    const q = divisors(an); // divisores de q (coeficiente líder)
+
+    // Formamos la lista sin simplificar: ± p/q para cada p en {1,3,...} y q en {1,3,...}
+    const combos: string[] = [];
+    for (const pi of p) {
+      for (const qi of q) {
+        // mostramos en forma no simplificada: \pm \frac{pi}{qi}
+        combos.push(`\\frac{${pi}}{${qi}}`);
+      }
+    }
+
+    // Eliminamos duplicados (por ejemplo si p contiene 1 y -1, usamos valores absolutos y luego anteponemos ±)
+    const uniqueRaw = Array.from(new Set(combos.map((c) => c)));
+
+    // Construimos la presentación: \pm 1/1, \pm 1/3, ... (mostrando solo las formas positivas en el numerador/denominador pero con ± delante)
+    const positivePairs: string[] = [];
+    for (const pi of p) {
+      for (const qi of q) {
+        positivePairs.push(`\\frac{${Math.abs(pi)}}{${Math.abs(qi)}}`);
+      }
+    }
+    const positiveUnique = Array.from(new Set(positivePairs));
+
+    // Construcción de texto LaTeX: \pm \frac{1}{1}, \pm \frac{1}{3}, ...
+    const latexListRaw = positiveUnique.map((f) => `\\pm ${f}`).join(", ");
+
+    // Lista simplificada: calculamos todas las fracciones y luego las simplificamos numéricamente (ej: 3/3 -> 1)
+    const simplifiedSet = new Set<string>();
+    for (const pi of p) {
+      for (const qi of q) {
+        if (qi === 0) continue;
+        const val = pi / qi;
+        // expresarlo como fracción simplificada posible o entero
+        if (Number.isInteger(val)) {
+          simplifiedSet.add(`\\pm ${val}`);
+        } else {
+          // simplificar fracción manual
+          const g = gcd2(Math.abs(pi), Math.abs(qi));
+          const np = Math.abs(pi) / g;
+          const nq = Math.abs(qi) / g;
+          simplifiedSet.add(`\\pm \\tfrac{${np}}{${nq}}`);
+        }
+      }
+    }
+
+    const latexSimplified = Array.from(simplifiedSet).join(", ");
+
+    return { latexListRaw, latexSimplified };
+  }
+
+  function gcd2(a: number, b: number): number {
+    a = Math.abs(a);
+    b = Math.abs(b);
+    while (b) [a, b] = [b, a % b];
+    return a;
+  }
+
+  function signOf(n: number) {
+    if (n > 0) return 1;
+    if (n < 0) return -1;
+    return 0;
+  }
+
+  function buildColoredTerm(coef: number, exp: number) {
+    const sign = coef >= 0 ? "+" : "-";
+    const abs = Math.abs(coef);
+    const coefStr = exp === 0 ? String(abs) : abs === 1 ? "" : String(abs);
+    const varPart = exp === 0 ? "" : exp === 1 ? "x" : `x^{${exp}}`;
+    return `${sign}${coefStr}${varPart}`;
+  }
+
+  function coloredLatexForTerms(terms: Term[]) {
+    // Devuelve una cadena LaTeX con términos coloreados y flechas en los cambios de signo
+    // terms ya están en orden descendente de expo
+    const parts: string[] = [];
+    for (let i = 0; i < terms.length; i++) {
+      const t = terms[i];
+      const termLatex = buildColoredTerm(t.coef, t.exp);
+      const colored =
+        t.coef >= 0
+          ? `\\textcolor{green}{${termLatex}}`
+          : `\\textcolor{red}{${termLatex}}`;
+      parts.push(colored);
+
+      // mirar siguiente término no nulo para decidir flecha
+      const next = terms.slice(i + 1).find((x) => x.coef !== 0);
+      if (next) {
+        const signNow = signOf(t.coef);
+        const signNext = signOf(next.coef);
+        if (signNow !== 0 && signNext !== 0 && signNow !== signNext) {
+          // cambio de signo -> mostrar flecha azul
+          parts.push(
+            "\\; \\xrightarrow{\\textcolor{blue}{\\text{ cambio }}} \\;"
+          );
+        } else {
+          parts.push("\\; \\;");
+        }
+      }
+    }
+    return parts.join(" ");
+  }
+
+  function buildSubstitutionLatex(terms: Term[]) {
+    // Ejemplo: 3(-x)^6 + 4(-x)^5 + 3(-x)^3 - (-x) - 3
+    const parts: string[] = [];
+    for (const t of terms) {
+      const sign = t.coef >= 0 ? "+" : "-";
+      const abs = Math.abs(t.coef);
+      if (t.exp === 0) {
+        parts.push(`${sign}${abs}`);
+      } else if (t.exp === 1) {
+        // caso -x
+        parts.push(`${sign}${abs}(-x)`);
+      } else {
+        parts.push(`${sign}${abs}(-x)^{${t.exp}}`);
+      }
+    }
+    // quitar posible + inicial y devolver limpio
+    const s = parts.join(" \\; ");
+    return s.replace(/^\+/, "");
+  }
+
+  function buildReducedNegLatex(terms: Term[]) {
+    // Aplica (-x)^k => (-1)^k x^k y multiplica coef
+    const reduced: Term[] = terms.map((t) => ({
+      exp: t.exp,
+      coef: t.coef * (t.exp % 2 === 0 ? 1 : -1),
+    }));
+    return coloredLatexForTerms(reduced);
+  }
+
+  const [input2, setInput2] = useState("x^5 - 3x^4 + 12x^3 - 28x^2 + 27x - 9");
+
+  const [resultado, setResultado] = useState<Resultado | null>(null);
+
+  function handleResolver() {
+    try {
+      const { coeffs, degree } = getCoeffsFromPolynomial(input2);
+      console.log("Coeficientes:", coeffs, "grado:", degree);
+
+      // construir lista de términos no nulos en orden decreciente de expo
+      const terms: Term[] = [];
+      for (let i = 0; i <= degree; i++) {
+        const exp = degree - i;
+        const coef = coeffs[i] || 0;
+        if (coef !== 0) terms.push({ exp, coef });
+      }
+
+      // Posibles ceros racionales (p/q)
+      const { latexListRaw, latexSimplified } = posiblesCerosRacionales(coeffs);
+
+      // Cambios de signo para P(x)
+      const cambiosPos = (() => {
+        let cnt = 0;
+        let lastSign = 0;
+        for (const c of coeffs) {
+          if (c === 0) continue;
+          const s = signOf(c);
+          if (lastSign === 0) {
+            lastSign = s;
+          } else {
+            if (s !== lastSign) {
+              cnt++;
               lastSign = s;
             } else {
-              if (s !== lastSign) {
-                cnt++;
-                lastSign = s;
-              } else {
-                lastSign = s;
-              }
+              lastSign = s;
             }
           }
-          return cnt;
-        })();
-  
-        // Cambios de signo para P(-x) (coef * (-1)^exp)
-        const coeffsNeg = coeffs.map((c, idx) => {
-          // idx corresponds to coefficient for exponent = degree - idx
-          const exp = degree - idx;
-          return c * (exp % 2 === 0 ? 1 : -1);
-        });
-  
-        const cambiosNeg = (() => {
-          let cnt = 0;
-          let lastSign = 0;
-          for (const c of coeffsNeg) {
-            if (c === 0) continue;
-            const s = signOf(c);
-            if (lastSign === 0) {
+        }
+        return cnt;
+      })();
+
+      // Cambios de signo para P(-x) (coef * (-1)^exp)
+      const coeffsNeg = coeffs.map((c, idx) => {
+        // idx corresponds to coefficient for exponent = degree - idx
+        const exp = degree - idx;
+        return c * (exp % 2 === 0 ? 1 : -1);
+      });
+
+      const cambiosNeg = (() => {
+        let cnt = 0;
+        let lastSign = 0;
+        for (const c of coeffsNeg) {
+          if (c === 0) continue;
+          const s = signOf(c);
+          if (lastSign === 0) {
+            lastSign = s;
+          } else {
+            if (s !== lastSign) {
+              cnt++;
               lastSign = s;
             } else {
-              if (s !== lastSign) {
-                cnt++;
-                lastSign = s;
-              } else {
-                lastSign = s;
-              }
+              lastSign = s;
             }
           }
-          return cnt;
-        })();
-  
-        // Generar LaTeX detallado
-        const latexPx = `P(x) = ${terms
+        }
+        return cnt;
+      })();
+
+      // Generar LaTeX detallado
+      const latexPx =
+        "P(x) =" +
+        terms
           .map((t, i) => {
             // formateamos con signo visible
             const sign =
@@ -1390,36 +1428,37 @@ function buildReducedNegLatex(terms: Term[]) {
             const coefAbs = Math.abs(t.coef);
             const coefStr =
               t.exp === 0 ? `${coefAbs}` : coefAbs === 1 ? "" : `${coefAbs}`;
-            const varPart = t.exp === 0 ? "" : t.exp === 1 ? `x` : `x^{${t.exp}}`;
+            const varPart =
+              t.exp === 0 ? "" : t.exp === 1 ? `x` : `x^{${t.exp}}`;
             return `${sign}${coefStr}${varPart}`;
           })
-          .join(" \\; ")};`;
-  
-        const latexPxColored = coloredLatexForTerms(terms);
-        const latexPminusRaw = buildSubstitutionLatex(terms);
-        const latexPminusReduced = buildReducedNegLatex(terms);
-  
-        setResultado({
-          coeffs,
-          degree,
-          terms,
-          latexListRaw,
-          latexSimplified,
-          latexPx,
-          latexPxColored,
-          latexPminusRaw,
-          latexPminusReduced,
-          cambiosPos,
-          cambiosNeg,
-        });
-      } catch (e) {
-        console.error(e);
-        alert(
-          "Error al interpretar el polinomio. Usa formato como: 3x^6 + 4x^5 + 3x^3 - x - 3"
-        );
-      }
+          .join(" \\; ");
+
+      const latexPxColored = coloredLatexForTerms(terms);
+      const latexPminusRaw = buildSubstitutionLatex(terms);
+      const latexPminusReduced = buildReducedNegLatex(terms);
+
+      setResultado({
+        coeffs,
+        degree,
+        terms,
+        latexListRaw,
+        latexSimplified,
+        latexPx,
+        latexPxColored,
+        latexPminusRaw,
+        latexPminusReduced,
+        cambiosPos,
+        cambiosNeg,
+      });
+    } catch (e) {
+      console.error(e);
+      alert(
+        "Error al interpretar el polinomio. Usa formato como: 3x^6 + 4x^5 + 3x^3 - x - 3"
+      );
     }
-  
+  }
+
   return (
     <PrecalculoContext.Provider
       value={{
@@ -1427,11 +1466,19 @@ function buildReducedNegLatex(terms: Term[]) {
         equation,
         setEquation,
         steps,
+        setSteps,
+        parseCoeff,
+        gcd3,
+        fracSimplifyLatex,
+        isPerfectSquare,
+        factorSquare,
+        sqrtDecompLatex,
+        round2,
+        solve,
 
         //TODO: GEOMETRIA ANALITICA
         setPuntoP,
         puntoP,
-        round2,
         x1,
         y1,
         puntoQ,
@@ -1524,7 +1571,7 @@ function buildReducedNegLatex(terms: Term[]) {
         setInput2,
         resultado,
         setResultado,
-        handleResolver
+        handleResolver,
       }}
     >
       {children}
