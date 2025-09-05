@@ -17,7 +17,7 @@ const PrecalculoContext = createContext<PrecalculoContextType>(null!);
 
 const PrecalculoProvider = ({ children }: ProviderProps) => {
   //TODO: Ecuaciones
-  const [equation, setEquation] = useState("x^2-4x+5=0");
+  const [equation, setEquation] = useState("1x^4-8x^2+2=0");
   const [steps, setSteps] = useState<JSX.Element[]>([]);
   const parseCoeff = (raw: string | undefined, defOne = 1) => {
     if (raw === undefined) return NaN;
@@ -1421,7 +1421,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
       const latexPx =
         "P(x) =" +
         terms
-          .map((t, i) => {
+          .map((t, ) => {
             // formateamos con signo visible
             const sign =
               t.coef >= 0 ? `+${Math.abs(t.coef)}` : `-${Math.abs(t.coef)}`;
