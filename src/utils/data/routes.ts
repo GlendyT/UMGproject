@@ -115,4 +115,9 @@ export const PrecalculoSlugs: slugstype[] = [
     name: "Números Complejos",
     href: "/precalculo/numeros-complejos",
   },
+  {
+    id: 9,
+    name: "Trigonometría",
+    href: "/precalculo/trigonometria",
+  },
 ];
