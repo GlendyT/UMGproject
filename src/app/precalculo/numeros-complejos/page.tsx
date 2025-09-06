@@ -270,7 +270,7 @@ export default function ComplexSteps() {
         </div>
       </div>
 
-      <div className="flex flex-row w-full items-start justify-center gap-2">
+      <div className="flex flex-row max-sm:flex-col w-full items-start justify-center gap-2">
         {/* Pasos */}
         <div className="border flex flex-col rounded-xl p-2 items-center justify-center">
           <h1 className="text-sm font-semibold">Procedimiento paso a paso</h1>
