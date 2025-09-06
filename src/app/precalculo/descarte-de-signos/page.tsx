@@ -10,7 +10,7 @@ export default function ReglaDescartesExacto() {
   const { setInput2, input2, resultado, handleResolver } = usePrecalculo();
 
   return (
-    <div className="min-h-screen flex flex-col items-center gap-2 p-4">
+    <div className="min-h-screen flex flex-col items-center gap-2 p-4 ">
       <div className="flex flex-row w-full ">
         <BotonBack />
         <h1 className="flex w-full text-2xl font-bold text-center items-center justify-center">
@@ -19,9 +19,9 @@ export default function ReglaDescartesExacto() {
       </div>
 
       <div className="flex flex-col w-full items-center justify-center gap-2">
-        <div className="flex flex-row items-center justify-center gap-2">
+        <div className="flex flex-row max-sm:flex-col items-center justify-center gap-2 max-sm:text-xs">
           <input
-            className="flex-1 p-2 border rounded-lg"
+            className="flex-1 p-2 border rounded-lg max-sm:text-xs"
             value={input2}
             onChange={(e) => setInput2(e.target.value)}
             spellCheck={false}
@@ -29,19 +29,19 @@ export default function ReglaDescartesExacto() {
           <InlineMath math={`P(x) = ${input2}`} />
         </div>
         <BotonUtil
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg max-sm:text-xs"
           onClick={handleResolver}
           label="Resolver"
         />
       </div>
 
       {resultado ? (
-        <div className="space-y-6">
+        <div className="flex flex-col w-96 items-center justify-center px-4 gap-2 max-sm:text-xs ">
           {/* Paso 1 */}
-          <h2 className="text-lg font-semibold">
+          <h2 className="text-lg max-sm:text-xs font-semibold">
             1. Encontrando los ceros racionales posibles
           </h2>
-          <p>
+          <p className="max-sm:text-xs">
             Según el teorema del factor racional, los posibles ceros son{" "}
             <InlineMath
               math={`
@@ -51,6 +51,7 @@ export default function ReglaDescartesExacto() {
             con p divisores del término independiente y q divisores del
             coeficiente líder.
           </p>
+
           <BlockMath
             math={`p = ${Math.abs(
               resultado.coeffs[resultado.coeffs.length - 1]
@@ -58,6 +59,7 @@ export default function ReglaDescartesExacto() {
               resultado.coeffs[resultado.coeffs.length - 1]
             )}`}
           />
+
           <BlockMath
             math={`q = ${Math.abs(
               resultado.coeffs[0]

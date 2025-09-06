@@ -1310,7 +1310,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
         if (signNow !== 0 && signNext !== 0 && signNow !== signNext) {
           // cambio de signo -> mostrar flecha azul
           parts.push(
-            "\\; \\xrightarrow{\\textcolor{blue}{\\text{ cambio }}} \\;"
+            "\\; \\xrightarrow{\\textcolor{blue}{\\text{ }}} \\;"
           );
         } else {
           parts.push("\\; \\;");
