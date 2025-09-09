@@ -1,17 +1,20 @@
 "use client";
 import BotonBack from "@/utils/BotonBack";
-import { VideosContabilidad } from "@/utils/data/videos";
+import { VideosMatematicasDiscreta } from "@/utils/data/videos";
 import { YouTubeEmbed } from "@next/third-parties/google";
+import React from "react";
 
-const Contabilidad = () => {
+const VideosMatematicaDiscreta = () => {
   return (
     <section className="flex flex-col gap-2  min-h-screen bg-gray-100 p-4">
       <div className="flex flex-row  w-full gap-4  text-4xl font-extrabold">
         <BotonBack />
-        <h1 className="text-center flex items-center justify-center w-full">Contabilidad</h1>
+        <h1 className="text-center flex items-center justify-center w-full">
+          Videos Matematica Discreta
+        </h1>
       </div>
       <div className="flex flex-wrap gap-8 justify-center">
-        {VideosContabilidad.map((video) => (
+        {VideosMatematicasDiscreta.map((video) => (
           <div key={video.id} className="flex flex-col">
             <h2 className="text-2xl font-bold mb-4">{video.title} </h2>
             <div className="aspect-video ">
@@ -29,4 +32,4 @@ const Contabilidad = () => {
   );
 };
 
-export default Contabilidad;
+export default VideosMatematicaDiscreta;

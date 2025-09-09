@@ -49,6 +49,11 @@ export const MatematicaDiscretaSlugs: slugstype[] = [
     name: "Compuertas lógicas",
     href: "/matematicadiscreta/compuertas-logicas",
   },
+  {
+    id: 3,
+    name: "Videos Matemática Discreta",
+    href: "/matematicadiscreta/videos-matematica-discreta",
+  },
 ];
 
 export const AlgebraLinealSlugs: slugstype[] = [
@@ -66,12 +71,12 @@ export const AlgebraLinealSlugs: slugstype[] = [
     id: 3,
     name: "Método de Laplace",
     href: "/algebralineal/metodo-de-laplace",
-  } /*
+  },
   {
     id: 4,
-    name: "Vectores",
-    href: "/algebralineal/vectores",
-  },*/,
+    name: "Método de Crammer",
+    href: "/algebralineal/metodo-de-cramer",
+  },
 ];
 
 export const PrecalculoSlugs: slugstype[] = [
@@ -115,9 +120,24 @@ export const PrecalculoSlugs: slugstype[] = [
     name: "Números Complejos",
     href: "/precalculo/numeros-complejos",
   },
+  // {
+  //   id: 9,
+  //   name: "Trigonometría",
+  //   href: "/precalculo/trigonometria",
+  // },
+  // {
+  //   id: 10,
+  //   name: "Ley de Senos",
+  //   href: "/precalculo/ley-de-senos",
+  // },
+  // {
+  //   id: 11,
+  //   name: "Ley de Cosenos",
+  //   href: "/precalculo/ley-de-cosenos",
+  // },
   {
-    id: 9,
-    name: "Trigonometría",
-    href: "/precalculo/trigonometria",
+    id: 12,
+    name: "Videos Precálculo",
+    href: "/precalculo/videos-precalculo",
   },
 ];
