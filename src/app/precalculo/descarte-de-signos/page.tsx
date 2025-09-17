@@ -3,25 +3,19 @@
 import "katex/dist/katex.min.css";
 import { BlockMath, InlineMath } from "react-katex";
 import usePrecalculo from "@/hooks/usePrecalculo";
-import BotonBack from "@/utils/BotonBack";
 import BotonUtil from "@/utils/BotonUtil";
+import TitleCourse from "@/components/TitleCourse";
 
 export default function ReglaDescartesExacto() {
   const { setInput2, input2, resultado, handleResolver } = usePrecalculo();
 
   return (
     <div className="min-h-screen flex flex-col items-center gap-2 p-4 ">
-      <div className="flex flex-row w-full ">
-        <BotonBack />
-        <h1 className="flex w-full text-2xl font-bold text-center items-center justify-center">
-          Descarte de Signos
-        </h1>
-      </div>
-
+      <TitleCourse course=" Descarte de Signos" />
       <div className="flex flex-col w-full items-center justify-center gap-2">
-        <div className="flex flex-row max-sm:flex-col items-center justify-center gap-2 max-sm:text-xs">
+        <div className="flex flex-col max-sm:flex-col items-center justify-center gap-2 max-sm:text-xs">
           <input
-            className="flex-1 p-2 border rounded-lg max-sm:text-xs"
+            className="flex w-full text-center  p-2 border rounded-lg max-sm:text-xs"
             value={input2}
             onChange={(e) => setInput2(e.target.value)}
             spellCheck={false}

@@ -15,6 +15,7 @@ import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import BotonBack from "@/utils/BotonBack";
 import usePrecalculo from "@/hooks/usePrecalculo";
+import TitleCourse from "@/components/TitleCourse";
 
 const PolynomialGX = () => {
   const {
@@ -30,29 +31,26 @@ const PolynomialGX = () => {
   } = usePrecalculo();
 
   return (
-    <div className="p-6 flex flex-col items-center justify-center min-h-screen">
-      <div className="flex flex-row gap-4  w-full py-1">
-        <BotonBack />
-        <div className="flex w-full flex-col  justify-center items-center">
-          <h2 className="text-xl font-bold">Gráfica de Polinomios</h2>
-          <div className="flex flex-col max-sm:flex-col  items-center justify-center gap-2 my-4">
-            <label className="font-medium">Ingrese el polinomio:</label>
-            <div className="flex flex-col gap-2 items-center">
-              <div className="flex items-center gap-2">
-                <span>f(x) =</span>
-                <input
-                  type="text"
-                  value={polynomialExpr}
-                  onChange={handlePolynomialChange}
-                  className="border rounded px-2 py-1 flex-grow"
-                  placeholder="Ejemplo: x^3-2x^2-3x"
-                />{" "}
-              </div>
-              <InlineMath math={`f(x) = ${gLatex}`} />
-            </div>
+    <div className="px-6 py-2 flex flex-col  min-h-screen">
+      <TitleCourse course="Gráfica de Polinomios" />
+
+      <div className="flex flex-col max-sm:flex-col  items-center justify-center gap-2 ">
+        <label className="font-medium">Ingrese el polinomio:</label>
+        <div className="flex flex-col gap-2 pb-2 items-center">
+          <div className="flex items-center gap-2">
+            <span>f(x) =</span>
+            <input
+              type="text"
+              value={polynomialExpr}
+              onChange={handlePolynomialChange}
+              className="border rounded px-2 py-1 flex-grow"
+              placeholder="Ejemplo: x^3-2x^2-3x"
+            />{" "}
           </div>
+          <InlineMath math={`f(x) = ${gLatex}`} />
         </div>
       </div>
+
       {/* PASO A PASO con react-katex */}
       <div className="flex flex-row max-sm:flex-col w-full  gap-2">
         <div className=" w-auto">

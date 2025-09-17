@@ -5,6 +5,7 @@ import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import BotonBack from "../../../utils/BotonBack";
 import useAlgoritmos from "@/hooks/useAlgebra";
+import TitleCourse from "@/components/TitleCourse";
 
 const SarrusCalculator = () => {
   const {
@@ -24,13 +25,7 @@ const SarrusCalculator = () => {
 
   return (
     <div className="p-6 min-h-screen flex flex-col gap-2 items-center bg-gray-100">
-      <div className="w-full flex flex-row">
-        <BotonBack />
-        <h1 className="text-3xl font-bold text-gray-800 text-center w-full">
-          Método de Sarrus
-        </h1>
-      </div>
-
+      <TitleCourse course="Método de Sarrus" />
       <div className="w-full flex flex-wrap justify-center gap-2">
         {/* INPUT MATRIZ */}
         <div className=" bg-white p-6 rounded-lg shadow-lg w-auto max-sm:w-full flex flex-col items-center justify-center">

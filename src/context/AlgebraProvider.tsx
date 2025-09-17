@@ -5,8 +5,11 @@ import { createContext, useState } from "react";
 import {
   AlgebraContextType,
   FractionMatrix,
+  Matrix,
   Matrix3x3,
+  MinorStep,
   ProviderProps,
+  StepData,
 } from "../types";
 
 const AlgebraContext = createContext<AlgebraContextType>(null!);
@@ -264,6 +267,296 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     { i: 2, j: 2, text: sec[2].val },
   ];
 
+  // ---------------- MÉTODO DE CRAMER ----------------
+   const [size2, setSize2] = useState<number>(3);
+  const [matrix3, setMatrix3] = useState<Matrix>([
+    [-1, 2, 4, 1],
+    [4, 6, -2, 2],
+    [1, -1, 6, 3],
+  ]);
+  const [result, setResult] = useState<{
+    det: Fraction;
+    detVars: Fraction[];
+    sols: Fraction[];
+  } | null>(null);
+  const [showFraction, setShowFraction] = useState(true);
+
+  // Función de determinante usando Fraction para precisión exacta
+  const determinant = (m: Matrix): Fraction => {
+    const n = m.length;
+    if (n === 1) return new Fraction(m[0][0]);
+    if (n === 2)
+      return new Fraction(m[0][0])
+        .mul(m[1][1])
+        .sub(new Fraction(m[0][1]).mul(m[1][0]));
+    if (n === 3) {
+      // Sarrus con Fraction exacta
+      const a = new Fraction(m[0][0]).mul(m[1][1]).mul(m[2][2]);
+      const b = new Fraction(m[0][1]).mul(m[1][2]).mul(m[2][0]);
+      const c = new Fraction(m[0][2]).mul(m[1][0]).mul(m[2][1]);
+      const d = new Fraction(m[0][2]).mul(m[1][1]).mul(m[2][0]);
+      const e = new Fraction(m[0][0]).mul(m[1][2]).mul(m[2][1]);
+      const f = new Fraction(m[0][1]).mul(m[1][0]).mul(m[2][2]);
+      return a.add(b).add(c).sub(d).sub(e).sub(f);
+    }
+    // Recursivo 4x4+
+    let det = new Fraction(0);
+    for (let j = 0; j < n; j++) {
+      const minor: Matrix = m
+        .slice(1)
+        .map((row) => row.filter((_, c) => c !== j));
+      const sign = j % 2 === 0 ? new Fraction(1) : new Fraction(-1);
+      det = det.add(sign.mul(new Fraction(m[0][j])).mul(determinant(minor)));
+    }
+    return det;
+  };
+
+  const determinantExpression = (m: Matrix): string => {
+    const n = m.length;
+    if (n === 1) return `${m[0][0]}`;
+    if (n === 2)
+      return `${m[0][0]}*${m[1][1]} - ${m[0][1]}*${m[1][0]} = ${determinant(
+        m
+      ).toFraction(false)}`;
+    if (n === 3) {
+      const a = new Fraction(m[0][0]).mul(m[1][1]).mul(m[2][2]);
+      const b = new Fraction(m[0][1]).mul(m[1][2]).mul(m[2][0]);
+      const c = new Fraction(m[0][2]).mul(m[1][0]).mul(m[2][1]);
+      const d = new Fraction(m[0][2]).mul(m[1][1]).mul(m[2][0]);
+      const e = new Fraction(m[0][0]).mul(m[1][2]).mul(m[2][1]);
+      const f = new Fraction(m[0][1]).mul(m[1][0]).mul(m[2][2]);
+      return `(${a.toFraction(false)}) + (${b.toFraction(
+        false
+      )}) + (${c.toFraction(false)}) - (${d.toFraction(
+        false
+      )}) - (${e.toFraction(false)}) - (${f.toFraction(false)}) = ${determinant(
+        m
+      ).toFraction(false)}`;
+    }
+    // 4x4+
+    const terms: string[] = [];
+    for (let j = 0; j < n; j++) {
+      const minor: Matrix = m
+        .slice(1)
+        .map((row) => row.filter((_, c) => c !== j));
+      const sign = j % 2 === 0 ? "" : "-";
+      terms.push(`${sign}${m[0][j]}*(${determinantExpression(minor)})`);
+    }
+    return terms.join(" + ");
+  };
+
+  const solve3 = () => {
+    const coeffs: Matrix = matrix3.map((row) => row.slice(0, size2));
+    const constants: Fraction[] = matrix3.map((row) => new Fraction(row[size2]));
+
+    const det = determinant(coeffs);
+    if (det.equals(0)) {
+      alert("El determinante es cero, el sistema no tiene solución única.");
+      return;
+    }
+
+    const detVars: Fraction[] = [];
+    const sols: Fraction[] = [];
+
+    for (let i = 0; i < size2; i++) {
+      const modified: Matrix = coeffs.map((row, r) =>
+        row.map((val, c) => (c === i ? constants[r] : val))
+      );
+      const detVar = determinant(modified);
+      detVars.push(detVar);
+      sols.push(detVar.div(det));
+    }
+
+    setResult({ det, detVars, sols });
+  };
+
+  const handleChange3 = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    row: number,
+    col: number
+  ) => {
+    const newMatrix = [...matrix3];
+    newMatrix[row][col] = Number(e.target.value);
+    setMatrix3(newMatrix);
+  };
+
+  const handleSizeChange3 = (newSize: number) => {
+    setSize2(newSize);
+    const newMatrix: Matrix = Array.from({ length: newSize }, () =>
+      Array(newSize + 1).fill(0)
+    );
+    setMatrix3(newMatrix);
+    setResult(null);
+  };
+
+  const matrixToString = (m: Matrix) =>
+    m.map((row) => row.join(" & ")).join(" \\\\ ");
+
+
+  /----------------- Metodo de Laplace ----------------/
+
+    const [size4, setSize4] = useState(3);
+  const [matrix4, setMatrix4] = useState([
+    [-3, 4, 2],
+    [2, -1, -3],
+    [4, -6, 5],
+  ]);
+
+  const [mode, setMode] = useState("col");
+  const [index, setIndex] = useState(2);
+
+  const handleChange4 = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    row: number,
+    col: number
+  ) => {
+    const newMatrix = [...matrix4];
+    newMatrix[row][col] = parseInt(e.target.value);
+    setMatrix4(newMatrix);
+  };
+
+  const handleSizeChange4 = (newSize: number) => {
+    setSize4(newSize);
+    setIndex(0);
+    const newMatrix = Array(newSize)
+      .fill(0)
+      .map(() => Array(newSize).fill(0));
+    setMatrix4(newMatrix);
+  };
+
+  const calculateDet = (
+    m: number[][],
+    showSteps = false
+  ): number | { value: number; steps: string | MinorStep[] } => {
+    const n = m.length;
+    if (n === 2) {
+      const result = m[0][0] * m[1][1] - m[0][1] * m[1][0];
+      if (showSteps) {
+        return {
+          value: result,
+          steps: `(${m[0][0]}) × (${m[1][1]}) - (${m[0][1]}) × (${m[1][0]}) = ${
+            m[0][0] * m[1][1]
+          } - ${m[0][1] * m[1][0]} = ${result}`,
+        };
+      }
+      return result;
+    }
+
+    let det = 0;
+    const detailSteps: MinorStep[] = [];
+
+    for (let j = 0; j < n; j++) {
+      const sign = j % 2 === 0 ? 1 : -1;
+      const minor = m.slice(1).map((row) => row.filter((_, c) => c !== j));
+      const minorResult = calculateDet(minor, showSteps && n === 3);
+      const minorValue =
+        showSteps && n === 3 && typeof minorResult === "object"
+          ? minorResult.value
+          : minorResult;
+
+      if (showSteps && n === 3) {
+        detailSteps.push({
+          element: m[0][j],
+          sign,
+          minor,
+          minorValue: typeof minorValue === "number" ? minorValue : 0,
+          minorSteps:
+            typeof minorResult === "object" &&
+            "steps" in minorResult &&
+            typeof minorResult.steps === "string"
+              ? minorResult.steps
+              : "",
+          term:
+            sign * m[0][j] * (typeof minorValue === "number" ? minorValue : 0),
+        });
+      }
+
+      det += sign * m[0][j] * (typeof minorValue === "number" ? minorValue : 0);
+    }
+
+    if (showSteps && n === 3) {
+      return { value: det, steps: detailSteps };
+    }
+
+    return det;
+  };
+
+  const laplaceDet = () => {
+    let det2 = 0;
+    const steps2: StepData[] = [];
+
+    if (mode === "col") {
+      for (let i = 0; i < size4; i++) {
+        const sign = (i + index) % 2 === 0 ? 1 : -1;
+        const element = matrix4[i][index];
+
+        const minor = matrix4
+          .filter((_, r) => r !== i)
+          .map((row) => row.filter((_, c) => c !== index));
+
+        const minorResult =
+          size === 4 && minor.length === 3
+            ? calculateDet(minor, true)
+            : calculateDet(minor);
+        const minorValue =
+          typeof minorResult === "object" ? minorResult.value : minorResult;
+        const term = sign * element * minorValue;
+
+        steps2.push({
+          element,
+          sign,
+          minor,
+          minorValue: typeof minorValue === "number" ? minorValue : 0,
+          term,
+          minorSteps:
+            typeof minorResult === "object" ? minorResult.steps : null,
+        });
+        det2 += term;
+      }
+    } else {
+      for (let j = 0; j < size4; j++) {
+        const sign = (index + j) % 2 === 0 ? 1 : -1;
+        const element = matrix4[index][j];
+
+        const minor = matrix4
+          .filter((_, r) => r !== index)
+          .map((row) => row.filter((_, c) => c !== j));
+
+        const minorResult =
+          size4 === 4 && minor.length === 3
+            ? calculateDet(minor, true)
+            : calculateDet(minor);
+        const minorValue =
+          typeof minorResult === "object" ? minorResult.value : minorResult;
+        const term = sign * element * minorValue;
+
+        steps2.push({
+          element,
+          sign,
+          minor,
+          minorValue: typeof minorValue === "number" ? minorValue : 0,
+          term,
+          minorSteps:
+            typeof minorResult === "object" ? minorResult.steps : null,
+        });
+        det2 += term;
+      }
+    }
+
+    return { det2, steps2 };
+  };
+
+  const { det2, steps2 } = laplaceDet();
+
+  const signMatrix: string[][] = Array(size4)
+    .fill(0)
+    .map((_, i) =>
+      Array(size4)
+        .fill(0)
+        .map((_, j) => ((i + j) % 2 === 0 ? "+" : "-"))
+    );
+
+
   return (
     <AlgebraContext.Provider
       value={{
@@ -296,6 +589,34 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         H,
         cx,
         cy,
+        size2,
+        setSize2,
+        matrix3,
+        setMatrix3,
+        result,
+        setResult,
+        showFraction,
+        setShowFraction,
+        solve3,
+        handleChange3,
+        handleSizeChange3,
+        matrixToString,
+        determinantExpression,
+        size4,
+        setSize4,
+        matrix4,
+        setMatrix4,
+        mode,
+        setMode,
+        index,
+        setIndex,
+        handleChange4,
+        handleSizeChange4,
+        calculateDet,
+        laplaceDet,
+        det2,
+        steps2,
+        signMatrix,
       }}
     >
       {children}

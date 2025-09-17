@@ -4,6 +4,7 @@ import { BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import usePrecalculo from "@/hooks/usePrecalculo";
 import BotonBack from "@/utils/BotonBack";
+import TitleCourse from "@/components/TitleCourse";
 
 const GeometriaPQ: React.FC = () => {
   const {
@@ -26,57 +27,49 @@ const GeometriaPQ: React.FC = () => {
     "flex flex-col h-full items-center justify-center gap-1 border-2 border-black rounded-2xl w-full";
 
   return (
-    <div className="px-4 py-2 min-h-screen flex flex-col  gap-6">
-      <div className="w-full flex flex-row  max-sm:flex-col  ">
-        <BotonBack />
-        <div className="flex flex-col gap-2 w-full items-center justify-center">
-          <h1 className="text-2xl max-sm:text-base font-bold text-center">
-            Distancia, Punto Medio,Pendiente, Ecuación de la recta
-          </h1>
-          <div className="flex max-sm:flex-col gap-4">
-            <div>
-              <h2 className="font-bold">Punto P (x₁, y₁)</h2>
-              <input
-                type="number"
-                className="border p-1 rounded w-20 mr-2"
-                value={x1}
-                onChange={(e) =>
-                  setPuntoP({ ...puntoP, x: Number(e.target.value) })
-                }
-              />
-              <input
-                type="number"
-                className="border p-1 rounded w-20"
-                value={y1}
-                onChange={(e) =>
-                  setPuntoP({ ...puntoP, y: Number(e.target.value) })
-                }
-              />
-            </div>
+    <div className="px-4 py-2 min-h-screen flex flex-col  gap-2">
+      <TitleCourse course="Distancia, Punto Medio,Pendiente, Ecuación de la recta" />
+      <div className="flex  gap-2 w-full items-center justify-center">
+        <div>
+          <h2 className="font-bold">Punto P (x₁, y₁)</h2>
+          <input
+            type="number"
+            className="border p-1 rounded w-20 mr-2"
+            value={x1}
+            onChange={(e) =>
+              setPuntoP({ ...puntoP, x: Number(e.target.value) })
+            }
+          />
+          <input
+            type="number"
+            className="border p-1 rounded w-20"
+            value={y1}
+            onChange={(e) =>
+              setPuntoP({ ...puntoP, y: Number(e.target.value) })
+            }
+          />
+        </div>
 
-            <div>
-              <h2 className="font-bold">Punto Q (x₂, y₂)</h2>
-              <input
-                type="number"
-                className="border p-1 rounded w-20 mr-2"
-                value={x2}
-                onChange={(e) =>
-                  setPuntoQ({ ...puntoQ, x: Number(e.target.value) })
-                }
-              />
-              <input
-                type="number"
-                className="border p-1 rounded w-20"
-                value={y2}
-                onChange={(e) =>
-                  setPuntoQ({ ...puntoQ, y: Number(e.target.value) })
-                }
-              />
-            </div>
-          </div>
+        <div>
+          <h2 className="font-bold">Punto Q (x₂, y₂)</h2>
+          <input
+            type="number"
+            className="border p-1 rounded w-20 mr-2"
+            value={x2}
+            onChange={(e) =>
+              setPuntoQ({ ...puntoQ, x: Number(e.target.value) })
+            }
+          />
+          <input
+            type="number"
+            className="border p-1 rounded w-20"
+            value={y2}
+            onChange={(e) =>
+              setPuntoQ({ ...puntoQ, y: Number(e.target.value) })
+            }
+          />
         </div>
       </div>
-
       <div className="flex flex-row max-sm:flex-col w-full gap-4 justify-center px-0">
         {/* Distancia */}
         <div className={`${cardMain}`}>

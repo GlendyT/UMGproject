@@ -1,197 +1,26 @@
 "use client";
-import React, { useState } from "react";
-import BotonBack from "../../../utils/BotonBack";
-
-type MinorStep = {
-  element: number;
-  sign: number;
-  minor: number[][];
-  minorValue: number;
-  minorSteps: string;
-  term: number;
-};
-
-type StepData = {
-  element: number;
-  sign: number;
-  minor: number[][];
-  minorValue: number;
-  term: number;
-  minorSteps: string | MinorStep[] | null;
-};
+import useAlgoritmos from "@/hooks/useAlgebra";
+import { MinorStep } from "@/types/index";
+import TitleCourse from "@/components/TitleCourse";
 
 export default function Laplace3x3() {
-  const [size, setSize] = useState(3);
-  const [matrix, setMatrix] = useState([
-    [-3, 4, 2],
-    [2, -1, -3],
-    [4, -6, 5],
-  ]);
-
-  const [mode, setMode] = useState("col");
-  const [index, setIndex] = useState(2);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    row: number,
-    col: number
-  ) => {
-    const newMatrix = [...matrix];
-    newMatrix[row][col] = parseInt(e.target.value);
-    setMatrix(newMatrix);
-  };
-
-  const handleSizeChange = (newSize: number) => {
-    setSize(newSize);
-    setIndex(0);
-    const newMatrix = Array(newSize)
-      .fill(0)
-      .map(() => Array(newSize).fill(0));
-    setMatrix(newMatrix);
-  };
-
-  const calculateDet = (
-    m: number[][],
-    showSteps = false
-  ): number | { value: number; steps: string | MinorStep[] } => {
-    const n = m.length;
-    if (n === 2) {
-      const result = m[0][0] * m[1][1] - m[0][1] * m[1][0];
-      if (showSteps) {
-        return {
-          value: result,
-          steps: `(${m[0][0]}) × (${m[1][1]}) - (${m[0][1]}) × (${m[1][0]}) = ${
-            m[0][0] * m[1][1]
-          } - ${m[0][1] * m[1][0]} = ${result}`,
-        };
-      }
-      return result;
-    }
-
-    let det = 0;
-    const detailSteps: MinorStep[] = [];
-
-    for (let j = 0; j < n; j++) {
-      const sign = j % 2 === 0 ? 1 : -1;
-      const minor = m.slice(1).map((row) => row.filter((_, c) => c !== j));
-      const minorResult = calculateDet(minor, showSteps && n === 3);
-      const minorValue =
-        showSteps && n === 3 && typeof minorResult === "object"
-          ? minorResult.value
-          : minorResult;
-
-      if (showSteps && n === 3) {
-        detailSteps.push({
-          element: m[0][j],
-          sign,
-          minor,
-          minorValue: typeof minorValue === "number" ? minorValue : 0,
-          minorSteps:
-            typeof minorResult === "object" &&
-            "steps" in minorResult &&
-            typeof minorResult.steps === "string"
-              ? minorResult.steps
-              : "",
-          term:
-            sign * m[0][j] * (typeof minorValue === "number" ? minorValue : 0),
-        });
-      }
-
-      det += sign * m[0][j] * (typeof minorValue === "number" ? minorValue : 0);
-    }
-
-    if (showSteps && n === 3) {
-      return { value: det, steps: detailSteps };
-    }
-
-    return det;
-  };
-
-  const laplaceDet = () => {
-    let det = 0;
-    const steps: StepData[] = [];
-
-    if (mode === "col") {
-      for (let i = 0; i < size; i++) {
-        const sign = (i + index) % 2 === 0 ? 1 : -1;
-        const element = matrix[i][index];
-
-        const minor = matrix
-          .filter((_, r) => r !== i)
-          .map((row) => row.filter((_, c) => c !== index));
-
-        const minorResult =
-          size === 4 && minor.length === 3
-            ? calculateDet(minor, true)
-            : calculateDet(minor);
-        const minorValue =
-          typeof minorResult === "object" ? minorResult.value : minorResult;
-        const term = sign * element * minorValue;
-
-        steps.push({
-          element,
-          sign,
-          minor,
-          minorValue: typeof minorValue === "number" ? minorValue : 0,
-          term,
-          minorSteps:
-            typeof minorResult === "object" ? minorResult.steps : null,
-        });
-        det += term;
-      }
-    } else {
-      for (let j = 0; j < size; j++) {
-        const sign = (index + j) % 2 === 0 ? 1 : -1;
-        const element = matrix[index][j];
-
-        const minor = matrix
-          .filter((_, r) => r !== index)
-          .map((row) => row.filter((_, c) => c !== j));
-
-        const minorResult =
-          size === 4 && minor.length === 3
-            ? calculateDet(minor, true)
-            : calculateDet(minor);
-        const minorValue =
-          typeof minorResult === "object" ? minorResult.value : minorResult;
-        const term = sign * element * minorValue;
-
-        steps.push({
-          element,
-          sign,
-          minor,
-          minorValue: typeof minorValue === "number" ? minorValue : 0,
-          term,
-          minorSteps:
-            typeof minorResult === "object" ? minorResult.steps : null,
-        });
-        det += term;
-      }
-    }
-
-    return { det, steps };
-  };
-
-  const { det, steps } = laplaceDet();
-
-  const signMatrix = Array(size)
-    .fill(0)
-    .map((_, i) =>
-      Array(size)
-        .fill(0)
-        .map((_, j) => ((i + j) % 2 === 0 ? "+" : "-"))
-    );
+  const {
+    mode,
+    index,
+    size4,
+    matrix4,
+    handleChange4,
+    signMatrix,
+    setMode,
+    setIndex,
+    handleSizeChange4,
+    steps2,
+    det2,
+  } = useAlgoritmos();
 
   return (
     <div className="min-h-screen flex flex-col gap-2 items-center w-full p-4 bg-gray-100">
-      <div className="flex flex-row w-full">
-        <BotonBack />
-        <div className="flex w-full items-center justify-center">
-          <h2 className="text-xl text-center font-bold mb-2">
-            Determinante por Laplace <br />
-          </h2>
-        </div>
-      </div>
+      <TitleCourse course="Determinante por LAPLACE" />
       <div className="flex flex-wrap items-center justify-center gap-10">
         <div className="flex flex-col items-center justify-between h-full  p-2 shadow-xl rounded-2xl ">
           <h2 className="text-xl text-center font-bold ">
@@ -200,16 +29,16 @@ export default function Laplace3x3() {
 
           <div
             className={`grid ${
-              size === 3 ? "grid-cols-3" : "grid-cols-4"
+              size4 === 3 ? "grid-cols-3" : "grid-cols-4"
             } gap-2 mb-4`}
           >
-            {matrix.map((row, i) =>
+            {matrix4.map((row, i) =>
               row.map((val, j) => (
                 <input
                   key={`${i}-${j}`}
                   type="number"
                   value={val}
-                  onChange={(e) => handleChange(e, i, j)}
+                  onChange={(e) => handleChange4(e, i, j)}
                   className="border p-2 w-16 text-center"
                 />
               ))
@@ -221,7 +50,7 @@ export default function Laplace3x3() {
           <h3 className="text-lg font-semibold">Matriz de signos:</h3>
           <div
             className={`grid ${
-              size === 3 ? "grid-cols-3" : "grid-cols-4"
+              size4 === 3 ? "grid-cols-3" : "grid-cols-4"
             } gap-2 mb-6`}
           >
             {signMatrix.map((row, i) =>
@@ -258,7 +87,7 @@ export default function Laplace3x3() {
               onChange={(e) => setIndex(parseInt(e.target.value))}
               className="border p-2 rounded-md"
             >
-              {Array(size)
+              {Array(size4)
                 .fill(0)
                 .map((_, i) => (
                   <option key={i} value={i}>
@@ -270,8 +99,8 @@ export default function Laplace3x3() {
           <div className=" shadow-xl rounded-xl  p-2">
             <label className="font-semibold mr-2">Tamaño:</label>
             <select
-              value={size}
-              onChange={(e) => handleSizeChange(parseInt(e.target.value))}
+              value={size4}
+              onChange={(e) => handleSizeChange4(parseInt(e.target.value))}
               className="border rounded-md p-2"
             >
               <option value={3}>3x3</option>
@@ -287,7 +116,7 @@ export default function Laplace3x3() {
             Expansión paso a paso:
           </h3>
           <div className="flex flex-wrap items-center justify-center w-full  gap-2">
-            {steps.map((s, idx) => (
+            {steps2.map((s, idx) => (
               <div
                 key={idx}
                 className={` p-4 flex rounded bg-gray-100 shadow-xl  ${
@@ -403,7 +232,7 @@ export default function Laplace3x3() {
         </div>
 
         <div className="w-auto flex flex-col items-center justify-center mt-4 p-2 shadow-2xl rounded-xl ">
-          {size === 4 ? (
+          {size4 === 4 ? (
             <>
               <h3 className="text-lg font-extrabold">
                 Cálculo final del determinante 4x4:
@@ -411,16 +240,16 @@ export default function Laplace3x3() {
               <div className="text-sm flex items-center flex-col gap-2">
                 <div className="">
                   {" "}
-                  {steps
+                  {steps2
                     .map((s) => s.term)
                     .join(" + ")
                     .replace(/\+ -/g, " - ")}
                 </div>
-                <div className="font-bold text-lg">Determinante = {det}</div>
+                <div className="font-bold text-lg">Determinante = {det2}</div>
               </div>
             </>
           ) : (
-            <h2 className="text-xl font-bold ">Determinante = {det}</h2>
+            <h2 className="text-xl font-bold ">Determinante = {det2}</h2>
           )}
         </div>
       </div>

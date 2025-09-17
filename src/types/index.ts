@@ -5,6 +5,11 @@ export interface ProviderProps {
   children: ReactNode;
 }
 
+
+// ---------------- MÉTODO DE CRAMER ----------------
+
+export type Matrix = (number | Fraction)[][];
+
 export interface AlgebraContextType {
   size: number;
   matrix: string[][];
@@ -35,6 +40,42 @@ export interface AlgebraContextType {
   H: number;
   cx: (j: number) => number;
   cy: (i: number) => number;
+  size2: number;
+  setSize2: (n: number) => void;
+  matrix3: Matrix;
+  setMatrix3: (m: Matrix) => void;
+  result: { det: Fraction; detVars: Fraction[]; sols: Fraction[] } | null;
+  showFraction: boolean;
+  setShowFraction: (b: boolean) => void;
+  setResult: (r: { det: Fraction; detVars: Fraction[]; sols: Fraction[] } | null) => void;
+  solve3: () => void;
+  handleChange3: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    row: number,
+    col: number
+  ) => void;
+  handleSizeChange3: (n: number) => void;
+  matrixToString: (m: Matrix) => string;
+  determinantExpression: (m: Matrix) => string;
+  size4: number;
+  setSize4: (n: number) => void;
+  matrix4: number[][];
+  setMatrix4: (m: number[][]) => void;
+  handleChange4: (
+    e: React.ChangeEvent<HTMLInputElement>,
+    row: number,
+    col: number
+  ) => void;
+  handleSizeChange4: (n: number) => void;
+  calculateDet: (m: number[][], showSteps?: boolean) => number | { value: number; steps: string | MinorStep[] };
+  mode: string;
+  setMode: (m: string) => void;
+  index: number;
+  setIndex: (i: number) => void;
+  signMatrix: string[][];
+  laplaceDet: () => { det2: number; steps2: StepData[] };
+  det2: number;
+  steps2: StepData[];
 }
 
 export type FractionMatrix = Fraction[][];
@@ -281,6 +322,37 @@ export interface PrecalculoContextType {
   resultado: Resultado | null;
   handleResolver: () => void;
   setResultado: (r: Resultado | null) => void;
+
+  //TODO: NUMEROS COMPLEJOS
+  sgn: (n: number) => string;
+  abs2: (n: number) => number;
+  isInt: (x: number) => boolean;
+  complexLatex: (z: Complex, parens?: boolean) => string;
+  gcd4: (a: number, b: number) => number;
+  gcd5: (a: number, b: number, c: number) => number;
+  add: (a: Complex, b: Complex) => Complex;
+  sub: (a: Complex, b: Complex) => Complex;
+  mul: (a: Complex, b: Complex) => Complex;
+  div: (a: Complex, b: Complex) => Complex;
+  powerISteps: (n: number) => string[];
+  stepsAdd: (a: Complex, b: Complex) => string[];
+  stepsSub: (a: Complex, b: Complex) => string[];
+  stepsMul: (a: Complex, b: Complex) => string[];
+  stepsDiv: (a: Complex, b: Complex, showFraction: boolean) => string[];
+  fracLatex: (num: number, den: number) => string;
+  a2: Complex;
+  setA2: (z: Complex) => void;
+  b2: Complex;
+  setB2: (z: Complex) => void;
+  op: Op;
+  setOp: (o: Op) => void;
+  exp: number;
+  setExp: (e: number) => void;
+  showFraction: boolean;
+  setShowFraction: (b: boolean) => void;
+  prettyResult: string;
+  steps2: string[];
+  powSteps: string[];
 }
 
 export type SynStep = {
@@ -325,3 +397,28 @@ export type BiquadraticSolverProps  = {
 };
 
 export type QuadraticSolverProps = Omit<BiquadraticSolverProps, "round2">;
+
+
+
+// ---------------- MÉTODO DE LAPLACE ----------------//
+export type MinorStep = {
+  element: number;
+  sign: number;
+  minor: number[][];
+  minorValue: number;
+  minorSteps: string;
+  term: number;
+};
+
+export type StepData = {
+  element: number;
+  sign: number;
+  minor: number[][];
+  minorValue: number;
+  term: number;
+  minorSteps: string | MinorStep[] | null;
+};
+
+//---- NUMEROS COMPLEJOS---//
+export type Complex = { re: number; im: number };
+export type Op = "add" | "sub" | "mul" | "div";

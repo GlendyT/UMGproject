@@ -1,4 +1,4 @@
-export const VideosContabilidad = [
+export const videosContabilidad = [
   //   {
   //     id: 1,
   //     title: "Promedio Simple",
@@ -62,17 +62,35 @@ export const VideosMatematicasDiscreta = [
     title: "Circuitos Pt.3",
     url: "gk-c2YuS3_M",
   },
+  {
+    id: 4,
+    title: "Circuitos Pt.4",
+    url: "CMaS9FSuHfE",
+  },
 ];
 
 export const videosprecalculo = [
   {
-    id: 1,
+    id: "1",
     title: "Gráfica de Polinomios",
     url: "Xcme71OEznY",
   },
   {
-    id: 2,
+    id: "2",
     title: "Teorema del Cociente y del Residuo",
     url: "TYftscAUHLA",
+  },
+];
+
+export const VideosAlgebraLineal = [
+  {
+    id: 1,
+    title: "Matrices en Excel",
+    url: "Xocu_g5fBpo",
+  },
+  {
+    id: 2,
+    title: "Matrices en Excel Pt.2",
+    url: "aMx3IG6JU5w",
   },
 ];

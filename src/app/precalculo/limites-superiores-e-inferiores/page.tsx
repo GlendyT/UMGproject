@@ -4,6 +4,7 @@ import { BlockMath, InlineMath } from "react-katex";
 import usePrecalculo from "@/hooks/usePrecalculo";
 import BotonBack from "@/utils/BotonBack";
 import BotonUtil from "@/utils/BotonUtil";
+import TitleCourse from "@/components/TitleCourse";
 
 export default function Ejemplo2Dinamico() {
   const {
@@ -20,12 +21,7 @@ export default function Ejemplo2Dinamico() {
 
   return (
     <div className="min-h-screen flex flex-col gap-2 p-4">
-      <div className="flex flex-row">
-        <BotonBack />
-        <h2 className=" w-full text-center text-lg font-bold">
-          Limites superiores e inferiores
-        </h2>
-      </div>
+      <TitleCourse course="  Limites superiores e inferiores" />
       <div className="flex flex-col w-full items-center justify-center">
         <div className="flex flex-col w-full justify-center  gap-2 items-center">
           <input
@@ -34,10 +30,8 @@ export default function Ejemplo2Dinamico() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Escribe un polinomio, p.ej.: 2x^5+5x^4-8x^3-14x^2+6x+9"
           />
-          <h3 className="flex flex-col items-center ">
-            Aplicar división sintética para{" "}
-            <InlineMath math={`P(x)=${polyToLatex(data3.coeffs0)}`} />
-          </h3>
+
+          <InlineMath math={`P(x)=${polyToLatex(data3.coeffs0)}`} />
         </div>
 
         <BotonUtil
