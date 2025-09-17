@@ -1,6 +1,6 @@
 # UMG Programs - Plataforma Educativa Matemática
 
-Plataforma web interactiva para el aprendizaje de matemáticas universitarias del segundo semestre, incluyendo herramientas de cálculo, visualización y resolución paso a paso de problemas matemáticos.
+Plataforma web interactiva para el aprendizaje de matemáticas universitarias, incluyendo herramientas de cálculo, visualización y resolución paso a paso de problemas matemáticos.
 
 ## 🚀 Stack Tecnológico
 
