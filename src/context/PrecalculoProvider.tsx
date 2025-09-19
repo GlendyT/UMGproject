@@ -2,6 +2,8 @@
 import "katex/dist/katex.min.css";
 import { createContext, useState, JSX, useMemo, useCallback } from "react";
 import {
+  Complex,
+  Op,
   PrecalculoContextType,
   ProviderProps,
   Resultado,
@@ -1309,9 +1311,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
         const signNext = signOf(next.coef);
         if (signNow !== 0 && signNext !== 0 && signNow !== signNext) {
           // cambio de signo -> mostrar flecha azul
-          parts.push(
-            "\\; \\xrightarrow{\\textcolor{blue}{\\text{ }}} \\;"
-          );
+          parts.push("\\; \\xrightarrow{\\textcolor{blue}{\\text{ }}} \\;");
         } else {
           parts.push("\\; \\;");
         }
@@ -1421,7 +1421,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
       const latexPx =
         "P(x) =" +
         terms
-          .map((t, ) => {
+          .map((t) => {
             // formateamos con signo visible
             const sign =
               t.coef >= 0 ? `+${Math.abs(t.coef)}` : `-${Math.abs(t.coef)}`;
@@ -1458,6 +1458,194 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
       );
     }
   }
+
+  //----NUMEROS COMPLEJOS----//
+
+  // ------- utilidades -------
+  const sgn = (n: number) => (n >= 0 ? "+" : "-");
+  const abs2 = (n: number) => Math.abs(n);
+  const isInt = (x: number) => Number.isInteger(x);
+
+  const complexLatex = (z: Complex, parens = true) => {
+    const s = `${z.re} ${sgn(z.im)} ${abs(z.im)}i`;
+    return parens ? `\\left(${s}\\right)` : s;
+  };
+
+  const gcd4 = (a: number, b: number): number => {
+    a = Math.trunc(Math.abs(a));
+    b = Math.trunc(Math.abs(b));
+    while (b) [a, b] = [b, a % b];
+    return a || 1;
+  };
+  const gcd5 = (a: number, b: number, c: number) => gcd2(gcd2(a, b), c);
+
+  // entero, fracción simplificada, o decimal si hace falta
+  const fracLatex = (num: number, den: number) => {
+    if (den === 0) return "\\text{indefinido}";
+    if (isInt(num) && isInt(den)) {
+      const g = gcd2(num, den);
+      const n = num / g,
+        d = den / g;
+      return d === 1 ? `${n}` : `\\dfrac{${n}}{${d}}`;
+    }
+    return `${(num / den).toFixed(3)}`;
+  };
+
+  // ------- operaciones -------
+  const add = (a: Complex, b: Complex): Complex => ({
+    re: a.re + b.re,
+    im: a.im + b.im,
+  });
+  const sub = (a: Complex, b: Complex): Complex => ({
+    re: a.re - b.re,
+    im: a.im - b.im,
+  });
+  const mul = (a: Complex, b: Complex): Complex => ({
+    re: a.re * b.re - a.im * b.im,
+    im: a.re * b.im + a.im * b.re,
+  });
+  const div = (a: Complex, b: Complex): Complex => {
+    const den = b.re * b.re + b.im * b.im;
+    return {
+      re: (a.re * b.re + a.im * b.im) / den,
+      im: (a.im * b.re - a.re * b.im) / den,
+    };
+  };
+
+  // ------- pasos LaTeX -------
+  function stepsAdd(a: Complex, b: Complex) {
+    const r = add(a, b);
+    return [
+      `${complexLatex(a)} + ${complexLatex(b)}`,
+      `= \\left(${a.re} + ${b.re}\\right) + \\left(${a.im} + ${b.im}\\right)i`,
+      `= ${r.re} ${sgn(r.im)} ${abs(r.im)}i`,
+    ];
+  }
+  function stepsSub(a: Complex, b: Complex) {
+    const r = sub(a, b);
+    return [
+      `${complexLatex(a)} - ${complexLatex(b)}`,
+      `= \\left(${a.re} - ${b.re}\\right) + \\left(${a.im} - ${b.im}\\right)i`,
+      `= ${r.re} ${sgn(r.im)} ${abs(r.im)}i`,
+    ];
+  }
+  function stepsMul(a: Complex, b: Complex) {
+    const r = mul(a, b);
+    const ac = a.re * b.re,
+      ad = a.re * b.im,
+      bc = a.im * b.re,
+      bd = a.im * b.im;
+    return [
+      `${complexLatex(a)}\\,${complexLatex(b)}`,
+      `= (${a.re}+${a.im}i)(${b.re}+${b.im}i)`,
+      `= ${ac} + ${ad}i + ${bc}i + ${bd}i^{2}`,
+      `= ${ac - bd} ${sgn(ad + bc)} ${abs(
+        ad + bc
+      )}i\\quad\\text{(porque }i^{2}=-1\\text{)}`,
+      `= ${r.re} ${sgn(r.im)} ${abs(r.im)}i`,
+    ];
+  }
+  function stepsDiv(a: Complex, b: Complex, showFraction: boolean) {
+    const den = b.re * b.re + b.im * b.im;
+    const ac = a.re * b.re,
+      bd = a.im * b.im,
+      bc = a.im * b.re,
+      ad = a.re * b.im;
+
+    const reNum = ac + bd; // numerador parte real
+    const imNum = bc - ad; // numerador parte imaginaria
+    const gAll = gcd5(reNum, imNum, den);
+
+    const reS = reNum / gAll,
+      imS = imNum / gAll,
+      denS = den / gAll;
+
+    if (showFraction) {
+      return [
+        `\\dfrac{${complexLatex(a, false)}}{${complexLatex(b, false)}}`,
+        `= \\dfrac{${complexLatex(a, false)}\\,(${b.re}-${
+          b.im
+        }i)}{${complexLatex(b, false)}\\,(${b.re}-${
+          b.im
+        }i)}\\quad\\text{(conjugado)}`,
+        `= \\dfrac{(${a.re}+${a.im}i)(${b.re}-${b.im}i)}{(${b.re})^{2}+(${b.im})^{2}}`,
+        `= \\dfrac{${reNum} ${sgn(imNum)} ${abs(imNum)}i}{${den}}`,
+        gAll > 1
+          ? `= \\dfrac{${reS} ${sgn(imS)} ${abs(
+              imS
+            )}i}{${denS}}\\quad\\text{(simplificando por }${gAll}\\text{)}`
+          : "",
+        `= ${fracLatex(reNum, den)} ${sgn(imNum)} ${fracLatex(
+          abs(imNum),
+          den
+        )}i`,
+      ].filter(Boolean);
+    } else {
+      return [
+        `\\dfrac{${complexLatex(a, false)}}{${complexLatex(b, false)}}`,
+        `= ${(reNum / den).toFixed(3)} ${sgn(imNum)} ${(
+          Math.abs(imNum) / den
+        ).toFixed(3)}i`,
+      ];
+    }
+  }
+
+  // ------- potencias de i -------
+  function powerISteps(n: number) {
+    if (!Number.isInteger(n)) return ["\\text{Usa un exponente entero.}"];
+    if (n === 0) return ["i^{0} = 1"];
+    const sign = n < 0 ? "-" : "";
+    const m = Math.abs(n);
+    const q = Math.floor(m / 4);
+    const r = m % 4;
+
+    const base = ["1", "i", "-1", "-i"][r]; // r = 0,1,2,3
+    const final =
+      n < 0 ? (r === 0 ? "1" : r === 1 ? "-i" : r === 2 ? "-1" : "i") : base;
+
+    const lines: string[] = [];
+    lines.push(`i^{${n}} = i^{${sign}${m}}`);
+    if (n < 0) lines.push(`= \\dfrac{1}{i^{${m}}}`);
+    lines.push(`= i^{4\\cdot ${q} + ${r}}`);
+    lines.push(`= (i^{4})^{${q}}\\, i^{${r}}`);
+    lines.push(`= ${final}`);
+    return lines;
+  }
+
+  const [a2, setA2] = useState<Complex>({ re: 3, im: 5 });
+  const [b2, setB2] = useState<Complex>({ re: 4, im: 2 });
+  const [op, setOp] = useState<Op>("add");
+  const [exp, setExp] = useState<number>(23);
+  const [showFraction, setShowFraction] = useState(true);
+
+  const steps2 = useMemo(() => {
+    if (op === "add") return stepsAdd(a2, b2);
+    if (op === "sub") return stepsSub(a2, b2);
+    if (op === "mul") return stepsMul(a2, b2);
+    if (b2.re === 0 && b2.im === 0) return ["\\text{División por cero}"];
+    return stepsDiv(a2, b2, showFraction);
+  }, [a2, b2, op, showFraction]);
+
+  const prettyResult = useMemo(() => {
+    if (op !== "div") {
+      const z = op === "add" ? add(a2, b2) : op === "sub" ? sub(a2, b2) : mul(a2, b2);
+      return `${z.re} ${sgn(z.im)} ${abs(z.im)}i`;
+    }
+    const den = b2.re * b2.re + b2.im * b2.im;
+    const reNum = a2.re * b2.re + a2.im * b2.im;
+    const imNum = a2.im * b2.re - a2.re * b2.im;
+    const gAll = gcd5(reNum, imNum, den);
+    const reS = reNum / gAll,
+      imS = imNum / gAll,
+      denS = den / gAll;
+    return showFraction
+      ? `\\dfrac{${reS} ${sgn(imS)} ${abs(imS)}i}{${denS}}`
+      : `${(reNum / den).toFixed(3)} ${sgn(imNum)} ${(
+          Math.abs(imNum) / den
+        ).toFixed(3)}i`;
+  }, [a2, b2, op, showFraction]);
+
+  const powSteps = useMemo(() => powerISteps(exp), [exp]);
 
   return (
     <PrecalculoContext.Provider
@@ -1572,6 +1760,37 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
         resultado,
         setResultado,
         handleResolver,
+
+        //TODO: NUMEROS COMPLEJOS
+        sgn,
+        abs2,
+        isInt,
+        complexLatex,
+        gcd4,
+        gcd5,
+        fracLatex,
+        add,
+        sub,
+        mul,
+        div,
+        stepsAdd,
+        stepsSub,
+        stepsMul,
+        stepsDiv,
+        powerISteps,
+        a2,
+        setA2,
+        b2,
+        setB2,
+        op,
+        setOp,
+        exp,
+        setExp,
+        showFraction,
+        setShowFraction,
+        prettyResult,
+        steps2,
+        powSteps,
       }}
     >
       {children}

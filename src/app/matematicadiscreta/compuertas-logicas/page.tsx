@@ -3,7 +3,7 @@
 import { BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import useMatematicaDiscreta from "@/hooks/useMatematicaDiscreta";
-import BotonBack from "@/utils/BotonBack";
+import TitleCourse from "@/components/TitleCourse";
 
 const CompuertasLogicas = () => {
   const { exprToLatex, setExpr, expr, vars, terms, table } =
@@ -11,13 +11,7 @@ const CompuertasLogicas = () => {
 
   return (
     <section className="min-h-screen bg-gray-100 p-4 flex flex-col gap-4">
-      <div className="w-full flex flex-row  ">
-        <BotonBack />
-        <h1 className="w-full text-2xl font-semibold text-center ">
-          Conversor de Compuertas y Expresiones Lógicas
-        </h1>
-      </div>
-
+      <TitleCourse course="Conversor de Compuertas y Expresiones Lógicas" />
       <div className="grid md:grid-cols-2 gap-4">
         {/* Entrada */}
         <div className="p-4 border rounded-lg bg-white shadow-sm">

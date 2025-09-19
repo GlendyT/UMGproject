@@ -3,6 +3,7 @@ import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import usePrecalculo from "@/hooks/usePrecalculo";
 import BotonBack from "@/utils/BotonBack";
+import TitleCourse from "@/components/TitleCourse";
 
 const PolynomialDivision: React.FC = () => {
   const {
@@ -22,35 +23,28 @@ const PolynomialDivision: React.FC = () => {
 
   return (
     <div className="p-4 text-neutral-900 bg-white min-h-screen font-serif">
-      <div className="flex flex-row w-full items-center">
-        <div className="flex flex-col gap-2 w-full items-center justify-center text-xl font-bold mb-4">
-          <div className="flex flex-row w-full items-center">
-            <BotonBack />
-            <h1 className="flex items-center w-full justify-center">
-              División larga de polinomios
-            </h1>
-          </div>
-          <label className="text-sm">
-            P(x):
-            <input
-              className="ml-2 text-black border-2 px-2 py-1 rounded"
-              value={P}
-              onChange={(e) => setP(e.target.value)}
-              placeholder="Ej: 8x^4+6x^2-3x+1"
-            />{" "}
-            <InlineMath math={`P(x) = ${coeffsToLatexDESC(dividend)}`} />
-          </label>
-          <label className="text-sm">
-            D(x):
-            <input
-              className="ml-2 text-black border-2 px-2 py-1 rounded"
-              value={D}
-              onChange={(e) => setD(e.target.value)}
-              placeholder="Ej: 2x^2-x+2"
-            />{" "}
-            <InlineMath math={`D(x) = ${coeffsToLatexDESC(divisor)}`} />
-          </label>
-        </div>
+      <TitleCourse course=" División larga de polinomios" />
+      <div className="flex flex-col gap-2 w-full items-center justify-center text-xl font-bold mb-4">
+        <label className="text-sm">
+          P(x):
+          <input
+            className="ml-2 text-black border-2 px-2 py-1 rounded"
+            value={P}
+            onChange={(e) => setP(e.target.value)}
+            placeholder="Ej: 8x^4+6x^2-3x+1"
+          />{" "}
+          <InlineMath math={`P(x) = ${coeffsToLatexDESC(dividend)}`} />
+        </label>
+        <label className="text-sm">
+          D(x):
+          <input
+            className="ml-2 text-black border-2 px-2 py-1 rounded"
+            value={D}
+            onChange={(e) => setD(e.target.value)}
+            placeholder="Ej: 2x^2-x+2"
+          />{" "}
+          <InlineMath math={`D(x) = ${coeffsToLatexDESC(divisor)}`} />
+        </label>
       </div>
 
       {/* Enunciado */}

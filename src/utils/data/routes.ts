@@ -77,6 +77,11 @@ export const AlgebraLinealSlugs: slugstype[] = [
     name: "Método de Crammer",
     href: "/algebralineal/metodo-de-cramer",
   },
+  {
+    id: 5,
+    name: "Videos Álgebra Lineal",
+    href: "/algebralineal/videos-algebra-lineal",
+  },
 ];
 
 export const PrecalculoSlugs: slugstype[] = [
@@ -139,5 +144,13 @@ export const PrecalculoSlugs: slugstype[] = [
     id: 12,
     name: "Videos Precálculo",
     href: "/precalculo/videos-precalculo",
+  },
+];
+
+export const ContabilidadSlugs: slugstype[] = [
+  {
+    id: 1,
+    name: "Videos Contabilidad II",
+    href: "/contabilidad/videos-contabilidad-ii",
   },
 ];

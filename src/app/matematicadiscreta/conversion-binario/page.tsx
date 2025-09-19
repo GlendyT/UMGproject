@@ -3,7 +3,8 @@
 import BotonBack from "@/utils/BotonBack";
 import useMatematicaDiscreta from "@/hooks/useMatematicaDiscreta";
 import BotonUtil from "@/utils/BotonUtil";
-import {  InlineMath } from "react-katex";
+import { InlineMath } from "react-katex";
+import TitleCourse from "@/components/TitleCourse";
 
 const Binario = () => {
   const {
@@ -21,36 +22,30 @@ const Binario = () => {
 
   return (
     <div className="flex flex-col  min-h-screen bg-gray-100 p-4">
-      <div className="w-full flex flex-row  ">
-        <BotonBack />
-        <div className="w-full flex flex-col items-center gap-2 ">
-          <h1 className="text-2xl max-sm:text-xl font-bold tracking-tight">
-            Conversor Binario ⇄ Decimal
-          </h1>
+      <TitleCourse course="Conversor Binario ⇄ Decimal" />
 
-          {/* Controles de modo */}
-          <div className="flex flex-row items-center gap-2 mb-6">
-            <BotonUtil
-              label="Binario → Decimal"
-              onClick={() => setMode("bin2dec")}
-              className={`px-4 py-2 rounded-2xl shadow-sm border transition max-sm:text-xs ${
-                mode === "bin2dec"
-                  ? "bg-gray-900 text-white"
-                  : "bg-white hover:bg-gray-100"
-              }`}
-            />
-            <BotonUtil
-              label="Decimal → Binario"
-              onClick={() => setMode("dec2bin")}
-              className={`px-4 py-2 rounded-2xl shadow-sm border transition max-sm:text-xs ${
-                mode === "dec2bin"
-                  ? "bg-gray-900 text-white"
-                  : "bg-white hover:bg-gray-100"
-              }`}
-            />
-          </div>
-        </div>
+      {/* Controles de modo */}
+      <div className="flex flex-row items-center justify-center gap-2 mb-6">
+        <BotonUtil
+          label="Binario → Decimal"
+          onClick={() => setMode("bin2dec")}
+          className={`px-4 py-2 rounded-2xl shadow-sm border transition max-sm:text-xs ${
+            mode === "bin2dec"
+              ? "bg-gray-900 text-white"
+              : "bg-white hover:bg-gray-100"
+          }`}
+        />
+        <BotonUtil
+          label="Decimal → Binario"
+          onClick={() => setMode("dec2bin")}
+          className={`px-4 py-2 rounded-2xl shadow-sm border transition max-sm:text-xs ${
+            mode === "dec2bin"
+              ? "bg-gray-900 text-white"
+              : "bg-white hover:bg-gray-100"
+          }`}
+        />
       </div>
+
       {/* Panel de entrada */}
       {mode === "bin2dec" ? (
         <section className="bg-white border rounded-2xl p-4 md:p-6 shadow-sm mb-6">

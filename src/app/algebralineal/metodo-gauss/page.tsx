@@ -1,19 +1,16 @@
 "use client";
 import BotonUtil from "@/utils/BotonUtil";
-import BotonBack from "@/utils/BotonBack";
 import Tabla from "@/components/Tabla";
 import Solucion from "@/components/Solucion";
 import Pasos from "@/components/Pasos";
 import useAlgoritmos from "@/hooks/useAlgebra";
+import TitleCourse from "@/components/TitleCourse";
 
 const MetodoGauss = () => {
   const { size, handleSizeChange, solve, nuevo } = useAlgoritmos();
   return (
     <div className="min-h-screen p-4 w-full flex flex-col gap-2">
-      <BotonBack />
-      <h2 className="text-2xl font-extrabold w-full text-center">
-        Método de Gauss (Dinámico)
-      </h2>
+      <TitleCourse course="Metodo de Gauss" />
       <div className="flex flex-row items-start justify-between gap-4 max-sm:flex-col px-4 ">
         <div className="flex flex-col gap-4 ">
           <div className="flex flex-row gap-4 max-sm:flex-col max-sm:items-center ">

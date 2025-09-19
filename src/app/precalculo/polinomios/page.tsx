@@ -13,6 +13,7 @@ import "katex/dist/katex.min.css";
 import usePrecalculo from "@/hooks/usePrecalculo";
 import BotonBack from "@/utils/BotonBack";
 import BotonUtil from "@/utils/BotonUtil";
+import TitleCourse from "@/components/TitleCourse";
 
 const QuadraticSolver = () => {
   const {
@@ -37,51 +38,46 @@ const QuadraticSolver = () => {
   } = usePrecalculo();
 
   return (
-    <div className="min-h-screen flex flex-col px-6 py-2 gap-2">
-      <div className="flex flex-row">
-        <BotonBack />
+    <div className="min-h-screen flex flex-col px-6 py-2 gap-0">
+      <TitleCourse course=" Ecuaciones de segundo grado con gráficas" />
 
-        <div className="flex flex-col gap-2 w-full items-center justify-center text-center">
-          <h1 className="text-2xl font-extrabold max-sm:text-base">
-            Ecuaciones de segundo grado con gráficas
-          </h1>
-          <h2 className="text-xl font-bold max-sm:text-xs">
-            <BlockMath math={paso1} />
-          </h2>
-          <div className="flex flex-row items-center gap-4">
-            <label>
-              a:{" "}
-              <input
-                type="number"
-                className="border p-1 rounded w-20"
-                value={a}
-                onChange={(e) => setA(Number(e.target.value))}
-              />
-            </label>
-            <label>
-              b:{" "}
-              <input
-                type="number"
-                className="border p-1 rounded w-20"
-                value={b}
-                onChange={(e) => setB(Number(e.target.value))}
-              />
-            </label>
-            <label>
-              c:{" "}
-              <input
-                type="number"
-                className="border p-1 rounded w-20"
-                value={c}
-                onChange={(e) => setC(Number(e.target.value))}
-              />
-            </label>
-            <BotonUtil
-              label={useFractions ? "Dec." : "Frac."}
-              className="px-4 py-2 bg-blue-600 text-white rounded max-sm:text-xs"
-              onClick={() => setUseFractions(!useFractions)}
+      <div className="flex flex-col  w-full items-center justify-center text-center">
+        <h2 className="text-xl font-bold max-sm:text-xs">
+          <BlockMath math={paso1} />
+        </h2>
+        <div className="flex flex-row items-center gap-2">
+          <label>
+            a:{" "}
+            <input
+              type="number"
+              className="border p-1 rounded w-20"
+              value={a}
+              onChange={(e) => setA(Number(e.target.value))}
             />
-          </div>
+          </label>
+          <label>
+            b:{" "}
+            <input
+              type="number"
+              className="border p-1 rounded w-20"
+              value={b}
+              onChange={(e) => setB(Number(e.target.value))}
+            />
+          </label>
+          <label>
+            c:{" "}
+            <input
+              type="number"
+              className="border p-1 rounded w-20"
+              value={c}
+              onChange={(e) => setC(Number(e.target.value))}
+            />
+          </label>
+          <BotonUtil
+            label={useFractions ? "Dec." : "Frac."}
+            className="px-4 py-2 bg-blue-600 text-white rounded text-xs"
+            onClick={() => setUseFractions(!useFractions)}
+          />
         </div>
       </div>
 
