@@ -67,6 +67,11 @@ export const VideosMatematicasDiscreta = [
     title: "Circuitos Pt.4",
     url: "CMaS9FSuHfE",
   },
+  {
+    id: 5,
+    title: "Circuitos Pt.5",
+    url: "tkRwfjoUHHk",
+  },
 ];
 
 export const videosprecalculo = [
@@ -80,6 +85,31 @@ export const videosprecalculo = [
     title: "Teorema del Cociente y del Residuo",
     url: "TYftscAUHLA",
   },
+  {
+    id: "3",
+    title: "Movimiento Armonico Amortiguado",
+    url: "0Tgh8qOwWMs",
+  },
+  {
+    id: "4",
+    title: "Movimiento Armonico Simple",
+    url: "iJsDYNX3Th4",
+  },
+  {
+    id: "5",
+    title: "Movimiento Armonico Simple Pt.2",
+    url: "-NiA91stnoU",
+  },
+  {
+    id: "6",
+    title: "Curvas Seno y Coseno Desplazadas",
+    url: "yYQ4qUAfCrM",
+  },
+  {
+    id: "7",
+    title: "Curvas Seno y Coseno",
+    url: "LHE1k3W5S1s",
+  },
 ];
 
 export const VideosAlgebraLineal = [
@@ -92,5 +122,15 @@ export const VideosAlgebraLineal = [
     id: 2,
     title: "Matrices en Excel Pt.2",
     url: "aMx3IG6JU5w",
+  },
+  {
+    id: 3,
+    title: "Proyecto de aplicacion para algebra Lineal",
+    url: "jD5WrXq2aQE",
+  },
+  {
+    id: 4,
+    title: "Matrices Inversas",
+    url: "kbV12K2-DMQ",
   },
 ];

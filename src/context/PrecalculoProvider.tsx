@@ -6,6 +6,7 @@ import {
   Op,
   PrecalculoContextType,
   ProviderProps,
+  Quadrant,
   Resultado,
   Step,
   SynStep,
@@ -1628,7 +1629,8 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
 
   const prettyResult = useMemo(() => {
     if (op !== "div") {
-      const z = op === "add" ? add(a2, b2) : op === "sub" ? sub(a2, b2) : mul(a2, b2);
+      const z =
+        op === "add" ? add(a2, b2) : op === "sub" ? sub(a2, b2) : mul(a2, b2);
       return `${z.re} ${sgn(z.im)} ${abs(z.im)}i`;
     }
     const den = b2.re * b2.re + b2.im * b2.im;
@@ -1646,6 +1648,362 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
   }, [a2, b2, op, showFraction]);
 
   const powSteps = useMemo(() => powerISteps(exp), [exp]);
+
+  /*   ---- IDENTIDADES FUNDAMENTALES ----   */
+
+  // Función para simplificar fracciones
+  function simplifyFraction(num: number, den: number): [number, number] {
+    function gcd(a: number, b: number): number {
+      return b === 0 ? a : gcd(b, a % b);
+    }
+    const divisor = gcd(Math.abs(num), Math.abs(den));
+    return [num / divisor, den / divisor];
+  }
+
+  // Generar string tipo "\tfrac{a}{b}"
+  function fracLatex2(num: number, den: number): string {
+    if (den === 1) return `${num}`;
+    return `\\tfrac{${num}}{${den}}`;
+  }
+
+  const [sinNum, setSinNum] = useState(3);
+  const [sinDen, setSinDen] = useState(5);
+  const [quadrant, setQuadrant] = useState<Quadrant>(2);
+
+  // ================== Calculos ==================
+
+  // Seno
+  const sinFrac = simplifyFraction(sinNum, sinDen);
+
+  // Coseno
+  const cosNumSq = sinDen ** 2 - sinNum ** 2;
+  const cosDenSq = sinDen ** 2;
+  const cosNum = Math.sqrt(cosNumSq);
+  const cosDen = Math.sqrt(cosDenSq);
+
+  // Simplificar coseno
+  const [cosSimpleNumBase, cosSimpleDen] = simplifyFraction(cosNum, cosDen);
+
+  // Aplicar signo de acuerdo al cuadrante
+  const cosSimpleNum =
+    quadrant === 2 || quadrant === 3 ? -cosSimpleNumBase : cosSimpleNumBase;
+
+  // Cosecante
+  const [cscNum, cscDen] = simplifyFraction(sinDen, sinNum);
+
+  // Secante
+  const [secNum, secDen] = simplifyFraction(cosSimpleDen, cosSimpleNum);
+
+  // Tangente
+  const [tanNum, tanDen] = simplifyFraction(
+    sinFrac[0] * cosSimpleDen,
+    sinFrac[1] * cosSimpleNum
+  );
+  // Cotangente
+  const [cotNum, cotDen] = simplifyFraction(tanDen, tanNum);
+
+  /*   ---- Curvas SENO Y COSENO ----   */
+
+  // Generar datos de la gráfica
+  const generateData = (a: number, k: number) => {
+    const data = [];
+    for (let x = 0; x <= 720; x += 10) {
+      const rad = (x * Math.PI) / 180; // pasar a radianes
+      const y = a * Math.sin(k * rad);
+      data.push({ x, y: parseFloat(y.toFixed(2)) });
+    }
+    return data;
+  };
+
+  const [a3, setA3] = useState(-3); // ejemplo para la gráfica
+  const [k3, setK3] = useState(3);
+
+  // Cálculos
+  const amplitude = Math.abs(a3);
+  const periodo = (2 * Math.PI) / k3;
+  const data4 = generateData(a3, k3);
+
+  /*  ---- CURVAS SENO Y COSENO DESPLAZADOS ----   */
+
+  // --- Utilidades para parsear entradas que pueden ser fracciones y/o contener pi ---
+  function parseFractionString(s: string): number | null {
+    // acepta formatos: "3/2", "-5/3", "4"
+    const m = s.match(/^([+-]?\d+)\/(\d+)$/);
+    if (m) {
+      const num = parseInt(m[1], 10);
+      const den = parseInt(m[2], 10);
+      if (den === 0) return null;
+      return num / den;
+    }
+    const n = Number(s);
+    if (!Number.isNaN(n)) return n;
+    return null;
+  }
+
+  function parsePiExpression(sRaw: string): number | null {
+    // Normaliza
+    let s = String(sRaw).trim().replace(/\s+/g, "");
+    s = s.replace(/−/g, "-"); // signo menos Unicode
+    s = s.replace(/π/g, "pi");
+    // regex que captura: [mult]? pi [ / denom ]?
+    // ejemplos admitidos: "pi", "3pi", "3/2pi", "pi/4", "2pi/5", "-pi/6"
+    const m = s.match(/^([+-]?\d+(?:\/\d+)?)?\*?pi(?:\/(\d+))?$/i);
+    if (m) {
+      let mult = 1;
+      if (m[1]) {
+        const maybeFrac = parseFractionString(m[1]);
+        if (maybeFrac === null) return null;
+        mult = maybeFrac;
+      }
+      const denom = m[2] ? parseInt(m[2], 10) : 1;
+      if (denom === 0) return null;
+      return (mult * Math.PI) / denom;
+    }
+    return null;
+  }
+
+  function parseInputToNumber(sRaw: string): number {
+    // Intenta detectar expresiones con pi, fracciones o número decimal
+    const s = String(sRaw).trim();
+    if (s === "") return NaN;
+    const piVal = parsePiExpression(s);
+    if (piVal !== null) return piVal;
+    const frac = parseFractionString(s);
+    if (frac !== null) return frac;
+    const n = Number(s);
+    return Number.isNaN(n) ? NaN : n;
+  }
+
+  function approxFraction(x: number, maxDen = 48) {
+    // aproxima x con num/den
+    const eps = 1e-8;
+    for (let den = 1; den <= maxDen; den++) {
+      const num = Math.round(x * den);
+      if (Math.abs(x - num / den) < eps) return { num, den };
+    }
+    return null;
+  }
+
+  function inputToTex(sRaw: string): string {
+    const s = String(sRaw).trim();
+    if (s === "") return "";
+    // intenta expresar en forma de fracción con pi si corresponde
+    const numeric = parseInputToNumber(s);
+    if (!Number.isNaN(numeric)) {
+      // si es múltiplo de pi, representarlo así
+      const ratio = numeric / Math.PI;
+      const frac = approxFraction(ratio, 48);
+      if (frac) {
+        const { num, den } = frac;
+        if (den === 1) return `${num}\\pi`;
+        if (num === 1) return `\\frac{\\pi}{${den}}`;
+        return `\\frac{${num}\\pi}{${den}}`;
+      }
+      // si no es múltiplo de pi, si es fracción simple representarla con \frac
+      const simpleFrac = s.match(/^([+-]?\d+)\/(\d+)$/);
+      if (simpleFrac) {
+        return `\\frac{${simpleFrac[1]}}{${simpleFrac[2]}}`;
+      }
+      // número decimal o entero
+      return numeric % 1 === 0 ? `${numeric}` : numeric.toFixed(4);
+    }
+    // si no pudimos parsear numéricamente (entrada libre), intentamos reemplazar 'pi' por '\pi'
+    return s.replace(/π/g, "\\pi").replace(/pi/g, "\\pi").replace(/\*/g, "");
+  }
+  // --- Generador de datos ---
+  function generateData2(
+    a: number,
+    k: number,
+    b: number,
+    type: "cos" | "sin" = "cos",
+    xMin = -Math.PI,
+    xMax = Math.PI * 3,
+    steps = 300
+  ) {
+    const data: { x: number; y: number }[] = [];
+    for (let i = 0; i <= steps; i++) {
+      const t = xMin + (i / steps) * (xMax - xMin);
+      const y =
+        type === "cos" ? a * Math.cos(k * t - b) : a * Math.sin(k * t - b);
+      data.push({ x: parseFloat(t.toFixed(4)), y: parseFloat(y.toFixed(4)) });
+    }
+    return data;
+  }
+  // Entradas como strings para permitir fracciones y pi
+  const [aStr, setAStr] = useState("5");
+  const [kStr, setKStr] = useState("3");
+  const [bStr, setBStr] = useState("pi/4");
+  const [type, setType] = useState<"cos" | "sin">("cos");
+
+  // Parsear a valores numéricos (radianes para b)
+  const aNum = parseInputToNumber(aStr);
+  const kNum = parseInputToNumber(kStr);
+  const bNum = parseInputToNumber(bStr);
+
+  // seguridad: evitar k = 0
+  const safeK = !Number.isNaN(kNum) && Math.abs(kNum) > 1e-12 ? kNum : NaN;
+
+  const data5 = useMemo(() => {
+    if (Number.isNaN(aNum) || Number.isNaN(safeK) || Number.isNaN(bNum))
+      return [];
+    return generateData2(aNum, safeK, bNum, type);
+  }, [aNum, safeK, bNum, type]);
+
+  // Valores derivables
+  const amplitude2 = Number.isNaN(aNum) ? NaN : Math.abs(aNum);
+  const periodNumeric = Number.isNaN(safeK) ? NaN : (2 * Math.PI) / safeK;
+  const desfaseNumeric =
+    Number.isNaN(safeK) || Number.isNaN(bNum) ? NaN : bNum / safeK;
+
+  // Representaciones TeX para mostrar paso a paso sin omitir nada
+  const aTex = inputToTex(aStr);
+  const kTex = inputToTex(kStr);
+  const bTex = inputToTex(bStr);
+
+  // Periodo: mostrar pasos
+  // Paso 1: p = 2\pi / k
+  const periodoPaso1 = "p = \\frac{2\\pi}{k}";
+  // Paso 2: sustitución p = 2\pi / (k_value)
+  const periodoPaso2 = `p = \\frac{2\\pi}{${kTex}}`;
+
+  // Intentar simplificar a una forma con \pi: p = (num/den)\pi
+  let periodoEnPiTex = "";
+  if (!Number.isNaN(periodNumeric)) {
+    const ratio = periodNumeric / Math.PI; // debería ser 2/k
+    const frac = approxFraction(ratio, 48);
+    if (frac) {
+      const { num, den } = frac;
+      if (den === 1) periodoEnPiTex = `${num}\\pi`;
+      else if (num === 1) periodoEnPiTex = `\\frac{\\pi}{${den}}`;
+      else periodoEnPiTex = `\\frac{${num}\\pi}{${den}}`;
+    }
+  }
+
+  // para mostrar valor numérico decimal
+  const periodoDecimalTex = Number.isNaN(periodNumeric)
+    ? "NaN"
+    : periodNumeric.toFixed(6);
+
+  // Desfase: mostrar paso detallado
+  const desfasePaso1 = `${kTex}x - ${bTex} = ${kTex}\\left(x - \\frac{${bTex}}{${kTex}}\\right)`;
+  // Mostrar b/k en forma simplificada (si es múltiplo de pi, representarlo como fracción de pi)
+  let bOverKTex = "";
+  if (!Number.isNaN(desfaseNumeric)) {
+    const ratio = desfaseNumeric / Math.PI; // si es múltiplo de pi
+    const frac = approxFraction(ratio, 48);
+    if (frac) {
+      const { num, den } = frac;
+      if (den === 1) bOverKTex = `${num}\\pi`;
+      else if (num === 1) bOverKTex = `\\frac{\\pi}{${den}}`;
+      else bOverKTex = `\\frac{${num}\\pi}{${den}}`;
+    } else {
+      // si no, intentar fracción simple
+      const simpleFrac = approxFraction(desfaseNumeric, 48);
+      if (simpleFrac) {
+        bOverKTex = `\\frac{${simpleFrac.num}}{${simpleFrac.den}}`;
+      } else {
+        bOverKTex = desfaseNumeric.toFixed(6);
+      }
+    }
+  }
+
+  const funcTex =
+    type === "cos"
+      ? `y = ${aTex}\\cos\\left(${kTex}x - ${bTex}\\right)`
+      : `y = ${aTex}\\sin\\left(${kTex}x - ${bTex}\\right)`;
+
+  /*  ---- Movimiento Armonico Simple ----   */
+
+  const [amplitudeInput, setAmplitudeInput] = useState<string>("2");
+  const [omegaInput, setOmegaInput] = useState<string>("3");
+  const [mode, setMode] = useState<"sin" | "cos">("sin");
+  // parse floats but also keep exact fractional KaTeX form using Fraction when possible
+  const a4 = useMemo(
+    () => Number(parseFloat(amplitudeInput) || 0),
+    [amplitudeInput]
+  );
+  const omega = useMemo(
+    () => Number(parseFloat(omegaInput) || 0),
+    [omegaInput]
+  );
+
+  // derived values
+  const period = omega === 0 ? Infinity : (2 * Math.PI) / omega; // p = 2π/ω
+  const frequency = omega / (2 * Math.PI); // f = ω/(2π)
+
+  const omegaTex = (() => {
+    try {
+      return new Fraction(omega).toFraction(true);
+    } catch (e) {
+      return String(omega);
+    }
+  })();
+
+  const periodTex = omega === 0 ? "\\infty" : `\\frac{2\\pi}{${omegaTex}}`;
+  const frequencyTex = `\\frac{${omegaTex}}{2\\pi}`;
+
+  // numeric strings
+  const periodNum = Number.isFinite(period) ? period.toFixed(6) : "∞";
+  const frequencyNum = frequency.toFixed(6);
+
+  // build data for one full period (0..p) with 200 samples or fallback when omega=0
+  const data6 = useMemo(() => {
+    const points: { t: number; y: number }[] = [];
+    if (!Number.isFinite(period)) {
+      // flat line y = a*sin(0) = 0 (if omega=0, argument is 0, so y = a*sin(0) = 0; for cos it's a)
+      const defaultY = mode === "sin" ? 0 : a4;
+      for (let i = 0; i <= 100; i++) points.push({ t: i / 10, y: defaultY });
+      return points;
+    }
+    const samples = 200;
+    for (let i = 0; i <= samples; i++) {
+      const t = (i / samples) * period;
+      const arg = omega * t;
+      const y = mode === "sin" ? a4 * Math.sin(arg) : a4 * Math.cos(arg);
+      points.push({ t, y });
+    }
+    return points;
+  }, [a4, omega, period, mode]);
+
+
+
+  /*  ---- Movimiento Armonico Amortiguado ----   */
+
+  // Función amortiguada
+  function dampedHarmonic(k: number, c: number, f: number, t: number) {
+    const w = 2 * Math.PI * f;
+    return k * Math.exp(-c * t) * Math.cos(w * t);
+  }
+
+  // Envolventes
+  function upperEnvelope(k: number, c: number, t: number) {
+    return k * Math.exp(-c * t);
+  }
+  function lowerEnvelope(k: number, c: number, t: number) {
+    return -k * Math.exp(-c * t);
+  }
+
+  // Parámetros dinámicos
+  const [k2, setK2] = useState(2);
+  const [c2, setC2] = useState(1.5);
+  const [f2, setF2] = useState(3);
+
+  // Cálculos derivados
+  const p = useMemo(() => 1 / f2, [f2]);
+  const w = useMemo(() => 2 * Math.PI *  f2, [f2]);
+
+  // Datos para la gráfica
+  const data7 = useMemo(() => {
+    return Array.from({ length: 200 }, (_, i) => {
+      const t = i / 100; // de 0 a 2
+      return {
+        t,
+        y: dampedHarmonic(k2, c2, f2, t),
+        upper: upperEnvelope(k2, c2, t),
+        lower: lowerEnvelope(k2, c2, t),
+      };
+    });
+  }, [k2, c2, f2]);
 
   return (
     <PrecalculoContext.Provider
@@ -1791,6 +2149,99 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
         prettyResult,
         steps2,
         powSteps,
+
+        //todo: IDENTIDADES FUNDAMENTALES
+        simplifyFraction,
+        fracLatex2,
+        sinNum,
+        setSinNum,
+        sinDen,
+        setSinDen,
+        quadrant,
+        setQuadrant,
+        sinFrac,
+        cosNumSq,
+        cosDenSq,
+        cosNum,
+        cosDen,
+        cosSimpleNumBase,
+        cosSimpleDen,
+        cosSimpleNum,
+        cscNum,
+        cscDen,
+        secNum,
+        secDen,
+        tanNum,
+        tanDen,
+        cotNum,
+        cotDen,
+
+        //TODO CURVAS SENO Y COSENO
+        generateData,
+        a3,
+        setA3,
+        k3,
+        setK3,
+        amplitude,
+        periodo,
+        data4,
+
+        //TODO CURVAS SENO Y COSENO DESPLAZADOS
+
+        aStr,
+        setAStr,
+        kStr,
+        setKStr,
+        bStr,
+        setBStr,
+        type,
+        setType,
+        aNum,
+        kNum,
+        bNum,
+        safeK,
+        data5,
+        amplitude2,
+        periodNumeric,
+        desfaseNumeric,
+        aTex,
+        kTex,
+        bTex,
+        periodoPaso1,
+        periodoPaso2,
+        periodoEnPiTex,
+        periodoDecimalTex,
+        desfasePaso1,
+        bOverKTex,
+        funcTex,
+
+        //TODO MOVIMIENTO ARMONICO SIMPLE
+        amplitudeInput,
+        setAmplitudeInput,
+        omegaInput,
+        setOmegaInput,
+        mode,
+        setMode,
+        a4,
+        omegaTex,
+        periodTex,
+        frequencyTex,
+        periodNum,
+        frequencyNum,
+        data6,
+
+        //TODO MOVIMIENTO ARMONICO AMORTIGUADO
+        k2,
+        setK2,
+        c2,
+        setC2,
+        f2,
+        setF2,
+        p,
+        w,
+        data7,
+      
+
       }}
     >
       {children}
