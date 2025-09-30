@@ -125,23 +125,33 @@ export const PrecalculoSlugs: slugstype[] = [
     name: "Números Complejos",
     href: "/precalculo/numeros-complejos",
   },
-  // {
-  //   id: 9,
-  //   name: "Trigonometría",
-  //   href: "/precalculo/trigonometria",
-  // },
-  // {
-  //   id: 10,
-  //   name: "Ley de Senos",
-  //   href: "/precalculo/ley-de-senos",
-  // },
-  // {
-  //   id: 11,
-  //   name: "Ley de Cosenos",
-  //   href: "/precalculo/ley-de-cosenos",
-  // },
   {
+    id: 9,
+    name: "Identidades Fundamentales",
+    href: "/precalculo/identidades-fundamentales",
+  },
+  {
+    id: 10,
+    name: "Curvas Seno y Coseno",
+    href: "/precalculo/curvas-seno-y-coseno",
+  },
+  {
+    id: 11,
+    name: "Curvas Seno y Coseno Desplazadas",
+    href: "/precalculo/curvas-seno-y-coseno-desplazadas",
+  },
+    {
     id: 12,
+    name: "Movimiento Armonico Simple",
+    href: "/precalculo/movimiento-armonico-simple",
+  },
+      {
+    id: 13,
+    name: "Movimiento Armonico Amortiguado",
+    href: "/precalculo/movimiento-armonico-amortiguado",
+  },
+  {
+    id: 14,
     name: "Videos Precálculo",
     href: "/precalculo/videos-precalculo",
   },

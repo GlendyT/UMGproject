@@ -5,7 +5,6 @@ export interface ProviderProps {
   children: ReactNode;
 }
 
-
 // ---------------- MÉTODO DE CRAMER ----------------
 
 export type Matrix = (number | Fraction)[][];
@@ -47,7 +46,9 @@ export interface AlgebraContextType {
   result: { det: Fraction; detVars: Fraction[]; sols: Fraction[] } | null;
   showFraction: boolean;
   setShowFraction: (b: boolean) => void;
-  setResult: (r: { det: Fraction; detVars: Fraction[]; sols: Fraction[] } | null) => void;
+  setResult: (
+    r: { det: Fraction; detVars: Fraction[]; sols: Fraction[] } | null
+  ) => void;
   solve3: () => void;
   handleChange3: (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -67,7 +68,10 @@ export interface AlgebraContextType {
     col: number
   ) => void;
   handleSizeChange4: (n: number) => void;
-  calculateDet: (m: number[][], showSteps?: boolean) => number | { value: number; steps: string | MinorStep[] };
+  calculateDet: (
+    m: number[][],
+    showSteps?: boolean
+  ) => number | { value: number; steps: string | MinorStep[] };
   mode: string;
   setMode: (m: string) => void;
   index: number;
@@ -158,6 +162,8 @@ export type routetype = {
 };
 
 export type slugstype = Omit<routetype, "bgColor" | "image">;
+
+export type Quadrant = 1 | 2 | 3 | 4;
 
 export interface PrecalculoContextType {
   //TODO: ECUACIONES
@@ -353,6 +359,96 @@ export interface PrecalculoContextType {
   prettyResult: string;
   steps2: string[];
   powSteps: string[];
+
+  //TODO: IDENTIDADES FUNDAMENTALES
+  simplifyFraction: (num: number, den: number) => [number, number];
+  fracLatex2: (num: number, den: number) => string;
+  sinNum: number;
+  setSinNum: (n: number) => void;
+  sinDen: number;
+  setSinDen: (n: number) => void;
+  quadrant: Quadrant;
+  setQuadrant: (q: Quadrant) => void;
+  sinFrac: [number, number];
+  cosNumSq: number;
+  cosDenSq: number;
+  cosNum: number;
+  cosDen: number;
+  cosSimpleNumBase: number;
+  cosSimpleDen: number;
+  cosSimpleNum: number;
+  cscNum: number;
+  cscDen: number;
+  secNum: number;
+  secDen: number;
+  tanNum: number;
+  tanDen: number;
+  cotNum: number;
+  cotDen: number;
+
+  //Todo Curvas Seno y Coseno
+  generateData: (a: number, k: number) => { x: number; y: number }[];
+  a3: number;
+  setA3: (n: number) => void;
+  k3: number;
+  setK3: (n: number) => void;
+  amplitude: number;
+  periodo: number;
+  data4: { x: number; y: number }[];
+
+  //TODO CURVAS SENO Y COSENO DESPLAZADAS
+  aStr: string;
+  setAStr: (s: string) => void;
+  kStr: string;
+  setKStr: (s: string) => void;
+  bStr: string;
+  setBStr: (s: string) => void;
+  type: "cos" | "sin";
+  setType: (t: "cos" | "sin") => void;
+  aNum: number;
+  kNum: number;
+  bNum: number;
+  safeK: number;
+  data5: { x: number; y: number }[];
+  amplitude2: number;
+  periodNumeric: number;
+  desfaseNumeric: number;
+  aTex: string;
+  kTex: string;
+  bTex: string;
+  periodoPaso1: string;
+  periodoPaso2: string;
+  periodoEnPiTex: string;
+  periodoDecimalTex: string;
+  desfasePaso1: string;
+  bOverKTex: string;
+  funcTex: string;
+
+  //TODO MOVIMIENTO ARMÓNICO SIMPLE
+  amplitudeInput: string;
+  setAmplitudeInput: (s: string) => void;
+  omegaInput: string;
+  setOmegaInput: (s: string) => void;
+  mode: "sin" | "cos";
+  setMode: (m: "sin" | "cos") => void;
+  a4: number;
+  omegaTex: string;
+  periodTex: string;
+  frequencyTex: string;
+  periodNum: string;
+  frequencyNum: string;
+  data6: { t: number; y: number }[];
+
+  //TODO MOVIMIENTO ARMÓNICO AMORTIGUADO
+  k2: number;
+  setK2: (n: number) => void;
+  c2: number;
+  setC2: (n: number) => void;
+  f2: number;
+  setF2: (n: number) => void;
+  p: number;
+  w: number;
+  data7: { t: number; y: number; upper: number; lower: number }[];
 }
 
 export type SynStep = {
@@ -384,7 +480,7 @@ export type Resultado = {
   cambiosNeg: number;
 };
 
-export type BiquadraticSolverProps  = {
+export type BiquadraticSolverProps = {
   equation: string;
   a: number;
   b: number;
@@ -397,8 +493,6 @@ export type BiquadraticSolverProps  = {
 };
 
 export type QuadraticSolverProps = Omit<BiquadraticSolverProps, "round2">;
-
-
 
 // ---------------- MÉTODO DE LAPLACE ----------------//
 export type MinorStep = {
