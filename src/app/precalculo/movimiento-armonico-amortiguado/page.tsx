@@ -1,6 +1,6 @@
 "use client";
 
-import { BlockMath, InlineMath } from "react-katex";
+import { InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import {
   LineChart,
@@ -16,7 +16,7 @@ import usePrecalculo from "@/hooks/usePrecalculo";
 import TitleCourse from "@/components/TitleCourse";
 
 export default function DampedMotion() {
-  const { k2, setK2, c2, setC2, f2, setF2, p, w, data7 } = usePrecalculo();
+  const { k2, setK2, c2, setC2, f2, setF2, data7 } = usePrecalculo();
 
   return (
     <div className="flex flex-col gap-2  min-h-screen bg-gray-100 p-4">
@@ -84,7 +84,13 @@ export default function DampedMotion() {
       </div>
 
       {/* Gráfica */}
-      <div className="h-96">
+      <div
+        style={{
+          width: "100%",
+          height: 380,
+          background: "white",
+        }}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data7}>
             <CartesianGrid strokeDasharray="3 3" />

@@ -125,7 +125,7 @@ export default function TrigonometriaFracciones() {
         {/* Tangente */}
         <div className="border-l-4 border-purple-500 bg-purple-500/10 p-1 w-auto">
           <h2 className="text-xl font-semibold">d. Tangente</h2>
-          <BlockMath math="\\tan t = \\dfrac{\\sin t}{\\cos t}" />
+          <BlockMath math={`\\tan t = \\dfrac{\\sin t}{\\cos t}`} />
           <BlockMath
             math={`= \\dfrac{${fracLatex2(
               sinFrac[0],
@@ -138,7 +138,7 @@ export default function TrigonometriaFracciones() {
         {/* Cotangente */}
         <div className="border-l-4 border-orange-500 bg-orange-500/10 p-1 w-auto">
           <h2 className="text-xl font-semibold">e. Cotangente</h2>
-          <BlockMath math="\\cot t = \\dfrac{1}{\\tan t}" />
+          <BlockMath math={`\\cot t = \\dfrac{1}{\\tan t}`} />
           <BlockMath math={`= \\dfrac{1}{${fracLatex2(tanNum, tanDen)}}`} />
           <BlockMath math={`= ${fracLatex2(cotNum, cotDen)}`} />
         </div>
