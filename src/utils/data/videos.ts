@@ -44,6 +44,11 @@ export const videosContabilidad = [
     title: "Punto de Equilibrio Pt.2",
     url: "EZCEzEBXfXE",
   },
+  {
+    id: 10,
+    title: "Flujo de Efectivo",
+    url: "Ez384mscsHY",
+  }
 ];
 
 export const VideosMatematicasDiscreta = [
@@ -72,6 +77,16 @@ export const VideosMatematicasDiscreta = [
     title: "Circuitos Pt.5",
     url: "tkRwfjoUHHk",
   },
+  {
+    id: 6,
+    title: "Circuitos Pt.6",
+    url: "lXP1JtJwXFM",
+  },
+  {
+    id: 7,
+    title: "Resta de BINARIO por el metodo de complemento a 2",
+    url: "7YmF3qon9-M",
+  }
 ];
 
 export const videosprecalculo = [
@@ -133,4 +148,17 @@ export const VideosAlgebraLineal = [
     title: "Matrices Inversas",
     url: "kbV12K2-DMQ",
   },
+  {
+    id: 5,
+    title: "Vectores",
+    url: "J-52F8K6O_4",
+  }
 ];
+
+export const videosAlgoritmo = [
+  {
+    id: 1,
+    title: "Algoritmo de Proyecto",
+    url: "wvfRwmIksms",
+  }
+]
