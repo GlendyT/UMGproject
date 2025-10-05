@@ -164,3 +164,12 @@ export const ContabilidadSlugs: slugstype[] = [
     href: "/contabilidad/videos-contabilidad-ii",
   },
 ];
+
+
+export const AlgoritmoSlugs: slugstype[] = [
+  {
+    id: 1,
+    name: "Videos Algoritmos",
+    href: "/algoritmos/videos-algoritmos",
+  },
+];
