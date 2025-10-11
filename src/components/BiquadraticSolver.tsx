@@ -44,7 +44,7 @@ export const BiquadraticSolver = ({
         Resolver: <InlineMath math={equation} />
         Identificamos: <InlineMath math={`a=${a},\\;b=${b},\\;c=${c}`} />{" "}
         <div key="substitution">
-          <p className="font-semibold">1) Sustitución</p>
+          <p className="font-semibold">1 Sustitución</p>
           <BlockMath
             math={`${a}w^2 ${b >= 0 ? "+" : ""}${b}w ${
               c >= 0 ? "+" : ""
@@ -53,7 +53,7 @@ export const BiquadraticSolver = ({
         </div>
       </div>
       <div key="determinante" className={`${styles}`}>
-        2) Determinante <BlockMath math={`D=b^2-4ac`} />
+        2 Determinante <BlockMath math={`D=b^2-4ac`} />
         <BlockMath math={`=(${b})^2-4(${a})(${c})`} />
         <BlockMath math={`=${b * b}-${4 * a * c}`} />
         <BlockMath math={`Determinante=${D}`} />
@@ -63,7 +63,7 @@ export const BiquadraticSolver = ({
       </div>
       <div key="FormulaGeneral" className={`${styles}`}>
         <p key="fg" className="font-semibold">
-          3) Fórmula general en <InlineMath math={`w`} />{" "}
+          3 Fórmula general en <InlineMath math={`w`} />{" "}
         </p>
         <BlockMath key="fg1" math={`w=\\frac{-b\\pm\\sqrt{D}}{2a}`} />
         <BlockMath
@@ -103,7 +103,7 @@ export const BiquadraticSolver = ({
       </div>
       <div key="CalculoTitle" className={`${styles}`}>
         <p key="wcalc" className="font-semibold">
-          4) Cálculo de <InlineMath math={`w_1`} /> y{" "}
+          4 Cálculo de <InlineMath math={`w_1`} /> y{" "}
           <InlineMath math={`w_2`} />
         </p>
         <BlockMath

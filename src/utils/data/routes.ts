@@ -79,6 +79,11 @@ export const AlgebraLinealSlugs: slugstype[] = [
   },
   {
     id: 5,
+    name: "Vectores",
+    href: "/algebralineal/vectores",
+  },
+  {
+    id: 6,
     name: "Videos Álgebra Lineal",
     href: "/algebralineal/videos-algebra-lineal",
   },
@@ -140,12 +145,12 @@ export const PrecalculoSlugs: slugstype[] = [
     name: "Curvas Seno y Coseno Desplazadas",
     href: "/precalculo/curvas-seno-y-coseno-desplazadas",
   },
-    {
+  {
     id: 12,
     name: "Movimiento Armonico Simple",
     href: "/precalculo/movimiento-armonico-simple",
   },
-      {
+  {
     id: 13,
     name: "Movimiento Armonico Amortiguado",
     href: "/precalculo/movimiento-armonico-amortiguado",
@@ -164,7 +169,6 @@ export const ContabilidadSlugs: slugstype[] = [
     href: "/contabilidad/videos-contabilidad-ii",
   },
 ];
-
 
 export const AlgoritmoSlugs: slugstype[] = [
   {
