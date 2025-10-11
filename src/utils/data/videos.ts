@@ -48,6 +48,16 @@ export const videosContabilidad = [
     id: 10,
     title: "Flujo de Efectivo",
     url: "Ez384mscsHY",
+  },
+  {
+    id: 11,
+    title:" Flujo de Efectivo Pt.2",
+    url: "MP3oISirBMY",
+  },
+  {
+    id: 12,
+    title: "Flujo de Efectivo Pt.3",
+    url: "rc9nznrddvA",
   }
 ];
 
