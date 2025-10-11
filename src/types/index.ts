@@ -80,7 +80,52 @@ export interface AlgebraContextType {
   laplaceDet: () => { det2: number; steps2: StepData[] };
   det2: number;
   steps2: StepData[];
+
+  //TODO: VECTORES
+
+  mode2: Mode2;
+  setMode2: (m: Mode2) => void;
+  mag: string;
+  setMag: (s: string) => void;
+  angleInput: string;
+  setAngleInput: (s: string) => void;
+  xComp: string;
+  setXComp: (s: string) => void;
+  yComp: string;
+  setYComp: (s: string) => void;
+  vectors: { mag?: string; angle?: string; x?: string; y?: string }[];
+  setVectors: (
+    v: { mag?: string; angle?: string; x?: string; y?: string }[]
+  ) => void;
+  VectorRow: (props: { idx: number }) => JSX.Element;
+  scalar: string;
+  setScalar: (s: string) => void;
+  handleCompute: () => void;
+  output: JSX.Element[];
+  setOutput: (o: JSX.Element[]) => void;
+  chartDataAndOptions: {
+    labels: string[];
+    datasets: {
+      label: string;
+      data: { x: number; y: number }[];
+      drawArrow?: boolean;
+      arrowColor?: string;
+      borderColor?: string;
+      borderWidth?: number;
+      pointRadius?: number;
+    }[];
+    options: object;
+  };
 }
+
+export type Mode2 =
+  | "polar-to-components"
+  | "components-to-polar"
+  | "sum-vectors"
+  | "subtract-vectors"
+  | "scalar-multiplication"
+  | "angle-between"
+  | "unit-vector";
 
 export type FractionMatrix = Fraction[][];
 

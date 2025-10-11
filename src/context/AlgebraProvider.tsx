@@ -1,16 +1,23 @@
 "use client";
 
 import Fraction from "fraction.js";
-import { createContext, useState } from "react";
+import { createContext, JSX, useMemo, useState } from "react";
 import {
   AlgebraContextType,
   FractionMatrix,
   Matrix,
   Matrix3x3,
   MinorStep,
+  Mode2,
   ProviderProps,
   StepData,
 } from "../types";
+import { InlineMath } from "react-katex";
+import { Chart, registerables } from "chart.js";
+import annotationPlugin from "chartjs-plugin-annotation";
+
+Chart.register(...registerables);
+Chart.register(annotationPlugin);
 
 const AlgebraContext = createContext<AlgebraContextType>(null!);
 
@@ -268,7 +275,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   ];
 
   // ---------------- MÉTODO DE CRAMER ----------------
-   const [size2, setSize2] = useState<number>(3);
+  const [size2, setSize2] = useState<number>(3);
   const [matrix3, setMatrix3] = useState<Matrix>([
     [-1, 2, 4, 1],
     [4, 6, -2, 2],
@@ -347,7 +354,9 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   const solve3 = () => {
     const coeffs: Matrix = matrix3.map((row) => row.slice(0, size2));
-    const constants: Fraction[] = matrix3.map((row) => new Fraction(row[size2]));
+    const constants: Fraction[] = matrix3.map(
+      (row) => new Fraction(row[size2])
+    );
 
     const det = determinant(coeffs);
     if (det.equals(0)) {
@@ -392,10 +401,9 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   const matrixToString = (m: Matrix) =>
     m.map((row) => row.join(" & ")).join(" \\\\ ");
 
+  /----------------- Metodo de Laplace ----------------/;
 
-  /----------------- Metodo de Laplace ----------------/
-
-    const [size4, setSize4] = useState(3);
+  const [size4, setSize4] = useState(3);
   const [matrix4, setMatrix4] = useState([
     [-3, 4, 2],
     [2, -1, -3],
@@ -556,6 +564,875 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         .map((_, j) => ((i + j) % 2 === 0 ? "+" : "-"))
     );
 
+  /----------------- Vectores ----------------/;
+
+  function deg2rad(d: number) {
+    return (d * Math.PI) / 180;
+  }
+  function rad2deg(r: number) {
+    return (r * 180) / Math.PI;
+  }
+  function norm360(a: number) {
+    return ((a % 360) + 360) % 360;
+  }
+
+  /* Parse cardinal formats like: "N 60 O", "E 30 N", or direct degrees "30" */
+  function parseCardinal(input: string): {
+    angleDeg: number;
+    parsed: boolean;
+    explanation: string;
+  } {
+    const s = input.trim().replace(/°/g, "").toUpperCase();
+    if (/^-?\d+(\.?\d+)?$/.test(s)) {
+      const angleDeg = parseFloat(s);
+      return {
+        angleDeg: norm360(angleDeg),
+        parsed: true,
+        explanation: `Ángulo directo: ${angleDeg}° (desde +x).`,
+      };
+    }
+    const m = s.match(/^([NS])\s*(\d+(\.?\d+)?)\s*([EO])$/);
+    if (m) {
+      const ns = m[1];
+      const ang = parseFloat(m[2]);
+      const eo = m[4];
+      let angleFromEast = 0;
+      if (ns === "N" && eo === "E") angleFromEast = 90 - ang;
+      if (ns === "N" && eo === "O") angleFromEast = 90 + ang;
+      if (ns === "S" && eo === "E") angleFromEast = 270 - ang;
+      if (ns === "S" && eo === "O") angleFromEast = 270 + ang;
+      return {
+        angleDeg: norm360(angleFromEast),
+        parsed: true,
+        explanation: `Convertido a ${norm360(angleFromEast)}° desde +x.`,
+      };
+    }
+    const m2 = s.match(/^([EO])\s*(\d+(\.?\d+)?)\s*([NS])$/);
+    if (m2) {
+      const eo = m2[1];
+      const ang = parseFloat(m2[2]);
+      const ns = m2[4];
+      let angleFromEast = 0;
+      if (eo === "E" && ns === "N") angleFromEast = 0 + ang;
+      if (eo === "E" && ns === "S") angleFromEast = 360 - ang;
+      if (eo === "O" && ns === "N") angleFromEast = 180 - ang;
+      if (eo === "O" && ns === "S") angleFromEast = 180 + ang;
+      return {
+        angleDeg: norm360(angleFromEast),
+        parsed: true,
+        explanation: `Convertido a ${norm360(angleFromEast)}° desde +x.`,
+      };
+    }
+    return {
+      angleDeg: 0,
+      parsed: false,
+      explanation:
+        "No se pudo interpretar. Use grados (ej. 30) o cardinal (ej. N 60 O).",
+    };
+  }
+
+  /* ---------- math & step functions (devuelven strings LaTeX-friendly) ---------- */
+
+  function polarToComponentsSteps(magStr: string, angleStr: string) {
+    const steps: JSX.Element[] = [];
+    const m = parseFloat(magStr);
+
+    const parsed = parseCardinal(angleStr);
+    if (!parsed.parsed) {
+      steps.push(<div key="error">ERROR: {parsed.explanation}</div>);
+      return { steps, x: NaN, y: NaN };
+    }
+
+    const angleDeg = parsed.angleDeg;
+    const rad = deg2rad(angleDeg);
+    const x = m * Math.cos(rad);
+    const y = m * Math.sin(rad);
+    steps.push(
+      <div key="step4" className="flex flex-col">
+        <InlineMath math={`V_x  = ${m} \\cdot \\cos(${angleDeg}^\\circ) `} />
+        <InlineMath math={`V_x  = ${x.toFixed(2)}`} />
+      </div>
+    );
+    steps.push(
+      <div key="step4b" className="flex flex-col">
+        <InlineMath math={`V_y = ${m} \\cdot \\sin(${angleDeg}^\\circ) `} />
+        <InlineMath math={`V_y  = ${y.toFixed(2)}`} />
+      </div>
+    );
+    steps.push(
+      <div key="step5">
+        Resultado:{" "}
+        <InlineMath math={`V = (${x.toFixed(2)},\\; ${y.toFixed(2)})`} />
+      </div>
+    );
+    return { steps, x, y };
+  }
+
+  function componentsToPolarSteps(xStr: string, yStr: string) {
+    const steps: JSX.Element[] = [];
+    const x = parseFloat(xStr);
+    const y = parseFloat(yStr);
+    const mag = Math.hypot(x, y);
+    steps.push(
+      <div key="step2">
+        <InlineMath math={`|V| = \\sqrt{${x}^2 + ${y}^2} `} />
+        <InlineMath math={` = ${mag}`} />
+      </div>
+    );
+    const angleRad = Math.atan2(y, x);
+    const angleDeg = norm360(rad2deg(angleRad));
+    steps.push(
+      <div key="step3">
+        <InlineMath
+          math={`\\theta = \\operatorname{atan2}(V_y, V_x) = ${angleDeg.toFixed(
+            2
+          )}^\\circ`}
+        />
+      </div>
+    );
+    steps.push(
+      <div key="step4">
+       Resultado polar:{" "}
+        <InlineMath
+          math={`|V|=${mag.toFixed(2)},\\; \\theta=${angleDeg.toFixed(
+            2
+          )}^\\circ`}
+        />
+      </div>
+    );
+    return { steps, mag, angleDeg };
+  }
+
+  function sumVectorsSteps(
+    vecs: { x?: string; y?: string; mag?: string; angle?: string }[]
+  ) {
+    const steps: JSX.Element[] = [];
+    let sumX = 0;
+    let sumY = 0;
+    vecs.forEach((v, i) => {
+      if (v.x !== undefined && v.y !== undefined && v.x !== "" && v.y !== "") {
+        const xv = parseFloat(v.x);
+        const yv = parseFloat(v.y);
+        sumX += xv;
+        sumY += yv;
+      } else if (
+        v.mag !== undefined &&
+        v.angle !== undefined &&
+        v.mag !== "" &&
+        v.angle !== ""
+      ) {
+        const { steps: s2, x, y } = polarToComponentsSteps(v.mag, v.angle);
+        s2.forEach((t, j) => steps.push(<div key={`vec${i}-${j}`}> {t}</div>));
+        sumX += x;
+        sumY += y;
+      } else {
+        steps.push(
+          <div key={`vec${i}`}>- Vector {i + 1}: formato no reconocido.</div>
+        );
+      }
+    });
+    steps.push(
+      <div key="sum" className="flex flex-col">
+
+        <InlineMath
+          math={`\\Sigma V_x = ${sumX.toFixed(
+            2
+          )}`}
+        />
+                <InlineMath
+          math={` \\Sigma V_y = ${sumY.toFixed(2)}`}
+        />
+      </div>
+    );
+    const mag = Math.hypot(sumX, sumY);
+    const angleDeg = norm360(rad2deg(Math.atan2(sumY, sumX)));
+    steps.push(
+      <div key="result">
+        3) Resultante:{" "}
+        <InlineMath math={`R = (${sumX.toFixed(2)},\\; ${sumY.toFixed(2)})`} />
+      </div>
+    );
+    steps.push(
+      <div key="mag" className="flex flex-col"> 
+         <InlineMath math={`|R| = \\sqrt{${sumX.toFixed(2)}^2 + ${sumY.toFixed(2)}^2} `} />
+        <InlineMath math={`|R| = ${mag.toFixed(2)}`} />
+      </div>
+    );
+    steps.push(
+      <div key="angle">
+        5) <InlineMath math={`\\theta = ${angleDeg.toFixed(2)}^\\circ`} />
+      </div>
+    );
+    steps.push(
+      <div key="polar">
+        6) Resultado polar:{" "}
+        <InlineMath
+          math={`|R|=${mag.toFixed(2)},\\; \\theta=${angleDeg.toFixed(
+            2
+          )}^\\circ`}
+        />
+      </div>
+    );
+    return { steps, sumX, sumY, mag, angleDeg };
+  }
+
+  function scalarMultiplySteps(
+    sStr: string,
+    v: { x?: string; y?: string; mag?: string; angle?: string }
+  ) {
+    const steps: JSX.Element[] = [];
+    const s = parseFloat(sStr);
+    if (v.x !== undefined && v.y !== undefined && v.x !== "" && v.y !== "") {
+      const x = parseFloat(v.x);
+      const y = parseFloat(v.y);
+      steps.push(
+        <div key="vector">
+          2) Vector: <InlineMath math={`${x},\\; ${y}`} />
+        </div>
+      );
+      const xr = s * x;
+      const yr = s * y;
+      steps.push(
+        <div key="multiply">
+          3) <InlineMath math={`${s} \\cdot (${x}, ${y}) = (${xr}, ${yr})`} />
+        </div>
+      );
+      steps.push(
+        <div key="result">
+          4) Resultado:{" "}
+          <InlineMath math={`${xr.toFixed(2)},\\; ${yr.toFixed(2)}`} />
+        </div>
+      );
+      return { steps, xr, yr };
+    } else if (
+      v.mag !== undefined &&
+      v.angle !== undefined &&
+      v.mag !== "" &&
+      v.angle !== ""
+    ) {
+      const m = parseFloat(v.mag);
+      const { steps: s2, x, y } = polarToComponentsSteps(v.mag, v.angle);
+      s2.forEach((t, i) => steps.push(<div key={`polar${i}`}> {t}</div>));
+      const xr = s * x;
+      const yr = s * y;
+      steps.push(
+        <div key="newmag" className="flex flex-col">
+          3) Magnitud nueva:{" "}
+          <InlineMath math={`|V'| = ${s} \\cdot ${m} `} />
+          <InlineMath math={`= ${Math.abs(s * m)}   `} />
+        </div>
+      );
+      steps.push(
+        <div key="result">
+          4) Resultado en componentes:{" "}
+          <InlineMath math={`${xr.toFixed(2)},\\; ${yr.toFixed(2)}`} />
+        </div>
+      );
+      return { steps, xr, yr };
+    }
+    steps.push(<div key="error">Formato vector no reconocido.</div>);
+    return { steps };
+  }
+
+  function angleBetweenSteps(
+    a: { x?: string; y?: string; mag?: string; angle?: string },
+    b: { x?: string; y?: string; mag?: string; angle?: string }
+  ) {
+    const steps: JSX.Element[] = [];
+    steps.push(
+      <div key="step1">1) Obtener componentes de ambos vectores.</div>
+    );
+    function ensureComponents(
+      v: { x?: string; y?: string; mag?: string; angle?: string },
+      idx: number
+    ) {
+      if (v.x !== undefined && v.y !== undefined && v.x !== "" && v.y !== "")
+        return {
+          x: parseFloat(v.x),
+          y: parseFloat(v.y),
+          steps: [
+            <div key={`vec${idx}`}>
+              - Vector {idx}: ({v.x}, {v.y}).
+            </div>,
+          ],
+        };
+      if (
+        v.mag !== undefined &&
+        v.angle !== undefined &&
+        v.mag !== "" &&
+        v.angle !== ""
+      ) {
+        const { steps: s2, x, y } = polarToComponentsSteps(v.mag, v.angle);
+        return {
+          x,
+          y,
+          steps: [
+            <div key={`vec${idx}`}>
+              - Vector {idx} (polar): |V|={v.mag}, θ=&apos;{v.angle}&apos;.
+            </div>,
+            ...s2,
+          ],
+        };
+      }
+      return {
+        x: NaN,
+        y: NaN,
+        steps: [
+          <div key={`vec${idx}`}>- Vector {idx}: formato no reconocido.</div>,
+        ],
+      };
+    }
+    const A = ensureComponents(a, 1);
+    const B = ensureComponents(b, 2);
+    A.steps.forEach((t, i) => steps.push(<div key={`A${i}`}> {t}</div>));
+    B.steps.forEach((t, i) => steps.push(<div key={`B${i}`}> {t}</div>));
+    steps.push(
+      <div key="dot">
+        2) Producto punto: <InlineMath math={`A\\cdot B = A_x B_x + A_y B_y`} />
+        .
+      </div>
+    );
+    const dot = A.x * B.x + A.y * B.y;
+    steps.push(
+      <div key="dotcalc">
+        <InlineMath
+          math={`A\\cdot B = ${A.x.toFixed(6)}\\cdot ${B.x.toFixed(
+            6
+          )} + ${A.y.toFixed(6)}\\cdot ${B.y.toFixed(6)} = ${dot.toFixed(6)}`}
+        />
+      </div>
+    );
+    const magA = Math.hypot(A.x, A.y);
+    const magB = Math.hypot(B.x, B.y);
+    steps.push(
+      <div key="norms">
+        3) Normas:{" "}
+        <InlineMath
+          math={`|A|=${magA.toFixed(6)},\\; |B|=${magB.toFixed(6)}`}
+        />
+      </div>
+    );
+    const cosTheta = dot / (magA * magB);
+    const cosClamped = Math.max(-1, Math.min(1, cosTheta));
+    const thetaDeg = rad2deg(Math.acos(cosClamped));
+    steps.push(
+      <div key="angle">
+        4){" "}
+        <InlineMath
+          math={`\\cos\\theta = ${cosClamped.toFixed(
+            6
+          )} \\Rightarrow \\theta = \\arccos(${cosClamped.toFixed(
+            6
+          )}) = ${thetaDeg.toFixed(6)}^\\circ`}
+        />
+      </div>
+    );
+    return { steps, thetaDeg };
+  }
+
+  function unitVectorSteps(v: {
+    x?: string;
+    y?: string;
+    mag?: string;
+    angle?: string;
+  }) {
+    const steps: JSX.Element[] = [];
+    steps.push(<div key="step1">1) Obtener componentes de V.</div>);
+    let A: { x: number; y: number; steps: JSX.Element[] } | null = null;
+    if (v.x !== undefined && v.y !== undefined && v.x !== "" && v.y !== "")
+      A = {
+        x: parseFloat(v.x),
+        y: parseFloat(v.y),
+        steps: [
+          <div key="vec">
+            - Vector: ({v.x}, {v.y}).
+          </div>,
+        ],
+      };
+    else if (
+      v.mag !== undefined &&
+      v.angle !== undefined &&
+      v.mag !== "" &&
+      v.angle !== ""
+    ) {
+      const { steps: s2, x, y } = polarToComponentsSteps(v.mag, v.angle);
+      A = {
+        x,
+        y,
+        steps: [
+          <div key="vec">
+            - Vector (polar): |V|={v.mag}, θ=&apos;{v.angle}&apos;.
+          </div>,
+          ...s2,
+        ],
+      };
+    } else {
+      steps.push(<div key="error">Formato no reconocido.</div>);
+      return { steps };
+    }
+    A!.steps.forEach((t: JSX.Element, i: number) =>
+      steps.push(<div key={`A${i}`}> {t}</div>)
+    );
+    const mag = Math.hypot(A!.x, A!.y);
+    steps.push(
+      <div key="mag">
+        2) <InlineMath math={`|V| = ${mag.toFixed(6)}`} />
+      </div>
+    );
+    const ux = A!.x / mag;
+    const uy = A!.y / mag;
+    steps.push(
+      <div key="unit">
+        3) Vector unitario:{" "}
+        <InlineMath
+          math={`\\hat{u} = (${ux.toFixed(6)},\\; ${uy.toFixed(6)})`}
+        />
+      </div>
+    );
+    return { steps, ux, uy };
+  }
+
+  /* ---------- Chart arrow plugin ---------- */
+  /* Plugin draws arrow lines between the dataset first and last point when dataset.drawArrow === true */
+  interface ChartInstance {
+    ctx: CanvasRenderingContext2D;
+    data: {
+      datasets: Array<{
+        drawArrow?: boolean;
+        arrowColor?: string;
+        borderColor?: string;
+        lineWidth?: number;
+      }>;
+    };
+    getDatasetMeta: (index: number) => {
+      data: Array<{
+        getProps: (props: string[], final: boolean) => { x: number; y: number };
+      }>;
+    };
+  }
+
+  const arrowPlugin = {
+    id: "arrowPlugin",
+    afterDatasetsDraw: (chart: ChartInstance) => {
+      const ctx = chart.ctx;
+      chart.data.datasets.forEach((dataset, dsIndex: number) => {
+        if (!dataset.drawArrow) return;
+        const meta = chart.getDatasetMeta(dsIndex);
+        const points = meta.data;
+        if (!points || points.length < 2) return;
+        const start = points[0].getProps(["x", "y"], true);
+        const end = points[points.length - 1].getProps(["x", "y"], true);
+        const fromX = start.x,
+          fromY = start.y,
+          toX = end.x,
+          toY = end.y;
+        const headlen = 10;
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.strokeStyle = dataset.arrowColor || dataset.borderColor || "black";
+        ctx.lineWidth = dataset.lineWidth || 2;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(
+          toX - headlen * Math.cos(angle - Math.PI / 6),
+          toY - headlen * Math.sin(angle - Math.PI / 6)
+        );
+        ctx.lineTo(
+          toX - headlen * Math.cos(angle + Math.PI / 6),
+          toY - headlen * Math.sin(angle + Math.PI / 6)
+        );
+        ctx.closePath();
+        ctx.fillStyle = dataset.arrowColor || dataset.borderColor || "black";
+        ctx.fill();
+        ctx.restore();
+      });
+    },
+  };
+  Chart.register(arrowPlugin);
+
+  const [mode2, setMode2] = useState<Mode2>("polar-to-components");
+  const [mag, setMag] = useState<string>("10");
+  const [angleInput, setAngleInput] = useState<string>("30");
+  const [xComp, setXComp] = useState<string>("6");
+  const [yComp, setYComp] = useState<string>("8");
+  const [vectors, setVectors] = useState<
+    { mag?: string; angle?: string; x?: string; y?: string }[]
+  >([
+    { mag: "3", angle: "30" },
+    { x: "-3", y: "4" },
+  ]);
+  const [scalar, setScalar] = useState<string>("-2");
+  const [output, setOutput] = useState<JSX.Element[]>([]);
+
+  function vecToXY(v: {
+    mag?: string;
+    angle?: string;
+    x?: string;
+    y?: string;
+  }) {
+    if (v.x !== undefined && v.y !== undefined && v.x !== "" && v.y !== "")
+      return { x: parseFloat(v.x), y: parseFloat(v.y) };
+    if (
+      v.mag !== undefined &&
+      v.angle !== undefined &&
+      v.mag !== "" &&
+      v.angle !== ""
+    ) {
+      const { x, y } = polarToComponentsSteps(v.mag, v.angle);
+      return { x, y };
+    }
+    return null;
+  }
+
+  const chartDataAndOptions = useMemo(() => {
+    const datasets: Array<{
+      label: string;
+      data: Array<{ x: number; y: number }>;
+      drawArrow?: boolean;
+      arrowColor?: string;
+      borderColor?: string;
+      borderWidth?: number;
+      pointRadius?: number;
+      borderDash?: number[];
+    }> = [];
+    const xs: number[] = [0];
+    const ys: number[] = [0];
+
+    if (mode2 === "polar-to-components") {
+      const v = vecToXY({ mag, angle: angleInput });
+      if (v) {
+        datasets.push({
+          label: "V",
+          data: [
+            { x: 0, y: 0 },
+            { x: v.x, y: v.y },
+          ],
+          drawArrow: true,
+          arrowColor: "blue",
+          borderColor: "blue",
+          borderWidth: 2,
+          pointRadius: 0,
+        });
+        xs.push(v.x);
+        ys.push(v.y);
+      }
+    }
+
+    if (mode2 === "components-to-polar") {
+      const v = vecToXY({ x: xComp, y: yComp });
+      if (v) {
+        datasets.push({
+          label: "V",
+          data: [
+            { x: 0, y: 0 },
+            { x: v.x, y: v.y },
+          ],
+          drawArrow: true,
+          arrowColor: "blue",
+          borderColor: "blue",
+          borderWidth: 2,
+          pointRadius: 0,
+        });
+        xs.push(v.x);
+        ys.push(v.y);
+      }
+    }
+
+    if (mode2 === "sum-vectors" || mode2 === "subtract-vectors") {
+      const v1 = vecToXY(vectors[0] || {});
+      const v2 = vecToXY(vectors[1] || {});
+      if (v1) {
+        datasets.push({
+          label: "V1",
+          data: [
+            { x: 0, y: 0 },
+            { x: v1.x, y: v1.y },
+          ],
+          drawArrow: true,
+          arrowColor: "blue",
+          borderColor: "blue",
+          borderWidth: 2,
+          pointRadius: 0,
+        });
+        xs.push(v1.x);
+        ys.push(v1.y);
+      }
+      if (v2) {
+        datasets.push({
+          label: "V2",
+          data: [
+            { x: 0, y: 0 },
+            { x: v2.x, y: v2.y },
+          ],
+          drawArrow: true,
+          arrowColor: "green",
+          borderColor: "green",
+          borderWidth: 2,
+          pointRadius: 0,
+        });
+        xs.push(v2.x);
+        ys.push(v2.y);
+      }
+      if (v1 && v2) {
+        const rx = v1.x + (mode2 === "subtract-vectors" ? -v2.x : v2.x);
+        const ry = v1.y + (mode2 === "subtract-vectors" ? -v2.y : v2.y);
+        datasets.push({
+          label: "R",
+          data: [
+            { x: 0, y: 0 },
+            { x: rx, y: ry },
+          ],
+          drawArrow: true,
+          arrowColor: "red",
+          borderColor: "red",
+          borderWidth: 2,
+          pointRadius: 0,
+        });
+        xs.push(rx);
+        ys.push(ry);
+      }
+    }
+
+    if (mode2 === "scalar-multiplication") {
+      const v = vecToXY(vectors[0] || {});
+      if (v) {
+        datasets.push({
+          label: "V",
+          data: [
+            { x: 0, y: 0 },
+            { x: v.x, y: v.y },
+          ],
+          drawArrow: true,
+          arrowColor: "blue",
+          borderColor: "blue",
+          borderWidth: 2,
+          pointRadius: 0,
+        });
+        const s = parseFloat(scalar);
+        const rx = s * v.x;
+        const ry = s * v.y;
+        datasets.push({
+          label: "s·V",
+          data: [
+            { x: 0, y: 0 },
+            { x: rx, y: ry },
+          ],
+          drawArrow: true,
+          arrowColor: "red",
+          borderColor: "red",
+          borderWidth: 2,
+          pointRadius: 0,
+          borderDash: [6, 4],
+        });
+        xs.push(v.x, rx);
+        ys.push(v.y, ry);
+      }
+    }
+
+    if (mode2 === "angle-between") {
+      const v1 = vecToXY(vectors[0] || {});
+      const v2 = vecToXY(vectors[1] || {});
+      if (v1) {
+        datasets.push({
+          label: "A",
+          data: [
+            { x: 0, y: 0 },
+            { x: v1.x, y: v1.y },
+          ],
+          drawArrow: true,
+          arrowColor: "blue",
+          borderColor: "blue",
+          borderWidth: 2,
+          pointRadius: 0,
+        });
+        xs.push(v1.x);
+        ys.push(v1.y);
+      }
+      if (v2) {
+        datasets.push({
+          label: "B",
+          data: [
+            { x: 0, y: 0 },
+            { x: v2.x, y: v2.y },
+          ],
+          drawArrow: true,
+          arrowColor: "green",
+          borderColor: "green",
+          borderWidth: 2,
+          pointRadius: 0,
+        });
+        xs.push(v2.x);
+        ys.push(v2.y);
+      }
+    }
+
+    if (mode2 === "unit-vector") {
+      const v = vecToXY(vectors[0] || {});
+      if (v) {
+        datasets.push({
+          label: "V",
+          data: [
+            { x: 0, y: 0 },
+            { x: v.x, y: v.y },
+          ],
+          drawArrow: true,
+          arrowColor: "blue",
+          borderColor: "blue",
+          borderWidth: 2,
+          pointRadius: 0,
+        });
+        const magv = Math.hypot(v.x, v.y);
+        const ux = v.x / magv;
+        const uy = v.y / magv;
+        datasets.push({
+          label: "û",
+          data: [
+            { x: 0, y: 0 },
+            { x: ux, y: uy },
+          ],
+          drawArrow: true,
+          arrowColor: "red",
+          borderColor: "red",
+          borderWidth: 2,
+          pointRadius: 0,
+          borderDash: [6, 4],
+        });
+        xs.push(v.x, ux);
+        ys.push(v.y, uy);
+      }
+    }
+
+    const xmin = Math.min(...xs) - 1;
+    const xmax = Math.max(...xs) + 1;
+    const ymin = Math.min(...ys) - 1;
+    const ymax = Math.max(...ys) + 1;
+
+    const options = {
+      animation: { duration: 0 },
+      scales: {
+        x: {
+          type: "linear" as const,
+          min: xmin,
+          max: xmax,
+          grid: { color: "rgba(200,200,200,0.2)" },
+        },
+        y: {
+          type: "linear" as const,
+          min: ymin,
+          max: ymax,
+          grid: { color: "rgba(200,200,200,0.2)" },
+        },
+      },
+      plugins: { legend: { display: true }, tooltip: { enabled: true } },
+    };
+
+    return { datasets, options, labels: [] };
+  }, [mode2, mag, angleInput, xComp, yComp, vectors, scalar]);
+
+  function handleCompute() {
+    let resSteps: JSX.Element[] = [];
+    if (mode2 === "polar-to-components")
+      resSteps = polarToComponentsSteps(mag, angleInput).steps;
+    else if (mode2 === "components-to-polar")
+      resSteps = componentsToPolarSteps(xComp, yComp).steps;
+    else if (mode2 === "sum-vectors") resSteps = sumVectorsSteps(vectors).steps;
+    else if (mode2 === "subtract-vectors") {
+      if (vectors.length < 2)
+        resSteps = [
+          <div key="error">Debe ingresar al menos dos vectores (v1 y v2).</div>,
+        ];
+      else {
+        const negV2 = { ...vectors[1] };
+        if (negV2.x) negV2.x = (parseFloat(negV2.x) * -1).toString();
+        if (negV2.y) negV2.y = (parseFloat(negV2.y) * -1).toString();
+        if (negV2.mag && negV2.angle)
+          negV2.mag = (parseFloat(negV2.mag) * -1).toString();
+        resSteps = sumVectorsSteps([vectors[0], negV2]).steps;
+      }
+    } else if (mode2 === "scalar-multiplication") {
+      if (vectors.length < 1)
+        resSteps = [
+          <div key="error">
+            Ingrese un vector para multiplicar por el escalar.
+          </div>,
+        ];
+      else resSteps = scalarMultiplySteps(scalar, vectors[0]).steps;
+    } else if (mode2 === "angle-between") {
+      if (vectors.length < 2)
+        resSteps = [
+          <div key="error">
+            Ingrese dos vectores para calcular el ángulo entre ellos.
+          </div>,
+        ];
+      else resSteps = angleBetweenSteps(vectors[0], vectors[1]).steps;
+    } else if (mode2 === "unit-vector") {
+      if (vectors.length < 1)
+        resSteps = [<div key="error">Ingrese un vector.</div>];
+      else resSteps = unitVectorSteps(vectors[0]).steps;
+    }
+    setOutput(resSteps);
+  }
+
+  function VectorRow({ idx }: { idx: number }) {
+    const v = vectors[idx] || {};
+    function update(partial: Partial<typeof v>) {
+      const copy = vectors.slice();
+      copy[idx] = { ...(copy[idx] || {}), ...partial };
+      setVectors(copy);
+    }
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 p-1 border rounded-md">
+        <div className="flex flex-wrap items-center justify-around gap-2">
+          <div>
+            <label className="block text-sm"> Magnitud</label>
+            <input
+              value={v.mag || ""}
+              onChange={(e) => update({ mag: e.target.value })}
+              className="w-20 p-2 border rounded"
+              placeholder="ej. 10"
+            />
+          </div>
+          <div>
+            <label className="block text-sm">Angulo</label>
+            <input
+              value={v.angle || ""}
+              onChange={(e) => update({ angle: e.target.value })}
+              className="w-28 p-2 border rounded"
+              placeholder='ej.30 o "N 60 O"'
+            />
+          </div>
+        </div>
+        <div className="flex flex-col  items-center justify-center gap-1">
+          <h1 className="text-xs">O por componentes:</h1>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="flex flex-col items-center justify-center">
+              <label className=" text-xs"> x</label>
+              <input
+                value={v.x || ""}
+                onChange={(e) => update({ x: e.target.value })}
+                className="w-20 p-2 border rounded"
+                placeholder="x"
+              />
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              {" "}
+              <label className=" text-xs"> y</label>
+              <input
+                value={v.y || ""}
+                onChange={(e) => update({ y: e.target.value })}
+                className="w-20 p-2 border rounded"
+                placeholder="y"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <AlgebraContext.Provider
@@ -617,6 +1494,27 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         det2,
         steps2,
         signMatrix,
+
+        //TODO: VECTORES
+        mode2,
+        setMode2,
+        mag,
+        setMag,
+        angleInput,
+        setAngleInput,
+        xComp,
+        setXComp,
+        yComp,
+        setYComp,
+        vectors,
+        setVectors,
+        VectorRow,
+        scalar,
+        setScalar,
+        handleCompute,
+        setOutput,
+        output,
+        chartDataAndOptions,
       }}
     >
       {children}
