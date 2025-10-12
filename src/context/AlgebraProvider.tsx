@@ -684,17 +684,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     steps.push(
       <div key="step3">
         <InlineMath
-          math={`\\theta = \\operatorname{atan2}(V_y, V_x) = ${angleDeg.toFixed(
-            2
-          )}^\\circ`}
-        />
-      </div>
-    );
-    steps.push(
-      <div key="step4">
-       Resultado polar:{" "}
-        <InlineMath
-          math={`|V|=${mag.toFixed(2)},\\; \\theta=${angleDeg.toFixed(
+          math={`\\theta = \\operatorname\\arctan(\\frac{V_y}{ V_x}) \\ = \\operatorname\\arctan(\\frac${y} ${x}) = \\  ${angleDeg.toFixed(
             2
           )}^\\circ`}
         />
@@ -733,15 +723,8 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     });
     steps.push(
       <div key="sum" className="flex flex-col">
-
-        <InlineMath
-          math={`\\Sigma V_x = ${sumX.toFixed(
-            2
-          )}`}
-        />
-                <InlineMath
-          math={` \\Sigma V_y = ${sumY.toFixed(2)}`}
-        />
+        <InlineMath math={`\\Sigma V_x = ${sumX.toFixed(2)}`} />
+        <InlineMath math={` \\Sigma V_y = ${sumY.toFixed(2)}`} />
       </div>
     );
     const mag = Math.hypot(sumX, sumY);
@@ -753,8 +736,10 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       </div>
     );
     steps.push(
-      <div key="mag" className="flex flex-col"> 
-         <InlineMath math={`|R| = \\sqrt{${sumX.toFixed(2)}^2 + ${sumY.toFixed(2)}^2} `} />
+      <div key="mag" className="flex flex-col">
+        <InlineMath
+          math={`|R| = \\sqrt{${sumX.toFixed(2)}^2 + ${sumY.toFixed(2)}^2} `}
+        />
         <InlineMath math={`|R| = ${mag.toFixed(2)}`} />
       </div>
     );
@@ -817,9 +802,8 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       const yr = s * y;
       steps.push(
         <div key="newmag" className="flex flex-col">
-          3) Magnitud nueva:{" "}
-          <InlineMath math={`|V'| = ${s} \\cdot ${m} `} />
-          <InlineMath math={`= ${Math.abs(s * m)}   `} />
+           Magnitud nueva: <InlineMath math={`|V| = ${s} \\cdot ${m} `} />
+          <InlineMath math={`|V| = ${Math.abs(s * m)}   `} />
         </div>
       );
       steps.push(
@@ -839,9 +823,6 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     b: { x?: string; y?: string; mag?: string; angle?: string }
   ) {
     const steps: JSX.Element[] = [];
-    steps.push(
-      <div key="step1">1) Obtener componentes de ambos vectores.</div>
-    );
     function ensureComponents(
       v: { x?: string; y?: string; mag?: string; angle?: string },
       idx: number
@@ -851,9 +832,6 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
           x: parseFloat(v.x),
           y: parseFloat(v.y),
           steps: [
-            <div key={`vec${idx}`}>
-              - Vector {idx}: ({v.x}, {v.y}).
-            </div>,
           ],
         };
       if (
@@ -867,9 +845,6 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
           x,
           y,
           steps: [
-            <div key={`vec${idx}`}>
-              - Vector {idx} (polar): |V|={v.mag}, θ=&apos;{v.angle}&apos;.
-            </div>,
             ...s2,
           ],
         };
@@ -896,9 +871,9 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     steps.push(
       <div key="dotcalc">
         <InlineMath
-          math={`A\\cdot B = ${A.x.toFixed(6)}\\cdot ${B.x.toFixed(
-            6
-          )} + ${A.y.toFixed(6)}\\cdot ${B.y.toFixed(6)} = ${dot.toFixed(6)}`}
+          math={`A\\cdot B = ${A.x.toFixed(2)}\\cdot ${B.x.toFixed(
+            2
+          )} + ${A.y.toFixed(2)}\\cdot ${B.y.toFixed(2)} = ${dot.toFixed(2)}`}
         />
       </div>
     );
@@ -908,7 +883,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       <div key="norms">
         3) Normas:{" "}
         <InlineMath
-          math={`|A|=${magA.toFixed(6)},\\; |B|=${magB.toFixed(6)}`}
+          math={`|A|=${magA.toFixed(2)},\\; |B|=${magB.toFixed(2)}`}
         />
       </div>
     );
@@ -920,10 +895,10 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         4){" "}
         <InlineMath
           math={`\\cos\\theta = ${cosClamped.toFixed(
-            6
+            2
           )} \\Rightarrow \\theta = \\arccos(${cosClamped.toFixed(
-            6
-          )}) = ${thetaDeg.toFixed(6)}^\\circ`}
+            2
+          )}) = ${thetaDeg.toFixed(2)}^\\circ`}
         />
       </div>
     );
@@ -937,7 +912,6 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     angle?: string;
   }) {
     const steps: JSX.Element[] = [];
-    steps.push(<div key="step1">1) Obtener componentes de V.</div>);
     let A: { x: number; y: number; steps: JSX.Element[] } | null = null;
     if (v.x !== undefined && v.y !== undefined && v.x !== "" && v.y !== "")
       A = {
@@ -960,9 +934,6 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         x,
         y,
         steps: [
-          <div key="vec">
-            - Vector (polar): |V|={v.mag}, θ=&apos;{v.angle}&apos;.
-          </div>,
           ...s2,
         ],
       };
