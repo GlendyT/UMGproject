@@ -44,60 +44,11 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     const m: FractionMatrix = matrix.map((row) =>
       row.map((v) => new Fraction(v))
     );
-
     const n = size;
     const stepLog: string[] = [];
 
     stepLog.push("Matriz inicial:");
     stepLog.push(printMatrix(m));
-
-    // Eliminación hacia adelante (Gauss sin normalizar pivotes)
-    for (let k = 0; k < n - 1; k++) {
-      // Si el pivote es cero, intercambiar filas
-      if (m[k][k].equals(0)) {
-        let swapRow = -1;
-        for (let r = k + 1; r < n; r++) {
-          if (!m[r][k].equals(0)) {
-            swapRow = r;
-            break;
-          }
-        }
-        if (swapRow !== -1) {
-          [m[k], m[swapRow]] = [m[swapRow], m[k]];
-          stepLog.push(`Intercambiando fila ${k + 1} con fila ${swapRow + 1}`);
-          stepLog.push(printMatrix(m));
-        }
-      }
-
-      // Eliminación hacia abajo
-      for (let i = k + 1; i < n; i++) {
-        if (m[i][k].equals(0)) continue;
-        const factorA = m[k][k];
-        const factorB = m[i][k];
-        m[i] = m[i].map((_, j) =>
-          factorA.mul(m[i][j]).sub(factorB.mul(m[k][j]))
-        );
-        stepLog.push(
-          `Eliminando en fila ${i + 1}: F${i + 1} = (${factorA.toFraction(
-            false
-          )})·F${i + 1} - (${factorB.toFraction(false)})·F${k + 1}`
-        );
-        stepLog.push(printMatrix(m));
-      }
-    }
-
-    // Verificar contradicciones
-    for (let i = 0; i < n; i++) {
-      const allZeroCoeffs = m[i].slice(0, n).every((val) => val.equals(0));
-      if (allZeroCoeffs && !m[i][n].equals(0)) {
-        stepLog.push(
-          `El sistema no tiene solución (fila ${i + 1} contradictoria).`
-        );
-        setSolution(null);
-        setSteps(stepLog);
-        return;
-      }
-    }
 
     // Calcular rango
     let rank = 0;
@@ -673,21 +624,34 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     const x = parseFloat(xStr);
     const y = parseFloat(yStr);
     const mag = Math.hypot(x, y);
+    const xFmt = Number.isFinite(x) ? x : "0.00";
+    const yFmt = Number.isFinite(y) ? y : "0.00";
+    const x2 = x * x;
+    const y2 = y * y;
+    const sumSquares = x * x + y * y;
     steps.push(
-      <div key="step2">
-        <InlineMath math={`|V| = \\sqrt{${x}^2 + ${y}^2} `} />
-        <InlineMath math={` = ${mag}`} />
+      <div key="step2" className="flex flex-col">
+        <InlineMath math={`|V| = \\sqrt{(${xFmt})^2 + (${yFmt})^2}`} />
+        <InlineMath math={`|V| = \\sqrt{${x2} + ${y2}}`} />
+        <InlineMath math={`|V| = \\sqrt{${sumSquares}}`} />
+        <InlineMath math={`|V| = ${mag.toFixed(2)}`} />
       </div>
     );
     const angleRad = Math.atan2(y, x);
     const angleDeg = norm360(rad2deg(angleRad));
+    // prepare a LaTeX string that shows arctan with absolute values for the numeric display
+    const absY = Math.abs(y);
+    const absX = Math.abs(x);
+    const absYFmt = Number.isFinite(absY) ? absY : "0.00";
+    const absXFmt = Number.isFinite(absX) ? absX : "0.00";
+    const fracDisplay =
+      absX === 0 ? "\\infty" : `\\frac{${absYFmt}}{${absXFmt}}`;
+    const angleLatex = `\\theta = \\operatorname\\arctan(\\frac{V_y}{V_x}) \\ = \\operatorname\\arctan\\left(${fracDisplay}\\right) \\ = \\ ${angleDeg.toFixed(
+      2
+    )}^\\circ`;
     steps.push(
       <div key="step3">
-        <InlineMath
-          math={`\\theta = \\operatorname\\arctan(\\frac{V_y}{ V_x}) \\ = \\operatorname\\arctan(\\frac${y} ${x}) = \\  ${angleDeg.toFixed(
-            2
-          )}^\\circ`}
-        />
+        <InlineMath math={angleLatex} />
       </div>
     );
     return { steps, mag, angleDeg };
@@ -802,7 +766,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       const yr = s * y;
       steps.push(
         <div key="newmag" className="flex flex-col">
-           Magnitud nueva: <InlineMath math={`|V| = ${s} \\cdot ${m} `} />
+          Magnitud nueva: <InlineMath math={`|V| = ${s} \\cdot ${m} `} />
           <InlineMath math={`|V| = ${Math.abs(s * m)}   `} />
         </div>
       );
@@ -831,8 +795,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         return {
           x: parseFloat(v.x),
           y: parseFloat(v.y),
-          steps: [
-          ],
+          steps: [],
         };
       if (
         v.mag !== undefined &&
@@ -844,9 +807,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         return {
           x,
           y,
-          steps: [
-            ...s2,
-          ],
+          steps: [...s2],
         };
       }
       return {
@@ -861,42 +822,70 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     const B = ensureComponents(b, 2);
     A.steps.forEach((t, i) => steps.push(<div key={`A${i}`}> {t}</div>));
     B.steps.forEach((t, i) => steps.push(<div key={`B${i}`}> {t}</div>));
-    steps.push(
-      <div key="dot">
-        2) Producto punto: <InlineMath math={`A\\cdot B = A_x B_x + A_y B_y`} />
-        .
-      </div>
-    );
     const dot = A.x * B.x + A.y * B.y;
     steps.push(
-      <div key="dotcalc">
+      <div key="dotcalc" className="flex flex-col">
         <InlineMath
-          math={`A\\cdot B = ${A.x.toFixed(2)}\\cdot ${B.x.toFixed(
+          math={`A\\cdot B = (${A.x.toFixed(2)}\\cdot ${B.x.toFixed(
             2
-          )} + ${A.y.toFixed(2)}\\cdot ${B.y.toFixed(2)} = ${dot.toFixed(2)}`}
+          )}) + (${A.y.toFixed(2)}\\cdot ${B.y.toFixed(2)})`}
         />
+        <InlineMath math={`A\\cdot B = ${dot.toFixed(2)}`} />
       </div>
     );
+
     const magA = Math.hypot(A.x, A.y);
     const magB = Math.hypot(B.x, B.y);
+
+    // Format components and intermediate squares for A
+    const Ax = Number.isFinite(A.x) ? A.x : 0;
+    const Ay = Number.isFinite(A.y) ? A.y : 0;
+    const AxFmt = Ax.toFixed(1);
+    const AyFmt = Ay.toFixed(1);
+    const Ax2 = (Ax * Ax).toFixed(1);
+    const Ay2 = (Ay * Ay).toFixed(1);
+
+    // Format components and intermediate squares for B
+    const Bx = Number.isFinite(B.x) ? B.x : 0;
+    const By = Number.isFinite(B.y) ? B.y : 0;
+    const BxFmt = Bx.toFixed(1);
+    const ByFmt = By.toFixed(1);
+    const Bx2 = (Bx * Bx).toFixed(1);
+    const By2 = (By * By).toFixed(1);
+
+    const sumA = (Ax * Ax + Ay * Ay).toFixed(1);
+    const sumB = (Bx * Bx + By * By).toFixed(1);
+
     steps.push(
       <div key="norms">
-        3) Normas:{" "}
-        <InlineMath
-          math={`|A|=${magA.toFixed(2)},\\; |B|=${magB.toFixed(2)}`}
-        />
+        3) Normas:
+        <div className="flex flex-col">
+          <InlineMath math={`|A| = \\sqrt{(${AxFmt})^2 + (${AyFmt })^2 }`} />
+          <InlineMath math={`|A| = \\sqrt{${Ax2} + ${ Ay2 }}`} />
+          <InlineMath math={`|A| = \\sqrt{${sumA}}`} />
+          <InlineMath math={` |A|= ${magA.toFixed(2)}`} />
+        </div>
+        <div className="flex flex-col mt-2">
+          <InlineMath math={`|B| = \\sqrt{(${BxFmt})^2 + (${ByFmt})^2}`} />
+          <InlineMath math={` |B|= \\sqrt{${Bx2} + ${By2}}`} />
+          <InlineMath math={`|B| = \\sqrt{${sumB}}`} />
+          <InlineMath math={`|B| = ${magB.toFixed(2)}`} />
+        </div>
       </div>
     );
     const cosTheta = dot / (magA * magB);
     const cosClamped = Math.max(-1, Math.min(1, cosTheta));
     const thetaDeg = rad2deg(Math.acos(cosClamped));
     steps.push(
-      <div key="angle">
-        4){" "}
+      <div key="angle" className="flex flex-col">
+        4)
         <InlineMath
-          math={`\\cos\\theta = ${cosClamped.toFixed(
+          math={`\\cos\\theta = \\frac{${dot.toFixed(2)}}{${magA.toFixed(
             2
-          )} \\Rightarrow \\theta = \\arccos(${cosClamped.toFixed(
+          )}\\cdot ${magB.toFixed(2)}} =  ${cosClamped.toFixed(2)}`}
+        />
+        <InlineMath
+          math={`\\theta = \\arccos(${cosClamped.toFixed(
             2
           )}) = ${thetaDeg.toFixed(2)}^\\circ`}
         />
@@ -917,11 +906,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       A = {
         x: parseFloat(v.x),
         y: parseFloat(v.y),
-        steps: [
-          <div key="vec">
-            - Vector: ({v.x}, {v.y}).
-          </div>,
-        ],
+        steps: [],
       };
     else if (
       v.mag !== undefined &&
@@ -933,9 +918,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       A = {
         x,
         y,
-        steps: [
-          ...s2,
-        ],
+        steps: [...s2],
       };
     } else {
       steps.push(<div key="error">Formato no reconocido.</div>);
@@ -945,16 +928,45 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
       steps.push(<div key={`A${i}`}> {t}</div>)
     );
     const mag = Math.hypot(A!.x, A!.y);
+    // Guard against zero magnitude
+    if (mag === 0) {
+      steps.push(
+        <div key="zeromag">
+          2) Vector de magnitud cero; no existe vector unitario.
+        </div>
+      );
+      return { steps };
+    }
+
+    // Format components and intermediate squares for A (local variables)
+    const Ax = Number.isFinite(A!.x) ? A!.x : 0;
+    const Ay = Number.isFinite(A!.y) ? A!.y : 0;
+    const AxFmt = Ax.toFixed(1);
+    const AyFmt = Ay.toFixed(1);
+    const Ax2 = (Ax * Ax).toFixed(1);
+    const Ay2 = (Ay * Ay).toFixed(1);
+    const sumA = (Ax * Ax + Ay * Ay).toFixed(1);
     steps.push(
       <div key="mag">
-        2) <InlineMath math={`|V| = ${mag.toFixed(6)}`} />
+        2){" "}
+        <div className="flex flex-col">
+          <InlineMath math={`|A| = \\sqrt{(${AxFmt})^2 + (${AyFmt})^2 }`} />
+          <InlineMath math={`|A| = \\sqrt{${Ax2} + ${Ay2}}`} />
+          <InlineMath math={`|A| = \\sqrt{${sumA}}`} />
+          <InlineMath math={` |A|= ${mag.toFixed(2)}`} />
+        </div>
       </div>
     );
     const ux = A!.x / mag;
     const uy = A!.y / mag;
     steps.push(
-      <div key="unit">
+      <div key="unit" className="flex flex-col">
         3) Vector unitario:{" "}
+        <InlineMath
+          math={`|V| = \\frac{(${A!.x.toFixed(2)} + \\; ${A!.y.toFixed(
+            2
+          )})}{${mag.toFixed(2)}}`}
+        />
         <InlineMath
           math={`\\hat{u} = (${ux.toFixed(6)},\\; ${uy.toFixed(6)})`}
         />
