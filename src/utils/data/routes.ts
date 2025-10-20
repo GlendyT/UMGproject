@@ -79,11 +79,16 @@ export const AlgebraLinealSlugs: slugstype[] = [
   },
   {
     id: 5,
-    name: "Vectores",
-    href: "/algebralineal/vectores",
+    name: "Vectores 2D",
+    href: "/algebralineal/vectores2D",
   },
   {
     id: 6,
+    name: "Vectores 3D",
+    href: "/algebralineal/vectores3D",
+  },
+  {
+    id: 7,
     name: "Videos Álgebra Lineal",
     href: "/algebralineal/videos-algebra-lineal",
   },
