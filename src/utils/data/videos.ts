@@ -51,14 +51,29 @@ export const videosContabilidad = [
   },
   {
     id: 11,
-    title:" Flujo de Efectivo Pt.2",
+    title: " Flujo de Efectivo Pt.2",
     url: "MP3oISirBMY",
   },
   {
     id: 12,
     title: "Flujo de Efectivo Pt.3",
     url: "rc9nznrddvA",
-  }
+  },
+  {
+    id: 13,
+    title: "Flujo de Efectivo Pt.4",
+    url: "hEQVpPRls7w",
+  },
+  {
+    id: 14,
+    title: "Flujo de Efectivo Pt.5",
+    url: "wqajaZ06tys",
+  },
+  {
+    id: 15,
+    title: "Flujo de Efectivo Pt.6",
+    url: "jQF60H_SEU8",
+  },
 ];
 
 export const VideosMatematicasDiscreta = [
@@ -96,7 +111,22 @@ export const VideosMatematicasDiscreta = [
     id: 7,
     title: "Resta de BINARIO por el metodo de complemento a 2",
     url: "7YmF3qon9-M",
-  }
+  },
+  {
+    id: 8,
+    title: "Comparador de 2 bits",
+    url: "hj5V2GYLe6Y",
+  },
+  {
+    id: 9,
+    title: "Comparador de 8 bits PT.1",
+    url: "EZMn0apBVsU",
+  },
+  {
+    id: 10,
+    title: "Comparador de 8 bits PT.2",
+    url: "K26Toc-rEzA",
+  },
 ];
 
 export const videosprecalculo = [
@@ -135,6 +165,11 @@ export const videosprecalculo = [
     title: "Curvas Seno y Coseno",
     url: "LHE1k3W5S1s",
   },
+  {
+    id: "8",
+    title: "Angulos Dobles",
+    url: "bRK9v4QvLS4",
+  },
 ];
 
 export const VideosAlgebraLineal = [
@@ -162,7 +197,7 @@ export const VideosAlgebraLineal = [
     id: 5,
     title: "Vectores",
     url: "J-52F8K6O_4",
-  }
+  },
 ];
 
 export const videosAlgoritmo = [
@@ -170,5 +205,5 @@ export const videosAlgoritmo = [
     id: 1,
     title: "Algoritmo de Proyecto",
     url: "wvfRwmIksms",
-  }
-]
+  },
+];
