@@ -116,6 +116,13 @@ export interface AlgebraContextType {
     }[];
     options: object;
   };
+
+  //TODO: VECTORES EN 3D
+
+  GraphPointCalculator: React.FC;
+  DistanceCalculator: React.FC;
+  MagnitudeCalculator: React.FC;
+  UnitVectorCalculator: React.FC;
 }
 
 export type Mode2 =
@@ -561,3 +568,23 @@ export type StepData = {
 //---- NUMEROS COMPLEJOS---//
 export type Complex = { re: number; im: number };
 export type Op = "add" | "sub" | "mul" | "div";
+
+
+  export interface Vector {
+    x: number;
+    y: number;
+    z: number;
+  }
+
+
+  export type CalculatorType = "graph" | "distance" | "magnitude" | "unitVector";
+
+  // --- NUEVOS Componentes de Gráficos ---
+
+  export interface Graph3DProps {
+    x: number;
+    y: number;
+    z: number;
+    label: string;
+    scale: number; // Factor de escala para el tamaño del gráfico
+  }
