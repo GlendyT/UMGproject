@@ -1,6 +1,4 @@
 "use client";
-
-import BotonBack from "@/utils/BotonBack";
 import useMatematicaDiscreta from "@/hooks/useMatematicaDiscreta";
 import BotonUtil from "@/utils/BotonUtil";
 import { InlineMath } from "react-katex";

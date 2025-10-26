@@ -1,9 +1,6 @@
 "use client";
-
-import React, { useState } from "react";
 import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
-import BotonBack from "../../../utils/BotonBack";
 import useAlgoritmos from "@/hooks/useAlgebra";
 import TitleCourse from "@/components/TitleCourse";
 

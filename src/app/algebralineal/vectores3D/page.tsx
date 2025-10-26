@@ -3,24 +3,25 @@ import React, { useState } from "react";
 import "katex/dist/katex.min.css";
 import TitleCourse from "@/components/TitleCourse";
 import { CalculatorType } from "@/types/index";
-import useAlgoritmos from "@/hooks/useAlgebra";
+import GraphPointCalculator from "./GraphPointCalculator";
+import DistanceCalculator from "./DistanceCalculator";
+import MagnitudeCalculator from "./MagnitudeCalculator";
+import UnitVectorCalculator from "./UnitVectorCalculator";
+import CrossProductCalculator from "./CrossProductCalculator";
+import ParallelogramAreaCalculator from "./ParallelogramAreaCalculator";
 
 // --- Componente Principal (Página) ---
 const Home: React.FC = () => {
   const [selectedCalculator, setSelectedCalculator] =
     useState<CalculatorType>("graph");
-  const {
-    GraphPointCalculator,
-    DistanceCalculator,
-    MagnitudeCalculator,
-    UnitVectorCalculator,
-  } = useAlgoritmos();
 
   const calculatorComponents: { [key in CalculatorType]: React.ReactNode } = {
     graph: <GraphPointCalculator />,
     distance: <DistanceCalculator />,
     magnitude: <MagnitudeCalculator />,
     unitVector: <UnitVectorCalculator />,
+    crossProduct: <CrossProductCalculator />,
+    parallelogramArea: <ParallelogramAreaCalculator />,
   };
 
   return (
@@ -39,11 +40,12 @@ const Home: React.FC = () => {
               setSelectedCalculator(e.target.value as CalculatorType)
             }
           >
-            <option value="graph">Graficar un Punto P</option>{" "}
-            {/* Cambiado el orden */}
-            <option value="distance">Distancia entre dos puntos</option>
+            <option value="graph">Graficar un Punto P</option>
+            <option value="distance">Producto de 2 Vectores</option>
             <option value="magnitude">Magnitud de un Vector</option>
             <option value="unitVector">Vector Unitario (Dirección)</option>
+            <option value="crossProduct">Producto Cruz (Vectorial)</option>
+            <option value="parallelogramArea">Área de Paralelogramo</option>
           </select>
         </div>
       </div>

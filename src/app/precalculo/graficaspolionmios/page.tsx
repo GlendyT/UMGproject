@@ -13,7 +13,6 @@ import {
 } from "recharts";
 import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
-import BotonBack from "@/utils/BotonBack";
 import usePrecalculo from "@/hooks/usePrecalculo";
 import TitleCourse from "@/components/TitleCourse";
 
