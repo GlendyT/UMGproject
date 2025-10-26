@@ -2,7 +2,6 @@
 import "katex/dist/katex.min.css";
 import { BlockMath, InlineMath } from "react-katex";
 import usePrecalculo from "@/hooks/usePrecalculo";
-import BotonBack from "@/utils/BotonBack";
 import BotonUtil from "@/utils/BotonUtil";
 import TitleCourse from "@/components/TitleCourse";
 

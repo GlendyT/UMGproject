@@ -11,7 +11,6 @@ import {
 } from "recharts";
 import "katex/dist/katex.min.css";
 import usePrecalculo from "@/hooks/usePrecalculo";
-import BotonBack from "@/utils/BotonBack";
 import BotonUtil from "@/utils/BotonUtil";
 import TitleCourse from "@/components/TitleCourse";
 

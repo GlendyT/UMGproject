@@ -5,7 +5,6 @@ import { createContext, JSX, useMemo, useState } from "react";
 import {
   AlgebraContextType,
   FractionMatrix,
-  Graph3DProps,
   Matrix,
   Matrix3x3,
   MinorStep,
@@ -14,7 +13,7 @@ import {
   StepData,
   Vector,
 } from "../types";
-import { BlockMath, InlineMath } from "react-katex";
+import { InlineMath } from "react-katex";
 import { Chart, registerables } from "chart.js";
 import annotationPlugin from "chartjs-plugin-annotation";
 
@@ -1424,553 +1423,394 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     return isNaN(parsed) ? defaultValue : parsed;
   };
 
-  const Graph3D: React.FC<Graph3DProps> = ({ x, y, z, label, scale = 15 }) => {
-    const originX = 150; // Centro aproximado del SVG
-    const originY = 150;
-    const axisLength = 100;
+  const [pointPx, setPointPx] = useState<string>("5");
+  const [pointPy, setPointPy] = useState<string>("0");
+  const [pointPz, setPointPz] = useState<string>("3");
+  const [scale] = useState<number>(10);
+  const label = "P";
 
-    // Proyecciones isométricas simples para visualización
-    // Estas son proyecciones fijas, no interactivas
-    const projectX = (val: number) => val * scale * Math.cos(Math.PI / 6);
-    const projectY = (val: number) => val * scale * Math.cos(Math.PI / 6);
-    const projectZ = (val: number) => val * scale;
-
-    // Coordenadas proyectadas del punto
-    const px = originX + projectX(x) - projectY(y);
-    const py = originY - projectZ(z) - projectX(x) / 2 - projectY(y) / 2; // Invertimos Y para que Z positivo sea "arriba"
-
-    // Coordenadas para los ejes proyectados
-    const pXAxisX = originX + projectX(axisLength / scale);
-    const pXAxisY = originY - projectX(axisLength / scale) / 2;
-    const pYAxisX = originX - projectY(axisLength / scale);
-    const pYAxisY = originY - projectY(axisLength / scale) / 2;
-    const pZAxisX = originX;
-    const pZAxisY = originY - projectZ(axisLength / scale);
-
-    // Puntos de proyección para el plano XY (sombra)
-    const shadowX = originX + projectX(x) - projectY(y);
-    const shadowY = originY - projectX(x) / 2 - projectY(y) / 2;
-
-    // Puntos de proyección en los ejes para el camino
-    const pathX = originX + projectX(x);
-    const pathY = originY - projectX(x) / 2;
-
-    const pathXY = originX + projectX(x) - projectY(y);
-    const pathYX = originY - projectX(x) / 2 - projectY(y) / 2;
-
-    return (
-      <div className="flex justify-center items-center h-80 w-full bg-white rounded-md border border-gray-200 overflow-hidden relative">
-        <svg
-          width="100%"
-          height="100%"
-          viewBox="0 0 300 300"
-          className="w-full h-full"
-        >
-          {/* Eje X */}
-          <line
-            x1={originX}
-            y1={originY}
-            x2={pXAxisX}
-            y2={pXAxisY}
-            stroke="#e74c3c"
-            strokeWidth="1.5"
-          />
-          <text x={pXAxisX + 5} y={pXAxisY} fontSize="12" fill="#e74c3c">
-            X
-          </text>
-
-          {/* Eje Y */}
-          <line
-            x1={originX}
-            y1={originY}
-            x2={pYAxisX}
-            y2={pYAxisY}
-            stroke="#2ecc71"
-            strokeWidth="1.5"
-          />
-          <text x={pYAxisX - 15} y={pYAxisY} fontSize="12" fill="#2ecc71">
-            Y
-          </text>
-
-          {/* Eje Z */}
-          <line
-            x1={originX}
-            y1={originY}
-            x2={pZAxisX}
-            y2={pZAxisY}
-            stroke="#3498db"
-            strokeWidth="1.5"
-          />
-          <text x={pZAxisX + 5} y={pZAxisY - 5} fontSize="12" fill="#3498db">
-            Z
-          </text>
-
-          {/* Proyección en el plano XY (sombra o base) */}
-          <line
-            x1={originX}
-            y1={originY}
-            x2={pathX}
-            y2={pathY}
-            stroke="#f39c12"
-            strokeDasharray="3,3"
-            strokeWidth="0.8"
-          />
-          <line
-            x1={pathX}
-            y1={pathY}
-            x2={shadowX}
-            y2={shadowY}
-            stroke="#f39c12"
-            strokeDasharray="3,3"
-            strokeWidth="0.8"
-          />
-          <line
-            x1={originX}
-            y1={originY}
-            x2={pathXY}
-            y2={pathYX}
-            stroke="#f39c12"
-            strokeDasharray="3,3"
-            strokeWidth="0.8"
-          />
-
-          {/* Línea vertical hasta el punto */}
-          <line
-            x1={shadowX}
-            y1={shadowY}
-            x2={px}
-            y2={py}
-            stroke="#c0392b"
-            strokeWidth="1.5"
-            strokeDasharray="4,2"
-          />
-
-          {/* Vector desde el origen al punto */}
-          <line
-            x1={originX}
-            y1={originY}
-            x2={px}
-            y2={py}
-            stroke="#c0392b"
-            strokeWidth="2"
-          />
-
-          {/* Punto */}
-          <circle cx={px} cy={py} r="4" fill="#c0392b" />
-          <text
-            x={px + 8}
-            y={py - 8}
-            fontSize="14"
-            fill="#c0392b"
-            fontWeight="bold"
-          >
-            {label} ({x},{y},{z})
-          </text>
-        </svg>
-      </div>
-    );
+  const parsedPointP: Vector = {
+    x: parseFloatSafe(pointPx, -8),
+    y: parseFloatSafe(pointPy, 1),
+    z: parseFloatSafe(pointPz, 8),
   };
 
-  // --- Componente: Graficar Punto P ---
-  const GraphPointCalculator: React.FC = () => {
-    const [pointPx, setPointPx] = useState<string>("-2");
-    const [pointPy, setPointPy] = useState<string>("3");
-    const [pointPz, setPointPz] = useState<string>("5");
+  const originX = 150; // Centro aproximado del SVG
+  const originY = 150;
+  const axisLength = 100;
 
-    const parsedPointP: Vector = {
-      x: parseFloatSafe(pointPx, -2),
-      y: parseFloatSafe(pointPy, 3),
-      z: parseFloatSafe(pointPz, 5),
-    };
+  // Proyecciones isométricas simples para visualización
+  // Estas son proyecciones fijas, no interactivas
+  const projectX = (val: number) => val * scale * Math.cos(Math.PI / 6);
+  const projectY = (val: number) => val * scale * Math.cos(Math.PI / 6);
+  const projectZ = (val: number) => val * scale;
 
-    return (
-      <div className="flex flex-col gap-2 ">
-        <h2 className="text-2xl font-semibold text-gray-700 ">
-          Graficar el punto P
-        </h2>
-        <p className="text-gray-600">
-          Introduce las coordenadas
-        </p>
+  // Coordenadas proyectadas del punto
+  const px = originX + projectX(parsedPointP.x) - projectY(parsedPointP.y);
+  const py =
+    originY -
+    projectZ(parsedPointP.z) -
+    projectX(parsedPointP.x) / 2 -
+    projectY(parsedPointP.y) / 2; // Invertimos Y para que Z positivo sea "arriba"
 
-        <div className="flex flex-wrap items-center justify-center w-full gap-4 mb-6">
-          <label className="">
-            <span className="text-gray-700 w-full text-center flex justify-center font-medium">X</span>
-            <input
-              type="text"
-              value={pointPx}
-              onChange={(e) => setPointPx(e.target.value)}
-              className="mt-1 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
-              placeholder="Ej: -2"
-            />
-          </label>
-          <label className="">
-            <span className="text-gray-700 font-medium w-full text-center flex justify-center ">Y</span>
-            <input
-              type="text"
-              value={pointPy}
-              onChange={(e) => setPointPy(e.target.value)}
-              className="mt-1 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
-              placeholder="Ej: 3"
-            />
-          </label>
-          <label className="">
-            <span className="text-gray-700 font-medium w-full text-center flex justify-center ">Z</span>
-            <input
-              type="text"
-              value={pointPz}
-              onChange={(e) => setPointPz(e.target.value)}
-              className="mt-1 block w-20 rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2"
-              placeholder="Ej: 5"
-            />
-          </label>
-        </div>
+  // Coordenadas para los ejes proyectados
+  const pXAxisX = originX + projectX(axisLength / scale);
+  const pXAxisY = originY - projectX(axisLength / scale) / 2;
+  const pYAxisX = originX - projectY(axisLength / scale);
+  const pYAxisY = originY - projectY(axisLength / scale) / 2;
+  const pZAxisX = originX;
+  const pZAxisY = originY - projectZ(axisLength / scale);
 
-        <div className="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-2">
-            Gráfico 3D (Vista Isométrica)
-          </h3>
-          <p className="mb-4">
-            Representación del punto <InlineMath math="P" /> en un espacio
-            tridimensional.
-          </p>
-          <Graph3D
-            x={parsedPointP.x}
-            y={parsedPointP.y}
-            z={parsedPointP.z}
-            label="P"
-            scale={15}
-          />
-        </div>
-      </div>
-    );
+  // Puntos de proyección para el plano XY (sombra)
+  const shadowX = originX + projectX(parsedPointP.x) - projectY(parsedPointP.y);
+  const shadowY =
+    originY - projectX(parsedPointP.x) / 2 - projectY(parsedPointP.y) / 2;
+
+  // Puntos de proyección en los ejes para el camino
+  const pathX = originX + projectX(parsedPointP.x);
+  const pathY = originY - projectX(parsedPointP.x) / 2;
+
+  const pathXY = originX + projectX(parsedPointP.x) - projectY(parsedPointP.y);
+  const pathYX =
+    originY - projectX(parsedPointP.x) / 2 - projectY(parsedPointP.y) / 2;
+
+  // --- Componente: Análisis de Vectores ---
+
+  const [distP2x, setDistP2x] = useState<string>("-2");
+  const [distP2y, setDistP2y] = useState<string>("4");
+  const [distP2z, setDistP2z] = useState<string>("0");
+
+  const parsedDistP2: Vector = {
+    x: parseFloatSafe(distP2x, -2),
+    y: parseFloatSafe(distP2y, 4),
+    z: parseFloatSafe(distP2z, 0),
   };
 
-  // --- Componente: Distancia entre Puntos (sin cambios) ---
-  const DistanceCalculator: React.FC = () => {
-    const [distP1x, setDistP1x] = useState<string>("-1");
-    const [distP1y, setDistP1y] = useState<string>("0");
-    const [distP1z, setDistP1z] = useState<string>("3");
-    const [distP2x, setDistP2x] = useState<string>("-2");
-    const [distP2y, setDistP2y] = useState<string>("4");
-    const [distP2z, setDistP2z] = useState<string>("0");
+  // Producto escalar
+  const dotProduct =
+    parsedPointP.x * parsedDistP2.x +
+    parsedPointP.y * parsedDistP2.y +
+    parsedPointP.z * parsedDistP2.z;
 
-    const parsedDistP1: Vector = {
-      x: parseFloatSafe(distP1x, -1),
-      y: parseFloatSafe(distP1y, 0),
-      z: parseFloatSafe(distP1z, 3),
-    };
-    const parsedDistP2: Vector = {
-      x: parseFloatSafe(distP2x, -2),
-      y: parseFloatSafe(distP2y, 4),
-      z: parseFloatSafe(distP2z, 0),
-    };
+  // Magnitudes
+  const mag1 = Math.sqrt(
+    parsedPointP.x ** 2 + parsedPointP.y ** 2 + parsedPointP.z ** 2
+  );
+  const mag2 = Math.sqrt(
+    parsedDistP2.x ** 2 + parsedDistP2.y ** 2 + parsedDistP2.z ** 2
+  );
 
-    // Cálculo de distancia y pasos
-    const dx = parsedDistP1.x - parsedDistP2.x;
-    const dy = parsedDistP1.y - parsedDistP2.y;
-    const dz = parsedDistP1.z - parsedDistP2.z;
-    const dxSq = dx * dx;
-    const dySq = dy * dy;
-    const dzSq = dz * dz;
-    const sumSquares = dxSq + dySq + dzSq;
-    const calculatedDistance = Math.sqrt(sumSquares);
+  // Distancia
+  const dx = parsedPointP.x - parsedDistP2.x;
+  const dy = parsedPointP.y - parsedDistP2.y;
+  const dz = parsedPointP.z - parsedDistP2.z;
+  const distance = Math.sqrt(dx ** 2 + dy ** 2 + dz ** 2);
 
-    const distanceSteps = [
-      `P = (${parsedDistP1.x}, ${parsedDistP1.y}, ${parsedDistP1.z}) \\quad Q = (${parsedDistP2.x}, ${parsedDistP2.y}, ${parsedDistP2.z})`,
-      `\\overline{PQ} = \\sqrt{(${parsedDistP1.x} - ${parsedDistP2.x})^2 + (${parsedDistP1.y} - ${parsedDistP2.y})^2 + (${parsedDistP1.z} - ${parsedDistP2.z})^2}`,
-      `\\overline{PQ} = \\sqrt{(${dx})^2 + (${dy})^2 + (${dz})^2}`,
-      `\\overline{PQ} = \\sqrt{${dxSq} + ${dySq} + ${dzSq}}`,
-      `\\overline{PQ} = \\sqrt{${sumSquares}} \\approx ${calculatedDistance.toFixed(
-        2
-      )}`,
-    ];
+  // Ángulo
+  const cosAngle = mag1 > 0 && mag2 > 0 ? dotProduct / (mag1 * mag2) : 0;
+  const angleRad = Math.acos(Math.max(-1, Math.min(1, cosAngle)));
+  const angleDeg = (angleRad * 180) / Math.PI;
 
-    return (
-      <div className=" flex flex-col gap-2">
-        <h2 className="text-2xl text-center font-semibold text-gray-700 ">
-          Distancia entre dos puntos en <InlineMath math="IR^3" />
-        </h2>
-        <div className="flex flex-col items-center justify-center">
-          <label className="block text-gray-700 font-medium mb-2">
-            Punto P (x1, y1, z1):
-          </label>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="text"
-              value={distP1x}
-              onChange={(e) => setDistP1x(e.target.value)}
-              className="mt-1 w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="x1"
-            />
-            <input
-              type="text"
-              value={distP1y}
-              onChange={(e) => setDistP1y(e.target.value)}
-              className="mt-1 w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="y1"
-            />
-            <input
-              type="text"
-              value={distP1z}
-              onChange={(e) => setDistP1z(e.target.value)}
-              className="mt-1 w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="z1"
-            />
-          </div>
-        </div>
+  const dotProductSteps = [
+    `\\vec{u} = (${parsedPointP.x}, ${parsedPointP.y}, ${parsedPointP.z}) \\quad \\vec{v} = (${parsedDistP2.x}, ${parsedDistP2.y}, ${parsedDistP2.z})`,
+    `\\vec{u} \\cdot \\vec{v} = (${parsedPointP.x})(${parsedDistP2.x}) + (${parsedPointP.y})(${parsedDistP2.y}) + (${parsedPointP.z})(${parsedDistP2.z})`,
+    `\\vec{u} \\cdot \\vec{v} = ${parsedPointP.x * parsedDistP2.x} + ${
+      parsedPointP.y * parsedDistP2.y
+    } + ${parsedPointP.z * parsedDistP2.z} = ${dotProduct}`,
+  ];
 
-        <div className="flex flex-col items-center justify-center">
-          <label className="block text-gray-700 font-medium mb-2">
-            Punto Q (x2, y2, z2):
-          </label>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <input
-              type="text"
-              value={distP2x}
-              onChange={(e) => setDistP2x(e.target.value)}
-              className="mt-1  w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="x2"
-            />
-            <input
-              type="text"
-              value={distP2y}
-              onChange={(e) => setDistP2y(e.target.value)}
-              className="mt-1  w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="y2"
-            />
-            <input
-              type="text"
-              value={distP2z}
-              onChange={(e) => setDistP2z(e.target.value)}
-              className="mt-1  w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="z2"
-            />
-          </div>
-        </div>
+  const distanceSteps = [
+    `d = \\sqrt{(${parsedPointP.x} - ${parsedDistP2.x})^2 + (${parsedPointP.y} - ${parsedDistP2.y})^2 + (${parsedPointP.z} - ${parsedDistP2.z})^2}`,
+    `d = \\sqrt{${dx ** 2} + ${dy ** 2} + ${dz ** 2}} = ${distance.toFixed(2)}`,
+  ];
 
-        <div className="bg-green-50 border-l-4 border-green-400 text-green-800 p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-2">Pasos del Cálculo:</h3>
-          {distanceSteps.map((step, index) => (
-            <div key={index} className="mb-2">
-              <BlockMath math={step} />
-            </div>
-          ))}
-          <p className="mt-4 text-xl font-bold">
-            La distancia entre P y Q es aproximadamente:{" "}
-            <InlineMath math={`${calculatedDistance.toFixed(2)}`} />
-          </p>
-        </div>
-      </div>
-    );
-  };
+  const mag1Steps = [
+    `|\\vec{u}| = \\sqrt{(${parsedPointP.x})^2 + (${parsedPointP.y})^2 + (${parsedPointP.z})^2}`,
+    `|\\vec{u}| = \\sqrt{${parsedPointP.x ** 2} + ${parsedPointP.y ** 2} + ${
+      parsedPointP.z ** 2
+    }}`,
+    `|\\vec{u}| = \\sqrt{${
+      parsedPointP.x ** 2 + parsedPointP.y ** 2 + parsedPointP.z ** 2
+    }} = ${mag1.toFixed(2)}`,
+  ];
 
-  // --- Componente: Magnitud de un Vector (sin cambios) ---
-  const MagnitudeCalculator: React.FC = () => {
-    const [magVx, setMagVx] = useState<string>("1");
-    const [magVy, setMagVy] = useState<string>("3");
-    const [magVz, setMagVz] = useState<string>("-2");
+  const mag2Steps = [
+    `|\\vec{v}| = \\sqrt{(${parsedDistP2.x})^2 + (${parsedDistP2.y})^2 + (${parsedDistP2.z})^2}`,
+    `|\\vec{v}| = \\sqrt{${parsedDistP2.x ** 2} + ${parsedDistP2.y ** 2} + ${
+      parsedDistP2.z ** 2
+    }}`,
+    `|\\vec{v}| = \\sqrt{${
+      parsedDistP2.x ** 2 + parsedDistP2.y ** 2 + parsedDistP2.z ** 2
+    }} = ${mag2.toFixed(2)}`,
+  ];
 
-    const parsedMagV: Vector = {
-      x: parseFloatSafe(magVx, 1),
-      y: parseFloatSafe(magVy, 3),
-      z: parseFloatSafe(magVz, -2),
-    };
+  const angleSteps = [
+    `\\cos(\\theta) = \\frac{\\vec{u} \\cdot \\vec{v}}{|\\vec{u}||\\vec{v}|} = \\frac{${dotProduct}}{${mag1.toFixed(
+      2
+    )} \\times ${mag2.toFixed(2)}} = ${cosAngle.toFixed(4)}`,
+    `\\theta = \\arccos(${cosAngle.toFixed(4)}) = ${angleDeg.toFixed(2)}°`,
+  ];
 
-    // Cálculo de magnitud y pasos
-    const xSq = parsedMagV.x * parsedMagV.x;
-    const ySq = parsedMagV.y * parsedMagV.y;
-    const zSq = parsedMagV.z * parsedMagV.z;
-    const sumSq = xSq + ySq + zSq;
-    const calculatedMagnitude = Math.sqrt(sumSq);
+  // --- Componente: Magnitud de un Vector y Ángulos Directores ---
+  // Cálculo de magnitud y pasos
+  const xSq = parsedPointP.x * parsedPointP.x;
+  const ySq = parsedPointP.y * parsedPointP.y;
+  const zSq = parsedPointP.z * parsedPointP.z;
+  const sumSq = xSq + ySq + zSq;
+  const calculatedMagnitude = Math.sqrt(sumSq);
 
-    const magnitudeSteps = [
-      `V = (${parsedMagV.x}, ${parsedMagV.y}, ${parsedMagV.z})`,
-      `|V| = \\sqrt{(${parsedMagV.x})^2 + (${parsedMagV.y})^2 + (${parsedMagV.z})^2}`,
-      `|V| = \\sqrt{${xSq} + ${ySq} + ${zSq}}`,
-      `|V| = \\sqrt{${sumSq}} \\approx ${calculatedMagnitude.toFixed(2)}`,
-    ];
+  // Cálculo de ángulos directores
+  const alphaRad =
+    calculatedMagnitude > 0
+      ? Math.acos(parsedPointP.x / calculatedMagnitude)
+      : 0;
+  const betaRad =
+    calculatedMagnitude > 0
+      ? Math.acos(parsedPointP.y / calculatedMagnitude)
+      : 0;
+  const gammaRad =
+    calculatedMagnitude > 0
+      ? Math.acos(parsedPointP.z / calculatedMagnitude)
+      : 0;
 
-    return (
-      <div className=" flex flex-col gap-2 items-center justify-center">
-        <h2 className="text-2xl font-semibold text-gray-700">
-          Magnitud en <InlineMath math="IR^3" />
-        </h2>
-        <div className="flex flex-col items-center justify-center w-full">
-          <label className="block text-gray-700 font-medium ">
-            Vector V (x, y, z):
-          </label>
-          <div className="flex flex-wrap justify-center gap-4">
-            <input
-              type="text"
-              value={magVx}
-              onChange={(e) => setMagVx(e.target.value)}
-              className="mt-1 w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="x"
-            />
-            <input
-              type="text"
-              value={magVy}
-              onChange={(e) => setMagVy(e.target.value)}
-              className="mt-1 w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="y"
-            />
-            <input
-              type="text"
-              value={magVz}
-              onChange={(e) => setMagVz(e.target.value)}
-              className="mt-1 w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="z"
-            />
-          </div>
-        </div>
+  const alphaDeg = (alphaRad * 180) / Math.PI;
+  const betaDeg = (betaRad * 180) / Math.PI;
+  const gammaDeg = (gammaRad * 180) / Math.PI;
 
-        <div className="bg-purple-50 border-l-4 border-purple-400 text-purple-800 p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-2">Pasos del Cálculo:</h3>
-          {magnitudeSteps.map((step, index) => (
-            <div key={index} className="mb-2">
-              <BlockMath math={step} />
-            </div>
-          ))}
-          <p className="mt-4 text-xl font-bold">
-            La magnitud del vector V es aproximadamente:{" "}
-            <InlineMath math={`${calculatedMagnitude.toFixed(2)}`} />
-          </p>
-        </div>
-      </div>
-    );
-  };
+  const magnitudeSteps = [
+    `V = (${parsedPointP.x}, ${parsedPointP.y}, ${parsedPointP.z})`,
+    `|V| = \\sqrt{(${parsedPointP.x})^2 + (${parsedPointP.y})^2 + (${parsedPointP.z})^2}`,
+    `|V| = \\sqrt{${xSq} + ${ySq} + ${zSq}}`,
+    `|V| = \\sqrt{${sumSq}} \\approx ${calculatedMagnitude.toFixed(2)}`,
+  ];
+
+  const angleSteps2 =
+    calculatedMagnitude > 0
+      ? [
+          `\\alpha = \\arccos\\left(\\frac{${
+            parsedPointP.x
+          }}{${calculatedMagnitude.toFixed(
+            2
+          )}}\\right) \\approx ${alphaDeg.toFixed(2)}°`,
+          `\\beta = \\arccos\\left(\\frac{${
+            parsedPointP.y
+          }}{${calculatedMagnitude.toFixed(
+            2
+          )}}\\right) \\approx ${betaDeg.toFixed(2)}°`,
+          `\\gamma = \\arccos\\left(\\frac{${
+            parsedPointP.z
+          }}{${calculatedMagnitude.toFixed(
+            2
+          )}}\\right) \\approx ${gammaDeg.toFixed(2)}°`,
+        ]
+      : [];
 
   // --- Componente: Vector Unitario (sin cambios) ---
-  const UnitVectorCalculator: React.FC = () => {
-    const [unitVx, setUnitVx] = useState<string>("1");
-    const [unitVy, setUnitVy] = useState<string>("3");
-    const [unitVz, setUnitVz] = useState<string>("-2");
-    const [oppositeDirection, setOppositeDirection] = useState<boolean>(false);
+  const [oppositeDirection, setOppositeDirection] = useState<boolean>(false);
+  // Cálculo de vector unitario y pasos
+  const mag3 = Math.sqrt(sumSq);
 
-    const parsedUnitV: Vector = {
-      x: parseFloatSafe(unitVx, 1),
-      y: parseFloatSafe(unitVy, 3),
-      z: parseFloatSafe(unitVz, -2),
-    };
+  let calculatedUnitVector: Vector | null = null;
+  const unitVectorSteps1: string[] = [
+    `V = (${parsedPointP.x}, ${parsedPointP.y}, ${parsedPointP.z})`,
+  ];
 
-    // Cálculo de vector unitario y pasos
-    const xSq = parsedUnitV.x * parsedUnitV.x;
-    const ySq = parsedUnitV.y * parsedUnitV.y;
-    const zSq = parsedUnitV.z * parsedUnitV.z;
-    const sumSq = xSq + ySq + zSq;
-    const mag = Math.sqrt(sumSq);
+  if (mag3 === 0) {
+    unitVectorSteps1.push(
+      "La magnitud del vector es cero, por lo tanto, no se puede calcular un vector unitario."
+    );
+  } else {
+    let finalVx = parsedPointP.x;
+    let finalVy = parsedPointP.y;
+    let finalVz = parsedPointP.z;
 
-    let calculatedUnitVector: Vector | null = null;
-    const unitVectorSteps: string[] = [
-      `V = (${parsedUnitV.x}, ${parsedUnitV.y}, ${parsedUnitV.z})`,
-    ];
-
-    if (mag === 0) {
-      unitVectorSteps.push(
-        "La magnitud del vector es cero, por lo tanto, no se puede calcular un vector unitario."
-      );
-    } else {
-      let finalVx = parsedUnitV.x;
-      let finalVy = parsedUnitV.y;
-      let finalVz = parsedUnitV.z;
-
-      if (oppositeDirection) {
-        finalVx = -parsedUnitV.x;
-        finalVy = -parsedUnitV.y;
-        finalVz = -parsedUnitV.z;
-        unitVectorSteps.push(
-          `Vector en dirección opuesta: V' = (${finalVx}, ${finalVy}, ${finalVz})`
-        );
-      }
-
-      calculatedUnitVector = {
-        x: finalVx / mag,
-        y: finalVy / mag,
-        z: finalVz / mag,
-      };
-
-      unitVectorSteps.push(
-        `|V| = \\sqrt{(${parsedUnitV.x})^2 + (${parsedUnitV.y})^2 + (${
-          parsedUnitV.z
-        })^2} = \\sqrt{${sumSq}} \\approx ${mag.toFixed(2)}`
-      );
-      unitVectorSteps.push(
-        `U_V = \\frac{V}{|V|} = \\left( \\frac{${finalVx}}{\\sqrt{${sumSq}}}, \\frac{${finalVy}}{\\sqrt{${sumSq}}}, \\frac{${finalVz}}{\\sqrt{${sumSq}}} \\right)`
-      );
-      unitVectorSteps.push(
-        `U_V \\approx \\left( ${calculatedUnitVector.x.toFixed(
-          3
-        )}, ${calculatedUnitVector.y.toFixed(
-          3
-        )}, ${calculatedUnitVector.z.toFixed(3)} \\right)`
+    if (oppositeDirection) {
+      finalVx = -parsedPointP.x;
+      finalVy = -parsedPointP.y;
+      finalVz = -parsedPointP.z;
+      unitVectorSteps1.push(
+        `Vector en dirección opuesta: V' = (${finalVx}, ${finalVy}, ${finalVz})`
       );
     }
 
-    return (
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-col items-center justify-center">
-          <label className="block text-gray-700 font-medium ">
-            Vector V (x, y, z):
-          </label>
-          <div className="flex  gap-4 ">
-            <input
-              type="text"
-              value={unitVx}
-              onChange={(e) => setUnitVx(e.target.value)}
-              className="mt-1 w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="x"
-            />
-            <input
-              type="text"
-              value={unitVy}
-              onChange={(e) => setUnitVy(e.target.value)}
-              className="mt-1 w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="y"
-            />
-            <input
-              type="text"
-              value={unitVz}
-              onChange={(e) => setUnitVz(e.target.value)}
-              className="mt-1 w-20 rounded-md border-gray-300 shadow-sm p-2"
-              placeholder="z"
-            />
-          </div>
-          <label className="inline-flex items-center mt-3">
-            <input
-              type="checkbox"
-              checked={oppositeDirection}
-              onChange={(e) => setOppositeDirection(e.target.checked)}
-              className="form-checkbox h-5 w-5 text-indigo-600 rounded"
-            />
-            <span className="ml-2 text-gray-700">
-              Calcular en dirección opuesta
-            </span>
-          </label>
-        </div>
+    calculatedUnitVector = {
+      x: finalVx / mag3,
+      y: finalVy / mag3,
+      z: finalVz / mag3,
+    };
 
-        <div className="bg-orange-50 border-l-4 border-orange-400 text-orange-800 p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-2">Pasos del Cálculo:</h3>
-          {unitVectorSteps.map((step, index) => (
-            <div key={index} className="mb-2">
-              <BlockMath math={step} />
-            </div>
-          ))}
-          {calculatedUnitVector && mag !== 0 && (
-            <div className="mt-4 text-xl font-bold">
-              El vector unitario es aproximadamente:
-              <BlockMath
-                math={`U_V \\approx \\left( ${calculatedUnitVector.x.toFixed(
-                  3
-                )}, ${calculatedUnitVector.y.toFixed(
-                  3
-                )}, ${calculatedUnitVector.z.toFixed(3)} \\right)`}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+    unitVectorSteps1.push(
+      `|V| = \\sqrt{(${parsedPointP.x})^2 + (${parsedPointP.y})^2 + (${
+        parsedPointP.z
+      })^2} = \\sqrt{${sumSq}} \\approx ${mag3.toFixed(2)}`
     );
+    unitVectorSteps1.push(
+      `U_V = \\frac{V}{|V|} = \\left( \\frac{${finalVx}}{\\sqrt{${sumSq}}}, \\frac{${finalVy}}{\\sqrt{${sumSq}}}, \\frac{${finalVz}}{\\sqrt{${sumSq}}} \\right)`
+    );
+    unitVectorSteps1.push(
+      `U_V \\approx \\left( ${calculatedUnitVector.x.toFixed(
+        3
+      )}, ${calculatedUnitVector.y.toFixed(
+        3
+      )}, ${calculatedUnitVector.z.toFixed(3)} \\right)`
+    );
+  }
+
+  // --- Componente: Producto Cruz (Producto Vectorial) ---
+
+  const crossI =
+    parsedPointP.y * parsedDistP2.z - parsedPointP.z * parsedDistP2.y;
+  const crossJ = -(
+    parsedPointP.x * parsedDistP2.z -
+    parsedPointP.z * parsedDistP2.x
+  );
+  const crossK =
+    parsedPointP.x * parsedDistP2.y - parsedPointP.y * parsedDistP2.x;
+
+  const crossProduct: Vector = {
+    x: crossI,
+    y: crossJ,
+    z: crossK,
   };
+
+  // Magnitud del producto cruz
+  const crossMagnitude = Math.sqrt(
+    crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2
+  );
+
+  // Magnitudes de los vectores originales
+  const magU = Math.sqrt(
+    parsedPointP.x ** 2 + parsedPointP.y ** 2 + parsedPointP.z ** 2
+  );
+  const magV = Math.sqrt(
+    parsedDistP2.x ** 2 + parsedDistP2.y ** 2 + parsedDistP2.z ** 2
+  );
+
+  // Ángulo entre los vectores
+  const sinAngle = Math.sin(angleRad);
+
+  // Verificación: |u × v| = |u| * |v| * sin(θ)
+  const theoreticalMagnitude = magU * magV * sinAngle;
+
+  const crossProductSteps = [
+    `\\vec{u} = (${parsedPointP.x}, ${parsedPointP.y}, ${parsedPointP.z}) \\quad \\vec{v} = (${parsedDistP2.x}, ${parsedDistP2.y}, ${parsedDistP2.z})`,
+    `\\vec{u} \\times \\vec{v} = \\begin{vmatrix} \\vec{i} & \\vec{j} & \\vec{k} \\\\ ${parsedPointP.x} & ${parsedPointP.y} & ${parsedPointP.z} \\\\ ${parsedDistP2.x} & ${parsedDistP2.y} & ${parsedDistP2.z} \\end{vmatrix}`,
+    `\\vec{i}\\left(${parsedPointP.y} \\cdot ${parsedDistP2.z} - ${parsedPointP.z} \\cdot ${parsedDistP2.y}\\right) - \\vec{j}\\left(${parsedPointP.x} \\cdot ${parsedDistP2.z} - ${parsedPointP.z} \\cdot ${parsedDistP2.x}\\right) + \\vec{k}\\left(${parsedPointP.x} \\cdot ${parsedDistP2.y} - ${parsedPointP.y} \\cdot ${parsedDistP2.x}\\right)`,
+    `\\vec{i}(${parsedPointP.y * parsedDistP2.z} - ${
+      parsedPointP.z * parsedDistP2.y
+    }) - \\vec{j}(${parsedPointP.x * parsedDistP2.z} - ${
+      parsedPointP.z * parsedDistP2.x
+    }) + \\vec{k}(${parsedPointP.x * parsedDistP2.y} - ${
+      parsedPointP.y * parsedDistP2.x
+    })`,
+    `\\vec{u} \\times \\vec{v} = ${crossI}\\vec{i} ${
+      crossJ >= 0 ? "+" : ""
+    } ${crossJ}\\vec{j} ${crossK >= 0 ? "+" : ""} ${crossK}\\vec{k}`,
+    `\\vec{u} \\times \\vec{v} = (${crossProduct.x}, ${crossProduct.y}, ${crossProduct.z})`,
+  ];
+
+  const magnitudeSteps1 = [
+    `|\\vec{u} \\times \\vec{v}| = \\sqrt{(${crossProduct.x})^2 + (${crossProduct.y})^2 + (${crossProduct.z})^2}`,
+    `|\\vec{u} \\times \\vec{v}| = \\sqrt{${crossProduct.x ** 2} + ${
+      crossProduct.y ** 2
+    } + ${crossProduct.z ** 2}}`,
+    `|\\vec{u} \\times \\vec{v}| = \\sqrt{${
+      crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2
+    }} \\approx ${crossMagnitude.toFixed(2)}`,
+  ];
+
+  const verificationSteps = [
+    `|\\vec{u}| = \\sqrt{${parsedPointP.x}^2 + ${parsedPointP.y}^2 + ${
+      parsedPointP.z
+    }^2} \\approx ${magU.toFixed(2)}`,
+    `|\\vec{v}| = \\sqrt{${parsedDistP2.x}^2 + ${parsedDistP2.y}^2 + ${
+      parsedDistP2.z
+    }^2} \\approx ${magV.toFixed(2)}`,
+    `\\theta = ${angleDeg.toFixed(
+      2
+    )}° \\quad \\sin(\\theta) \\approx ${sinAngle.toFixed(4)}`,
+    `|\\vec{u} \\times \\vec{v}| = |\\vec{u}| \\cdot |\\vec{v}| \\cdot \\sin(\\theta)`,
+    `|\\vec{u} \\times \\vec{v}| = ${magU.toFixed(2)} \\times ${magV.toFixed(
+      2
+    )} \\times ${sinAngle.toFixed(4)} \\approx ${theoreticalMagnitude.toFixed(
+      2
+    )}`,
+  ];
+
+  // --- Componente: Área de Paralelogramo con Vértices ---
+  const [rx, setRx] = useState<string>("-3");
+  const [ry, setRy] = useState<string>("1");
+  const [rz, setRz] = useState<string>("6");
+
+  const parsedR: Vector = {
+    x: parseFloatSafe(rx, -3),
+    y: parseFloatSafe(ry, 1),
+    z: parseFloatSafe(rz, 6),
+  };
+
+  // Vectores desde P hacia Q y desde P hacia R
+  const vectorPQ: Vector = {
+    x: parsedPointP.x - parsedDistP2.x,
+    y: parsedPointP.y - parsedDistP2.y,
+    z: parsedPointP.z - parsedDistP2.z,
+  };
+
+  const vectorPR: Vector = {
+    x: parsedR.x - parsedDistP2.x,
+    y: parsedR.y - parsedDistP2.y,
+    z: parsedR.z - parsedDistP2.z,
+  };
+
+  // Área del paralelogramo = magnitud del producto cruz
+  const area = Math.sqrt(
+    crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2
+  );
+
+  // Área del triángulo = mitad del área del paralelogramo
+  const triangleArea = area / 2;
+
+  const pointsSteps = [
+    `P = (${parsedPointP.x}, ${parsedPointP.y}, ${parsedPointP.z})`,
+    `Q = (${parsedDistP2.x}, ${parsedDistP2.y}, ${parsedDistP2.z})`,
+    `R = (${parsedR.x}, ${parsedR.y}, ${parsedR.z})`,
+  ];
+
+  const vectorSteps = [
+    `\\vec{PQ} = Q - P = (${parsedDistP2.x} - ${parsedPointP.x}, ${parsedDistP2.y} - ${parsedPointP.y}, ${parsedDistP2.z} - ${parsedPointP.z})`,
+    `\\vec{PQ} = (${vectorPQ.x}, ${vectorPQ.y}, ${vectorPQ.z})`,
+    `\\vec{PR} = R - P = (${parsedDistP2.x} - ${parsedPointP.x}, ${parsedR.y} - ${parsedPointP.y}, ${parsedR.z} - ${parsedPointP.z})`,
+    `\\vec{PR} = (${vectorPR.x}, ${vectorPR.y}, ${vectorPR.z})`,
+  ];
+
+  const crossProductSteps1 = [
+    `\\vec{PQ} \\times \\vec{PR} = \\begin{vmatrix} \\vec{i} & \\vec{j} & \\vec{k} \\\\ ${vectorPQ.x} & ${vectorPQ.y} & ${vectorPQ.z} \\\\ ${vectorPR.x} & ${vectorPR.y} & ${vectorPR.z} \\end{vmatrix}`,
+    `\\vec{i}(${vectorPQ.y} \\cdot ${vectorPR.z} - ${vectorPQ.z} \\cdot ${vectorPR.y}) - \\vec{j}(${vectorPQ.x} \\cdot ${vectorPR.z} - ${vectorPQ.z} \\cdot ${vectorPR.x}) + \\vec{k}(${vectorPQ.x} \\cdot ${vectorPR.y} - ${vectorPQ.y} \\cdot ${vectorPR.x})`,
+    `\\vec{i}(${vectorPQ.y * vectorPR.z} - ${
+      vectorPQ.z * vectorPR.y
+    }) - \\vec{j}(${vectorPQ.x * vectorPR.z} - ${
+      vectorPQ.z * vectorPR.x
+    }) + \\vec{k}(${vectorPQ.x * vectorPR.y} - ${vectorPQ.y * vectorPR.x})`,
+    `\\vec{PQ} \\times \\vec{PR} = ${crossI}\\vec{i} ${
+      crossJ >= 0 ? "+" : ""
+    } ${crossJ}\\vec{j} ${crossK >= 0 ? "+" : ""} ${crossK}\\vec{k}`,
+    `\\vec{PQ} \\times \\vec{PR} = (${crossProduct.x}, ${crossProduct.y}, ${crossProduct.z})`,
+  ];
+
+  const areaSteps = [
+    `\\text{Área del paralelogramo} = |\\vec{PQ} \\times \\vec{PR}|`,
+    `= \\sqrt{(${crossProduct.x})^2 + (${crossProduct.y})^2 + (${crossProduct.z})^2}`,
+    `= \\sqrt{${crossProduct.x ** 2} + ${crossProduct.y ** 2} + ${
+      crossProduct.z ** 2
+    }}`,
+    `= \\sqrt{${
+      crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2
+    }} \\approx ${area.toFixed(4)}`,
+  ];
+
+  const triangleSteps = [
+    `\\text{Área del triángulo PQR} = \\frac{1}{2} |\\vec{PQ} \\times \\vec{PR}|`,
+    `= \\frac{${area.toFixed(4)}}{2} \\approx ${triangleArea.toFixed(4)}`,
+  ];
 
   return (
     <AlgebraContext.Provider
@@ -2054,10 +1894,80 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         output,
         chartDataAndOptions,
 
-        GraphPointCalculator,
-        DistanceCalculator,
-        MagnitudeCalculator,
-        UnitVectorCalculator,
+        //TODO: 3D VECTORS
+
+        pointPx,
+        setPointPx,
+        pointPy,
+        setPointPy,
+        pointPz,
+        setPointPz,
+        parsedPointP,
+        px,
+        py,
+        pXAxisX,
+        pXAxisY,
+        pYAxisX,
+        pYAxisY,
+        pZAxisX,
+        pZAxisY,
+        shadowX,
+        shadowY,
+        pathX,
+        pathY,
+        pathXY,
+        pathYX,
+        originX,
+        originY,
+        axisLength,
+        label,
+
+        distP2x,
+        setDistP2x,
+        distP2y,
+        setDistP2y,
+        distP2z,
+        setDistP2z,
+        dotProduct,
+        dotProductSteps,
+        mag1,
+        mag1Steps,
+        mag2,
+        mag2Steps,
+        distance,
+        distanceSteps,
+        angleDeg,
+        angleSteps,
+
+        magnitudeSteps,
+        angleSteps2,
+        calculatedMagnitude,
+
+        oppositeDirection,
+        setOppositeDirection,
+        unitVectorSteps1,
+        calculatedUnitVector,
+        mag3,
+
+        verificationSteps,
+        magnitudeSteps1,
+        crossProductSteps,
+        crossProduct,
+        crossMagnitude,
+
+        pointsSteps,
+        vectorSteps,
+        crossProductSteps1,
+        areaSteps,
+        triangleSteps,
+        rx,
+        setRx,
+        ry,
+        setRy,
+        rz,
+        setRz,
+        area,
+        triangleArea,
       }}
     >
       {children}

@@ -118,11 +118,76 @@ export interface AlgebraContextType {
   };
 
   //TODO: VECTORES EN 3D
+  pointPx: string;
+  setPointPx: (s: string) => void;
+  pointPy: string;
+  setPointPy: (s: string) => void;
+  pointPz: string;
+  setPointPz: (s: string) => void;
+  parsedPointP: { x: number; y: number; z: number };
+  px: number;
+  py: number;
+  pXAxisX: number;
+  pXAxisY: number;
+  pYAxisX: number;
+  pYAxisY: number;
+  pZAxisX: number;
+  pZAxisY: number;
+  shadowX: number;
+  shadowY: number;
+  pathX: number;
+  pathY: number;
+  pathXY: number;
+  pathYX: number;
+  originX: number;
+  originY: number;
+  axisLength: number;
+  label: string;
 
-  GraphPointCalculator: React.FC;
-  DistanceCalculator: React.FC;
-  MagnitudeCalculator: React.FC;
-  UnitVectorCalculator: React.FC;
+  distP2x: string;
+  setDistP2x: (s: string) => void;
+  distP2y: string;
+  setDistP2y: (s: string) => void;
+  distP2z: string;
+  setDistP2z: (s: string) => void;
+  dotProduct: number;
+  dotProductSteps: string[];
+  mag1: number;
+  mag1Steps: string[];
+  mag2: number;
+  mag2Steps: string[];
+  distance: number;
+  distanceSteps: string[];
+  angleDeg: number;
+  angleSteps: string[];
+  magnitudeSteps: string[];
+  angleSteps2: string[];
+  calculatedMagnitude: number;
+  oppositeDirection: boolean;
+  setOppositeDirection: (b: boolean) => void;
+  unitVectorSteps1: string[];
+  calculatedUnitVector: { x: number; y: number; z: number } | null;
+  mag3: number;
+
+  verificationSteps: string[];
+  magnitudeSteps1: string[];
+  crossProductSteps: string[];
+  crossProduct: { x: number; y: number; z: number };
+  crossMagnitude: number;
+
+  pointsSteps: string[];
+  vectorSteps: string[];
+  crossProductSteps1: string[];
+  areaSteps: string[];
+  triangleSteps: string[];
+  rx: string;
+  ry: string;
+  rz: string;
+  setRx: (s: string) => void;
+  setRy: (s: string) => void;
+  setRz: (s: string) => void;
+  area: number;
+  triangleArea: number;
 }
 
 export type Mode2 =
@@ -569,22 +634,18 @@ export type StepData = {
 export type Complex = { re: number; im: number };
 export type Op = "add" | "sub" | "mul" | "div";
 
+export interface Vector {
+  x: number;
+  y: number;
+  z: number;
+}
 
-  export interface Vector {
-    x: number;
-    y: number;
-    z: number;
-  }
+export type CalculatorType =
+  | "graph"
+  | "distance"
+  | "magnitude"
+  | "unitVector"
+  | "crossProduct"
+  | "parallelogramArea";
 
-
-  export type CalculatorType = "graph" | "distance" | "magnitude" | "unitVector";
-
-  // --- NUEVOS Componentes de Gráficos ---
-
-  export interface Graph3DProps {
-    x: number;
-    y: number;
-    z: number;
-    label: string;
-    scale: number; // Factor de escala para el tamaño del gráfico
-  }
+// --- NUEVOS Componentes de Gráficos ---

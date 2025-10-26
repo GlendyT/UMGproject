@@ -2,7 +2,6 @@
 import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import usePrecalculo from "@/hooks/usePrecalculo";
-import BotonBack from "@/utils/BotonBack";
 import TitleCourse from "@/components/TitleCourse";
 
 const PolynomialDivision: React.FC = () => {
