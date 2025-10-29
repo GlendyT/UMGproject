@@ -1,7 +1,7 @@
 import React from "react";
 import Graph3D from "./Graph3D";
 import { InlineMath } from "react-katex";
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 
 const GraphPointCalculator = () => {
   const {
@@ -11,7 +11,7 @@ const GraphPointCalculator = () => {
     setPointPx,
     setPointPy,
     setPointPz,
-  } = useAlgoritmos();
+  } = useAlgebra();
 
   return (
     <div className="flex flex-col gap-2 ">

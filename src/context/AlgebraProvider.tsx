@@ -1,9 +1,10 @@
 "use client";
 
 import Fraction from "fraction.js";
-import { createContext, JSX, useMemo, useState } from "react";
+import { createContext, JSX, useCallback, useMemo, useState } from "react";
 import {
   AlgebraContextType,
+  ChartInstance,
   FractionMatrix,
   Matrix,
   Matrix3x3,
@@ -226,7 +227,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     { i: 2, j: 2, text: sec[2].val },
   ];
 
-  // ---------------- MÉTODO DE CRAMER ----------------
+  //---------------- MÉTODO DE CRAMER ----------------//;
   const [size2, setSize2] = useState<number>(3);
   const [matrix3, setMatrix3] = useState<Matrix>([
     [-1, 2, 4, 1],
@@ -353,7 +354,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   const matrixToString = (m: Matrix) =>
     m.map((row) => row.join(" & ")).join(" \\\\ ");
 
-  /----------------- Metodo de Laplace ----------------/;
+  //----------------- Metodo de Laplace ----------------//;
 
   const [size4, setSize4] = useState(3);
   const [matrix4, setMatrix4] = useState([
@@ -516,109 +517,109 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         .map((_, j) => ((i + j) % 2 === 0 ? "+" : "-"))
     );
 
-  /----------------- Vectores ----------------/;
+  //----------------- Vectores ----------------//;
 
-  function deg2rad(d: number) {
-    return (d * Math.PI) / 180;
-  }
-  function rad2deg(r: number) {
-    return (r * 180) / Math.PI;
-  }
-  function norm360(a: number) {
-    return ((a % 360) + 360) % 360;
-  }
+  const deg2rad = useCallback((d: number) => (d * Math.PI) / 180, []);
+  const rad2deg = useCallback((r: number) => (r * 180) / Math.PI, []);
+  const norm360 = useCallback((a: number) => ((a % 360) + 360) % 360, []);
 
   /* Parse cardinal formats like: "N 60 O", "E 30 N", or direct degrees "30" */
-  function parseCardinal(input: string): {
-    angleDeg: number;
-    parsed: boolean;
-    explanation: string;
-  } {
-    const s = input.trim().replace(/°/g, "").toUpperCase();
-    if (/^-?\d+(\.?\d+)?$/.test(s)) {
-      const angleDeg = parseFloat(s);
+  const parseCardinal = useCallback(
+    (
+      input: string
+    ): {
+      angleDeg: number;
+      parsed: boolean;
+      explanation: string;
+    } => {
+      const s = input.trim().replace(/°/g, "").toUpperCase();
+      if (/^-?\d+(\.?\d+)?$/.test(s)) {
+        const angleDeg = parseFloat(s);
+        return {
+          angleDeg: norm360(angleDeg),
+          parsed: true,
+          explanation: `Ángulo directo: ${angleDeg}° (desde +x).`,
+        };
+      }
+      const m = s.match(/^([NS])\s*(\d+(\.?\d+)?)\s*([EO])$/);
+      if (m) {
+        const ns = m[1];
+        const ang = parseFloat(m[2]);
+        const eo = m[4];
+        let angleFromEast = 0;
+        if (ns === "N" && eo === "E") angleFromEast = 90 - ang;
+        if (ns === "N" && eo === "O") angleFromEast = 90 + ang;
+        if (ns === "S" && eo === "E") angleFromEast = 270 - ang;
+        if (ns === "S" && eo === "O") angleFromEast = 270 + ang;
+        return {
+          angleDeg: norm360(angleFromEast),
+          parsed: true,
+          explanation: `Convertido a ${norm360(angleFromEast)}° desde +x.`,
+        };
+      }
+      const m2 = s.match(/^([EO])\s*(\d+(\.?\d+)?)\s*([NS])$/);
+      if (m2) {
+        const eo = m2[1];
+        const ang = parseFloat(m2[2]);
+        const ns = m2[4];
+        let angleFromEast = 0;
+        if (eo === "E" && ns === "N") angleFromEast = 0 + ang;
+        if (eo === "E" && ns === "S") angleFromEast = 360 - ang;
+        if (eo === "O" && ns === "N") angleFromEast = 180 - ang;
+        if (eo === "O" && ns === "S") angleFromEast = 180 + ang;
+        return {
+          angleDeg: norm360(angleFromEast),
+          parsed: true,
+          explanation: `Convertido a ${norm360(angleFromEast)}° desde +x.`,
+        };
+      }
       return {
-        angleDeg: norm360(angleDeg),
-        parsed: true,
-        explanation: `Ángulo directo: ${angleDeg}° (desde +x).`,
+        angleDeg: 0,
+        parsed: false,
+        explanation:
+          "No se pudo interpretar. Use grados (ej. 30) o cardinal (ej. N 60 O).",
       };
-    }
-    const m = s.match(/^([NS])\s*(\d+(\.?\d+)?)\s*([EO])$/);
-    if (m) {
-      const ns = m[1];
-      const ang = parseFloat(m[2]);
-      const eo = m[4];
-      let angleFromEast = 0;
-      if (ns === "N" && eo === "E") angleFromEast = 90 - ang;
-      if (ns === "N" && eo === "O") angleFromEast = 90 + ang;
-      if (ns === "S" && eo === "E") angleFromEast = 270 - ang;
-      if (ns === "S" && eo === "O") angleFromEast = 270 + ang;
-      return {
-        angleDeg: norm360(angleFromEast),
-        parsed: true,
-        explanation: `Convertido a ${norm360(angleFromEast)}° desde +x.`,
-      };
-    }
-    const m2 = s.match(/^([EO])\s*(\d+(\.?\d+)?)\s*([NS])$/);
-    if (m2) {
-      const eo = m2[1];
-      const ang = parseFloat(m2[2]);
-      const ns = m2[4];
-      let angleFromEast = 0;
-      if (eo === "E" && ns === "N") angleFromEast = 0 + ang;
-      if (eo === "E" && ns === "S") angleFromEast = 360 - ang;
-      if (eo === "O" && ns === "N") angleFromEast = 180 - ang;
-      if (eo === "O" && ns === "S") angleFromEast = 180 + ang;
-      return {
-        angleDeg: norm360(angleFromEast),
-        parsed: true,
-        explanation: `Convertido a ${norm360(angleFromEast)}° desde +x.`,
-      };
-    }
-    return {
-      angleDeg: 0,
-      parsed: false,
-      explanation:
-        "No se pudo interpretar. Use grados (ej. 30) o cardinal (ej. N 60 O).",
-    };
-  }
+    },
+    [norm360]
+  );
 
-  /* ---------- math & step functions (devuelven strings LaTeX-friendly) ---------- */
+  const polarToComponentsSteps = useCallback(
+    (magStr: string, angleStr: string) => {
+      const steps: JSX.Element[] = [];
+      const m = parseFloat(magStr);
 
-  function polarToComponentsSteps(magStr: string, angleStr: string) {
-    const steps: JSX.Element[] = [];
-    const m = parseFloat(magStr);
+      const parsed = parseCardinal(angleStr);
+      if (!parsed.parsed) {
+        steps.push(<div key="error">ERROR: {parsed.explanation}</div>);
+        return { steps, x: NaN, y: NaN };
+      }
 
-    const parsed = parseCardinal(angleStr);
-    if (!parsed.parsed) {
-      steps.push(<div key="error">ERROR: {parsed.explanation}</div>);
-      return { steps, x: NaN, y: NaN };
-    }
-
-    const angleDeg = parsed.angleDeg;
-    const rad = deg2rad(angleDeg);
-    const x = m * Math.cos(rad);
-    const y = m * Math.sin(rad);
-    steps.push(
-      <div key="step4" className="flex flex-col">
-        <InlineMath math={`V_x  = ${m} \\cdot \\cos(${angleDeg}^\\circ) `} />
-        <InlineMath math={`V_x  = ${x.toFixed(2)}`} />
-      </div>
-    );
-    steps.push(
-      <div key="step4b" className="flex flex-col">
-        <InlineMath math={`V_y = ${m} \\cdot \\sin(${angleDeg}^\\circ) `} />
-        <InlineMath math={`V_y  = ${y.toFixed(2)}`} />
-      </div>
-    );
-    steps.push(
-      <div key="step5">
-        Resultado:{" "}
-        <InlineMath math={`V = (${x.toFixed(2)},\\; ${y.toFixed(2)})`} />
-      </div>
-    );
-    return { steps, x, y };
-  }
+      const angleDeg = parsed.angleDeg;
+      const rad = deg2rad(angleDeg);
+      const x = m * Math.cos(rad);
+      const y = m * Math.sin(rad);
+      steps.push(
+        <div key="step4" className="flex flex-col">
+          <InlineMath math={`V_x  = ${m} \\cdot \\cos(${angleDeg}^\\circ) `} />
+          <InlineMath math={`V_x  = ${x.toFixed(2)}`} />
+        </div>
+      );
+      steps.push(
+        <div key="step4b" className="flex flex-col">
+          <InlineMath math={`V_y = ${m} \\cdot \\sin(${angleDeg}^\\circ) `} />
+          <InlineMath math={`V_y  = ${y.toFixed(2)}`} />
+        </div>
+      );
+      steps.push(
+        <div key="step5">
+          Resultado:{" "}
+          <InlineMath math={`V = (${x.toFixed(2)},\\; ${y.toFixed(2)})`} />
+        </div>
+      );
+      return { steps, x, y };
+    },
+    [parseCardinal, deg2rad]
+  );
 
   function componentsToPolarSteps(xStr: string, yStr: string) {
     const steps: JSX.Element[] = [];
@@ -976,23 +977,6 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     return { steps, ux, uy };
   }
 
-  interface ChartInstance {
-    ctx: CanvasRenderingContext2D;
-    data: {
-      datasets: Array<{
-        drawArrow?: boolean;
-        arrowColor?: string;
-        borderColor?: string;
-        lineWidth?: number;
-      }>;
-    };
-    getDatasetMeta: (index: number) => {
-      data: Array<{
-        getProps: (props: string[], final: boolean) => { x: number; y: number };
-      }>;
-    };
-  }
-
   const arrowPlugin = {
     id: "arrowPlugin",
     afterDatasetsDraw: (chart: ChartInstance) => {
@@ -1036,39 +1020,76 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   };
   Chart.register(arrowPlugin);
 
+  //--Vectpres 2d--//
+
   const [mode2, setMode2] = useState<Mode2>("polar-to-components");
-  const [mag, setMag] = useState<string>("10");
-  const [angleInput, setAngleInput] = useState<string>("30");
-  const [xComp, setXComp] = useState<string>("6");
-  const [yComp, setYComp] = useState<string>("8");
   const [vectors, setVectors] = useState<
     { mag?: string; angle?: string; x?: string; y?: string }[]
   >([
-    { mag: "3", angle: "30" },
-    { x: "-3", y: "4" },
+    { mag: "10", angle: "30" },
+    { x: "6", y: "8" },
   ]);
   const [scalar, setScalar] = useState<string>("-2");
   const [output, setOutput] = useState<JSX.Element[]>([]);
 
-  function vecToXY(v: {
-    mag?: string;
-    angle?: string;
-    x?: string;
-    y?: string;
-  }) {
-    if (v.x !== undefined && v.y !== undefined && v.x !== "" && v.y !== "")
-      return { x: parseFloat(v.x), y: parseFloat(v.y) };
-    if (
-      v.mag !== undefined &&
-      v.angle !== undefined &&
-      v.mag !== "" &&
-      v.angle !== ""
-    ) {
-      const { x, y } = polarToComponentsSteps(v.mag, v.angle);
-      return { x, y };
-    }
-    return null;
-  }
+  const vecToXY = useCallback(
+    (v: { mag?: string; angle?: string; x?: string; y?: string }) => {
+      if (v.x !== undefined && v.y !== undefined && v.x !== "" && v.y !== "")
+        return { x: parseFloat(v.x), y: parseFloat(v.y) };
+      if (
+        v.mag !== undefined &&
+        v.angle !== undefined &&
+        v.mag !== "" &&
+        v.angle !== ""
+      ) {
+        const { x, y } = polarToComponentsSteps(v.mag, v.angle);
+        return { x, y };
+      }
+      return null;
+    },
+    [polarToComponentsSteps]
+  );
+
+  // Getters and setters for individual states based on vectors
+  const mag = vectors[0]?.mag || "";
+  const setMag = useCallback((value: string) => {
+    setVectors((prev) => {
+      const newV = [...prev];
+      if (!newV[0]) newV[0] = {};
+      newV[0] = { ...newV[0], mag: value };
+      return newV;
+    });
+  }, []);
+
+  const angleInput = vectors[0]?.angle || "";
+  const setAngleInput = useCallback((value: string) => {
+    setVectors((prev) => {
+      const newV = [...prev];
+      if (!newV[0]) newV[0] = {};
+      newV[0] = { ...newV[0], angle: value };
+      return newV;
+    });
+  }, []);
+
+  const xComp = vectors[1]?.x || "";
+  const setXComp = useCallback((value: string) => {
+    setVectors((prev) => {
+      const newV = [...prev];
+      if (!newV[1]) newV[1] = {};
+      newV[1] = { ...newV[1], x: value };
+      return newV;
+    });
+  }, []);
+
+  const yComp = vectors[1]?.y || "";
+  const setYComp = useCallback((value: string) => {
+    setVectors((prev) => {
+      const newV = [...prev];
+      if (!newV[1]) newV[1] = {};
+      newV[1] = { ...newV[1], y: value };
+      return newV;
+    });
+  }, []);
 
   const chartDataAndOptions = useMemo(() => {
     const datasets: Array<{
@@ -1085,7 +1106,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     const ys: number[] = [0];
 
     if (mode2 === "polar-to-components") {
-      const v = vecToXY({ mag, angle: angleInput });
+      const v = vecToXY({ mag: vectors[0]?.mag, angle: vectors[0]?.angle });
       if (v) {
         datasets.push({
           label: "V",
@@ -1105,7 +1126,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     }
 
     if (mode2 === "components-to-polar") {
-      const v = vecToXY({ x: xComp, y: yComp });
+      const v = vecToXY({ x: vectors[1]?.x, y: vectors[1]?.y });
       if (v) {
         datasets.push({
           label: "V",
@@ -1313,14 +1334,20 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     };
 
     return { datasets, options, labels: [] };
-  }, [mode2, mag, angleInput, xComp, yComp, vectors, scalar]);
+  }, [mode2, vectors, scalar, vecToXY]);
 
   function handleCompute() {
     let resSteps: JSX.Element[] = [];
     if (mode2 === "polar-to-components")
-      resSteps = polarToComponentsSteps(mag, angleInput).steps;
+      resSteps = polarToComponentsSteps(
+        vectors[0]?.mag || "",
+        vectors[0]?.angle || ""
+      ).steps;
     else if (mode2 === "components-to-polar")
-      resSteps = componentsToPolarSteps(xComp, yComp).steps;
+      resSteps = componentsToPolarSteps(
+        vectors[1]?.x || "",
+        vectors[1]?.y || ""
+      ).steps;
     else if (mode2 === "sum-vectors") resSteps = sumVectorsSteps(vectors).steps;
     else if (mode2 === "subtract-vectors") {
       if (vectors.length < 2)
@@ -1358,64 +1385,6 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     }
     setOutput(resSteps);
   }
-
-  function VectorRow({ idx }: { idx: number }) {
-    const v = vectors[idx] || {};
-    function update(partial: Partial<typeof v>) {
-      const copy = vectors.slice();
-      copy[idx] = { ...(copy[idx] || {}), ...partial };
-      setVectors(copy);
-    }
-    return (
-      <div className="flex flex-col items-center justify-center gap-2 p-1 border rounded-md">
-        <div className="flex flex-wrap items-center justify-around gap-2">
-          <div>
-            <label className="block text-sm"> Magnitud</label>
-            <input
-              value={v.mag || ""}
-              onChange={(e) => update({ mag: e.target.value })}
-              className="w-20 p-2 border rounded"
-              placeholder="ej. 10"
-            />
-          </div>
-          <div>
-            <label className="block text-sm">Angulo</label>
-            <input
-              value={v.angle || ""}
-              onChange={(e) => update({ angle: e.target.value })}
-              className="w-28 p-2 border rounded"
-              placeholder='ej.30 o "N 60 O"'
-            />
-          </div>
-        </div>
-        <div className="flex flex-col  items-center justify-center gap-1">
-          <h1 className="text-xs">O por componentes:</h1>
-          <div className="flex flex-wrap items-center justify-center gap-2">
-            <div className="flex flex-col items-center justify-center">
-              <label className=" text-xs"> x</label>
-              <input
-                value={v.x || ""}
-                onChange={(e) => update({ x: e.target.value })}
-                className="w-20 p-2 border rounded"
-                placeholder="x"
-              />
-            </div>
-            <div className="flex flex-col items-center justify-center">
-              {" "}
-              <label className=" text-xs"> y</label>
-              <input
-                value={v.y || ""}
-                onChange={(e) => update({ y: e.target.value })}
-                className="w-20 p-2 border rounded"
-                placeholder="y"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   /* ---------- Vectores en 3D ---------- */
 
   const parseFloatSafe = (value: string, defaultValue: number): number => {
@@ -1423,9 +1392,9 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     return isNaN(parsed) ? defaultValue : parsed;
   };
 
-  const [pointPx, setPointPx] = useState<string>("5");
-  const [pointPy, setPointPy] = useState<string>("0");
-  const [pointPz, setPointPz] = useState<string>("3");
+  const [pointPx, setPointPx] = useState<string>("1");
+  const [pointPy, setPointPy] = useState<string>("3");
+  const [pointPz, setPointPz] = useState<string>("-2");
   const [scale] = useState<number>(10);
   const label = "P";
 
@@ -1476,9 +1445,9 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   // --- Componente: Análisis de Vectores ---
 
-  const [distP2x, setDistP2x] = useState<string>("-2");
-  const [distP2y, setDistP2y] = useState<string>("4");
-  const [distP2z, setDistP2z] = useState<string>("0");
+  const [distP2x, setDistP2x] = useState<string>("2");
+  const [distP2y, setDistP2y] = useState<string>("1");
+  const [distP2z, setDistP2z] = useState<string>("4");
 
   const parsedDistP2: Vector = {
     x: parseFloatSafe(distP2x, -2),
@@ -1513,15 +1482,15 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   const dotProductSteps = [
     `\\vec{u} = (${parsedPointP.x}, ${parsedPointP.y}, ${parsedPointP.z}) \\quad \\vec{v} = (${parsedDistP2.x}, ${parsedDistP2.y}, ${parsedDistP2.z})`,
-    `\\vec{u} \\cdot \\vec{v} = (${parsedPointP.x})(${parsedDistP2.x}) + (${parsedPointP.y})(${parsedDistP2.y}) + (${parsedPointP.z})(${parsedDistP2.z})`,
+    `\\vec{u} \\cdot \\vec{v} = (${parsedPointP.x}*${parsedDistP2.x}) + (${parsedPointP.y}* ${parsedDistP2.y}) + (${parsedPointP.z}*${parsedDistP2.z})`,
     `\\vec{u} \\cdot \\vec{v} = ${parsedPointP.x * parsedDistP2.x} + ${
       parsedPointP.y * parsedDistP2.y
-    } + ${parsedPointP.z * parsedDistP2.z} = ${dotProduct}`,
+    } + ${parsedPointP.z * parsedDistP2.z}`,
   ];
 
   const distanceSteps = [
     `d = \\sqrt{(${parsedPointP.x} - ${parsedDistP2.x})^2 + (${parsedPointP.y} - ${parsedDistP2.y})^2 + (${parsedPointP.z} - ${parsedDistP2.z})^2}`,
-    `d = \\sqrt{${dx ** 2} + ${dy ** 2} + ${dz ** 2}} = ${distance.toFixed(2)}`,
+    `d = \\sqrt{${dx ** 2} + ${dy ** 2} + ${dz ** 2}}`,
   ];
 
   const mag1Steps = [
@@ -1531,7 +1500,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     }}`,
     `|\\vec{u}| = \\sqrt{${
       parsedPointP.x ** 2 + parsedPointP.y ** 2 + parsedPointP.z ** 2
-    }} = ${mag1.toFixed(2)}`,
+    }} `,
   ];
 
   const mag2Steps = [
@@ -1541,14 +1510,14 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     }}`,
     `|\\vec{v}| = \\sqrt{${
       parsedDistP2.x ** 2 + parsedDistP2.y ** 2 + parsedDistP2.z ** 2
-    }} = ${mag2.toFixed(2)}`,
+    }}`,
   ];
 
   const angleSteps = [
     `\\cos(\\theta) = \\frac{\\vec{u} \\cdot \\vec{v}}{|\\vec{u}||\\vec{v}|} = \\frac{${dotProduct}}{${mag1.toFixed(
       2
     )} \\times ${mag2.toFixed(2)}} = ${cosAngle.toFixed(4)}`,
-    `\\theta = \\arccos(${cosAngle.toFixed(4)}) = ${angleDeg.toFixed(2)}°`,
+    `\\theta = \\arccos(${cosAngle.toFixed(4)})`,
   ];
 
   // --- Componente: Magnitud de un Vector y Ángulos Directores ---
@@ -1581,7 +1550,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     `V = (${parsedPointP.x}, ${parsedPointP.y}, ${parsedPointP.z})`,
     `|V| = \\sqrt{(${parsedPointP.x})^2 + (${parsedPointP.y})^2 + (${parsedPointP.z})^2}`,
     `|V| = \\sqrt{${xSq} + ${ySq} + ${zSq}}`,
-    `|V| = \\sqrt{${sumSq}} \\approx ${calculatedMagnitude.toFixed(2)}`,
+    `|V| = \\sqrt{${sumSq}}`,
   ];
 
   const angleSteps2 =
@@ -1601,7 +1570,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
             parsedPointP.z
           }}{${calculatedMagnitude.toFixed(
             2
-          )}}\\right) \\approx ${gammaDeg.toFixed(2)}°`,
+          )}}\\right)  \\approx ${gammaDeg.toFixed(2)}°`,
         ]
       : [];
 
@@ -1677,7 +1646,6 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   const crossMagnitude = Math.sqrt(
     crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2
   );
-
   // Magnitudes de los vectores originales
   const magU = Math.sqrt(
     parsedPointP.x ** 2 + parsedPointP.y ** 2 + parsedPointP.z ** 2
@@ -1685,7 +1653,6 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   const magV = Math.sqrt(
     parsedDistP2.x ** 2 + parsedDistP2.y ** 2 + parsedDistP2.z ** 2
   );
-
   // Ángulo entre los vectores
   const sinAngle = Math.sin(angleRad);
 
@@ -1695,7 +1662,8 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   const crossProductSteps = [
     `\\vec{u} = (${parsedPointP.x}, ${parsedPointP.y}, ${parsedPointP.z}) \\quad \\vec{v} = (${parsedDistP2.x}, ${parsedDistP2.y}, ${parsedDistP2.z})`,
     `\\vec{u} \\times \\vec{v} = \\begin{vmatrix} \\vec{i} & \\vec{j} & \\vec{k} \\\\ ${parsedPointP.x} & ${parsedPointP.y} & ${parsedPointP.z} \\\\ ${parsedDistP2.x} & ${parsedDistP2.y} & ${parsedDistP2.z} \\end{vmatrix}`,
-    `\\vec{i}\\left(${parsedPointP.y} \\cdot ${parsedDistP2.z} - ${parsedPointP.z} \\cdot ${parsedDistP2.y}\\right) - \\vec{j}\\left(${parsedPointP.x} \\cdot ${parsedDistP2.z} - ${parsedPointP.z} \\cdot ${parsedDistP2.x}\\right) + \\vec{k}\\left(${parsedPointP.x} \\cdot ${parsedDistP2.y} - ${parsedPointP.y} \\cdot ${parsedDistP2.x}\\right)`,
+    `\\vec{i}\\left(${parsedPointP.y} \\cdot ${parsedDistP2.z} - ${parsedPointP.z} \\cdot ${parsedDistP2.y}\\right) - \\vec{j}\\left(${parsedPointP.x} \\cdot ${parsedDistP2.z} - ${parsedPointP.z} \\cdot ${parsedDistP2.x}\\right) + \\vec{k}\\left(${parsedPointP.x} \\cdot ${parsedDistP2.y} - ${parsedPointP.y} \\cdot ${parsedDistP2.x}\\right) `,
+
     `\\vec{i}(${parsedPointP.y * parsedDistP2.z} - ${
       parsedPointP.z * parsedDistP2.y
     }) - \\vec{j}(${parsedPointP.x * parsedDistP2.z} - ${
@@ -1703,10 +1671,10 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     }) + \\vec{k}(${parsedPointP.x * parsedDistP2.y} - ${
       parsedPointP.y * parsedDistP2.x
     })`,
+
     `\\vec{u} \\times \\vec{v} = ${crossI}\\vec{i} ${
       crossJ >= 0 ? "+" : ""
     } ${crossJ}\\vec{j} ${crossK >= 0 ? "+" : ""} ${crossK}\\vec{k}`,
-    `\\vec{u} \\times \\vec{v} = (${crossProduct.x}, ${crossProduct.y}, ${crossProduct.z})`,
   ];
 
   const magnitudeSteps1 = [
@@ -1716,7 +1684,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     } + ${crossProduct.z ** 2}}`,
     `|\\vec{u} \\times \\vec{v}| = \\sqrt{${
       crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2
-    }} \\approx ${crossMagnitude.toFixed(2)}`,
+    }} `,
   ];
 
   const verificationSteps = [
@@ -1737,7 +1705,7 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
     )}`,
   ];
 
-  // --- Componente: Área de Paralelogramo con Vértices ---
+  // --- Componente: Área de Paralelogramo con Vértices ---/
   const [rx, setRx] = useState<string>("-3");
   const [ry, setRy] = useState<string>("1");
   const [rz, setRz] = useState<string>("6");
@@ -1750,15 +1718,30 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
 
   // Vectores desde P hacia Q y desde P hacia R
   const vectorPQ: Vector = {
-    x: parsedPointP.x - parsedDistP2.x,
-    y: parsedPointP.y - parsedDistP2.y,
-    z: parsedPointP.z - parsedDistP2.z,
+    x: parsedDistP2.x - parsedPointP.x,
+    y: parsedDistP2.y - parsedPointP.y,
+    z: parsedDistP2.z - parsedPointP.z,
   };
 
-  const vectorPR: Vector = {
+  const vectorQR: Vector = {
     x: parsedR.x - parsedDistP2.x,
     y: parsedR.y - parsedDistP2.y,
     z: parsedR.z - parsedDistP2.z,
+  };
+
+  const crossI2 =
+    vectorPQ.y * vectorQR.z - vectorPQ.z * vectorQR.y;
+  const crossJ2 = -(
+    vectorPQ.x * vectorQR.z -
+    vectorPQ.z * vectorQR.x
+  );
+  const crossK2 =
+    vectorPQ.x * vectorQR.y - vectorPQ.y * vectorQR.x;
+
+  const crossProduct2: Vector = {
+    x: crossI2,
+    y: crossJ2,
+    z: crossK2,
   };
 
   // Área del paralelogramo = magnitud del producto cruz
@@ -1776,34 +1759,38 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
   ];
 
   const vectorSteps = [
-    `\\vec{PQ} = Q - P = (${parsedDistP2.x} - ${parsedPointP.x}, ${parsedDistP2.y} - ${parsedPointP.y}, ${parsedDistP2.z} - ${parsedPointP.z})`,
+    `\\vec{PQ} = Q - P = 
+    (${parsedDistP2.x} - ${parsedPointP.x}, ${parsedDistP2.y} - ${parsedPointP.y}, ${parsedDistP2.z} - ${parsedPointP.z})`,
     `\\vec{PQ} = (${vectorPQ.x}, ${vectorPQ.y}, ${vectorPQ.z})`,
-    `\\vec{PR} = R - P = (${parsedDistP2.x} - ${parsedPointP.x}, ${parsedR.y} - ${parsedPointP.y}, ${parsedR.z} - ${parsedPointP.z})`,
-    `\\vec{PR} = (${vectorPR.x}, ${vectorPR.y}, ${vectorPR.z})`,
+
+    `\\vec{QR} = R - Q = (${parsedR.x} - ${parsedDistP2.x}, ${parsedR.y} - ${parsedDistP2.y}, ${parsedR.z} - ${parsedDistP2.z})`,
+    `\\vec{PR} = (${vectorQR.x}, ${vectorQR.y}, ${vectorQR.z})`,
   ];
 
   const crossProductSteps1 = [
-    `\\vec{PQ} \\times \\vec{PR} = \\begin{vmatrix} \\vec{i} & \\vec{j} & \\vec{k} \\\\ ${vectorPQ.x} & ${vectorPQ.y} & ${vectorPQ.z} \\\\ ${vectorPR.x} & ${vectorPR.y} & ${vectorPR.z} \\end{vmatrix}`,
-    `\\vec{i}(${vectorPQ.y} \\cdot ${vectorPR.z} - ${vectorPQ.z} \\cdot ${vectorPR.y}) - \\vec{j}(${vectorPQ.x} \\cdot ${vectorPR.z} - ${vectorPQ.z} \\cdot ${vectorPR.x}) + \\vec{k}(${vectorPQ.x} \\cdot ${vectorPR.y} - ${vectorPQ.y} \\cdot ${vectorPR.x})`,
-    `\\vec{i}(${vectorPQ.y * vectorPR.z} - ${
-      vectorPQ.z * vectorPR.y
-    }) - \\vec{j}(${vectorPQ.x * vectorPR.z} - ${
-      vectorPQ.z * vectorPR.x
-    }) + \\vec{k}(${vectorPQ.x * vectorPR.y} - ${vectorPQ.y * vectorPR.x})`,
-    `\\vec{PQ} \\times \\vec{PR} = ${crossI}\\vec{i} ${
-      crossJ >= 0 ? "+" : ""
-    } ${crossJ}\\vec{j} ${crossK >= 0 ? "+" : ""} ${crossK}\\vec{k}`,
-    `\\vec{PQ} \\times \\vec{PR} = (${crossProduct.x}, ${crossProduct.y}, ${crossProduct.z})`,
+    `\\vec{PQ} \\times \\vec{PR} = \\begin{vmatrix} \\vec{i} & \\vec{j} & \\vec{k} \\\\ ${vectorPQ.x} & ${vectorPQ.y} & ${vectorPQ.z} \\\\ ${vectorQR.x} & ${vectorQR.y} & ${vectorQR.z} \\end{vmatrix}`,
+    `\\vec{i}(${vectorPQ.y} \\cdot  ${vectorQR.z} - ${vectorPQ.z} \\cdot  ${vectorQR.y}) - \\vec{j}(${vectorPQ.x} \\cdot  ${vectorQR.z} - ${vectorPQ.z} \\cdot  ${vectorQR.x}) + \\vec{k}(${vectorPQ.x} \\cdot  ${vectorQR.y} - ${vectorPQ.y} \\cdot  ${vectorQR.x})`,
+
+    `\\vec{i}(${vectorPQ.y * vectorQR.z} - ${
+      vectorPQ.z * vectorQR.y
+    }) - \\vec{j}(${vectorPQ.x * vectorQR.z} - ${
+      vectorPQ.z * vectorQR.x
+    }) + \\vec{k}(${vectorPQ.x * vectorQR.y} - ${vectorPQ.y * vectorQR.x})`,
+
+    `\\vec{PQ} \\times \\vec{PR} = ${crossI2}\\vec{i} ${
+      crossJ2 >= 0 ? "+" : ""
+    } ${crossJ2}\\vec{j} ${crossK2 >= 0 ? "+" : ""} ${crossK2}\\vec{k}`,
+    `\\vec{PQ} \\times \\vec{PR} = (${crossProduct2.x}, ${crossProduct2.y}, ${crossProduct2.z})`,
   ];
 
   const areaSteps = [
     `\\text{Área del paralelogramo} = |\\vec{PQ} \\times \\vec{PR}|`,
-    `= \\sqrt{(${crossProduct.x})^2 + (${crossProduct.y})^2 + (${crossProduct.z})^2}`,
-    `= \\sqrt{${crossProduct.x ** 2} + ${crossProduct.y ** 2} + ${
-      crossProduct.z ** 2
+    `= \\sqrt{(${crossProduct2.x})^2 + (${crossProduct2.y})^2 + (${crossProduct2.z})^2}`,
+    `= \\sqrt{${crossProduct2.x ** 2} + ${crossProduct2.y ** 2} + ${
+      crossProduct2.z ** 2
     }}`,
     `= \\sqrt{${
-      crossProduct.x ** 2 + crossProduct.y ** 2 + crossProduct.z ** 2
+      crossProduct2.x ** 2 + crossProduct2.y ** 2 + crossProduct2.z ** 2
     }} \\approx ${area.toFixed(4)}`,
   ];
 
@@ -1886,7 +1873,6 @@ const AlgebraProvider = ({ children }: ProviderProps) => {
         setYComp,
         vectors,
         setVectors,
-        VectorRow,
         scalar,
         setScalar,
         handleCompute,

@@ -1,4 +1,4 @@
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 import React from "react";
 import { BlockMath } from "react-katex";
 
@@ -13,9 +13,7 @@ const UnitVectorCalculator = () => {
     oppositeDirection,
     setOppositeDirection,
     unitVectorSteps1,
-    calculatedUnitVector,
-    mag3,
-  } = useAlgoritmos();
+  } = useAlgebra();
 
   return (
     <div className="flex flex-col gap-2">
@@ -66,18 +64,6 @@ const UnitVectorCalculator = () => {
             <BlockMath math={step} />
           </div>
         ))}
-        {calculatedUnitVector && mag3 !== 0 && (
-          <div className="mt-4 text-xl font-bold">
-            El vector unitario es aproximadamente:
-            <BlockMath
-              math={`U_V \\approx \\left( ${calculatedUnitVector.x.toFixed(
-                3
-              )}, ${calculatedUnitVector.y.toFixed(
-                3
-              )}, ${calculatedUnitVector.z.toFixed(3)} \\right)`}
-            />
-          </div>
-        )}
       </div>
     </div>
   );

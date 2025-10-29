@@ -2,10 +2,11 @@
 import "katex/dist/katex.min.css";
 import { Scatter } from "react-chartjs-2";
 import { Mode2 } from "@/types/index";
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 import TitleCourse from "@/components/TitleCourse";
 import BotonUtil from "@/utils/BotonUtil";
 import { FaPlus, FaRegTrashCan } from "react-icons/fa6";
+import VectorRow from "./VectorRow";
 
 export default function VectorSolver() {
   const {
@@ -21,14 +22,13 @@ export default function VectorSolver() {
     setYComp,
     vectors,
     setVectors,
-    VectorRow,
     scalar,
     setScalar,
     handleCompute,
     output,
     setOutput,
     chartDataAndOptions,
-  } = useAlgoritmos();
+  } = useAlgebra();
 
   const chartData = {
     datasets: chartDataAndOptions.datasets,
@@ -38,7 +38,7 @@ export default function VectorSolver() {
 
   return (
     <div className="flex flex-col gap-2  min-h-screen bg-gray-100 p-4">
-      <TitleCourse course="Vectores" />
+      <TitleCourse course="Vectores 2D" />
       <div className="flex flex-col items-center justify-center">
         <div className="bg-white/5 p-4 rounded ">
           <select

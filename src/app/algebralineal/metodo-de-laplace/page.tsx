@@ -1,5 +1,5 @@
 "use client";
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 import { MinorStep } from "@/types/index";
 import TitleCourse from "@/components/TitleCourse";
 
@@ -16,7 +16,7 @@ export default function Laplace3x3() {
     handleSizeChange4,
     steps2,
     det2,
-  } = useAlgoritmos();
+  } = useAlgebra();
 
   return (
     <div className="min-h-screen flex flex-col gap-2 items-center w-full p-4 bg-gray-100">

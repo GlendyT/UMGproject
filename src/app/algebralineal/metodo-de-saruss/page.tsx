@@ -1,7 +1,7 @@
 "use client";
 import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 import TitleCourse from "@/components/TitleCourse";
 
 const SarrusCalculator = () => {
@@ -18,7 +18,7 @@ const SarrusCalculator = () => {
     redLines,
     blueLines,
     expr,
-  } = useAlgoritmos();
+  } = useAlgebra();
 
   return (
     <div className="p-6 min-h-screen flex flex-col gap-2 items-center bg-gray-100">

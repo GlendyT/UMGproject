@@ -2,8 +2,8 @@
 import AlgoritmosContext from "@/context/AlgebraProvider";
 import { useContext } from "react";
 
-const useAlgoritmos = () => {
+const useAlgebra = () => {
   return useContext(AlgoritmosContext);
 };
 
-export default useAlgoritmos;
+export default useAlgebra;
