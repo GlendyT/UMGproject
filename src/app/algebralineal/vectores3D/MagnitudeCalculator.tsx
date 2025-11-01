@@ -1,6 +1,6 @@
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 import React from "react";
-import { BlockMath, InlineMath } from "react-katex";
+import { InlineMath } from "react-katex";
 
 const MagnitudeCalculator = () => {
   const {
@@ -11,14 +11,14 @@ const MagnitudeCalculator = () => {
     pointPz,
     setPointPz,
     magnitudeSteps,
-    angleSteps,
+    angleSteps2,
     calculatedMagnitude,
-  } = useAlgoritmos();
+  } = useAlgebra();
 
   return (
     <div className=" flex flex-col gap-2 items-center justify-center">
-      <h2 className="text-2xl font-semibold text-gray-700">
-        Magnitud y Ángulos en <InlineMath math="IR^3" />
+      <h2 className="text-2xl max-sm:text-xs font-semibold text-gray-700">
+        Magnitud y Ángulos
       </h2>
       <div className="flex flex-col items-center justify-center w-full">
         <label className="block text-gray-700 font-medium ">
@@ -49,29 +49,31 @@ const MagnitudeCalculator = () => {
         </div>
       </div>
 
-      <div className="bg-purple-50 border-l-4 border-purple-400 text-purple-800 p-4 rounded-md">
-        <h3 className="text-lg font-semibold mb-2">Cálculo de Magnitud:</h3>
-        {magnitudeSteps.map((step, index) => (
-          <div key={index} className="mb-2">
-            <BlockMath math={step} />
-          </div>
-        ))}
-        <p className="mt-4 text-xl font-bold">
-          La magnitud del vector V es aproximadamente:{" "}
-          <InlineMath math={`${calculatedMagnitude.toFixed(2)}`} />
-        </p>
-      </div>
-
-      {calculatedMagnitude > 0 && (
-        <div className="bg-blue-50 border-l-4 border-blue-400 text-blue-800 p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-2">Ángulos Directores:</h3>
-          {angleSteps.map((step, index) => (
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <div className="bg-purple-50 flex flex-col gap-2 items-center justify-center border-l-4 border-purple-400 text-purple-800 p-4 rounded-md">
+          <h3 className="text-lg font-semibold mb-2">Cálculo de Magnitud:</h3>
+          {magnitudeSteps.map((step, index) => (
             <div key={index} className="mb-2">
-              <BlockMath math={step} />
+              <InlineMath math={step} />
             </div>
           ))}
+          <p className=" text-xl font-bold">
+            La magnitud:{" "}
+            <InlineMath math={`${calculatedMagnitude.toFixed(2)}`} />
+          </p>
         </div>
-      )}
+
+        {calculatedMagnitude > 0 && (
+          <div className="bg-blue-50 flex flex-col gap-2 items-center justify-center border-l-4 border-blue-400 text-blue-800 p-4 rounded-md">
+            <h3 className="text-lg font-semibold mb-2">Ángulos Directores:</h3>
+            {angleSteps2.map((step, index) => (
+              <div key={index} className="mb-2">
+                <InlineMath math={step} />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,7 +1,7 @@
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 
 const Solucion = () => {
-  const { solution, formatNumber } = useAlgoritmos();
+  const { solution, formatNumber } = useAlgebra();
   return (
     <div className="">
       {solution && (

@@ -3,11 +3,11 @@ import BotonUtil from "@/utils/BotonUtil";
 import Tabla from "@/components/Tabla";
 import Solucion from "@/components/Solucion";
 import Pasos from "@/components/Pasos";
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 import TitleCourse from "@/components/TitleCourse";
 
 const MetodoGauss = () => {
-  const { size, handleSizeChange, solve, nuevo } = useAlgoritmos();
+  const { size, handleSizeChange, solve, nuevo } = useAlgebra();
   return (
     <div className="min-h-screen p-4 w-full flex flex-col gap-2">
       <TitleCourse course="Metodo de Gauss" />

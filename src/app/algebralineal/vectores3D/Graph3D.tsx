@@ -1,4 +1,4 @@
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 import React from "react";
 
 const Graph3D = () => {
@@ -21,7 +21,7 @@ const Graph3D = () => {
     py,
     parsedPointP,
     label,
-  } = useAlgoritmos();
+  } = useAlgebra();
 
   return (
     <div className="flex justify-center items-center h-80 w-full bg-white rounded-md border border-gray-200 overflow-hidden relative">

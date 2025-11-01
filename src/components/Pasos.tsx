@@ -1,7 +1,7 @@
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 
 const Pasos = () => {
-  const { steps } = useAlgoritmos();
+  const { steps } = useAlgebra();
   return (
     <div className="w-full  h-full bg-amber-50 rounded-lg shadow-md">
       <div className="p-4 bg-amber-100 rounded-t-lg border-b border-amber-200">

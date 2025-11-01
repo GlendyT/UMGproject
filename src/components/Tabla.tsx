@@ -1,7 +1,7 @@
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 
 const Tabla = () => {
-  const { matrix, handleChange } = useAlgoritmos();
+  const { matrix, handleChange } = useAlgebra();
   return (
     <table className="table-auto border-collapse rounded-lg overflow-hidden">
       <thead className="bg-teal-800 border-collapse rounded-3xl text-white">

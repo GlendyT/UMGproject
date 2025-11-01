@@ -97,7 +97,6 @@ export interface AlgebraContextType {
   setVectors: (
     v: { mag?: string; angle?: string; x?: string; y?: string }[]
   ) => void;
-  VectorRow: (props: { idx: number }) => JSX.Element;
   scalar: string;
   setScalar: (s: string) => void;
   handleCompute: () => void;
@@ -649,3 +648,21 @@ export type CalculatorType =
   | "parallelogramArea";
 
 // --- NUEVOS Componentes de Gráficos ---
+
+
+  export interface ChartInstance {
+    ctx: CanvasRenderingContext2D;
+    data: {
+      datasets: Array<{
+        drawArrow?: boolean;
+        arrowColor?: string;
+        borderColor?: string;
+        lineWidth?: number;
+      }>;
+    };
+    getDatasetMeta: (index: number) => {
+      data: Array<{
+        getProps: (props: string[], final: boolean) => { x: number; y: number };
+      }>;
+    };
+  }

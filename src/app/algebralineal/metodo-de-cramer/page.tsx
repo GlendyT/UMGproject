@@ -3,7 +3,7 @@ import { BlockMath, InlineMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import Fraction from "fraction.js";
 import BotonUtil from "@/utils/BotonUtil";
-import useAlgoritmos from "@/hooks/useAlgebra";
+import useAlgebra from "@/hooks/useAlgebra";
 import { Matrix } from "@/types/index";
 import TitleCourse from "@/components/TitleCourse";
 
@@ -19,7 +19,7 @@ export default function CramerSolver() {
     handleSizeChange3,
     matrixToString,
     determinantExpression,
-  } = useAlgoritmos();
+  } = useAlgebra();
 
   return (
     <div className="p-6 ">

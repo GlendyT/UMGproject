@@ -1233,7 +1233,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
     }
 
     // Eliminamos duplicados (por ejemplo si p contiene 1 y -1, usamos valores absolutos y luego anteponemos ±)
-    const uniqueRaw = Array.from(new Set(combos.map((c) => c)));
+    //const uniqueRaw = Array.from(new Set(combos.map((c) => c)));
 
     // Construimos la presentación: \pm 1/1, \pm 1/3, ... (mostrando solo las formas positivas en el numerador/denominador pero con ± delante)
     const positivePairs: string[] = [];
@@ -1935,6 +1935,7 @@ const PrecalculoProvider = ({ children }: ProviderProps) => {
     try {
       return new Fraction(omega).toFraction(true);
     } catch (e) {
+      console.log(e)
       return String(omega);
     }
   })();
