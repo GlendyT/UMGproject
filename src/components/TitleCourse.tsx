@@ -7,7 +7,7 @@ type TitleCourseProps = {
 
 const TitleCourse = ({ course }: TitleCourseProps) => {
   return (
-    <div className="flex flex-row w-full items-center ">
+    <div className="flex flex-row w-full ">
       <BotonBack />
       <h1 className="text-center w-full text-2xl font-extrabold max-sm:text-xl">
         {course}

@@ -269,15 +269,37 @@ export interface MatematicaDiscretaContextType {
 
 export type GateType = "AND" | "OR" | "NOT" | "XOR" | "NAND" | "NOR" | "XNOR";
 
+export type youtubeVideos = {
+  id: number;
+  title: string;
+  url: string;
+};
+
+export type slugstype = {
+  id: number;
+  name: string;
+  href: string;
+  file?: string;
+  videos?: youtubeVideos[];
+};
+
 export type routetype = {
   id: number;
   name: string;
   href: string;
   bgColor: string;
   image: string;
+  subroutes?: slugstype[];
 };
 
-export type slugstype = Omit<routetype, "bgColor" | "image">;
+export type SemesterType = {
+  id: number;
+  name: string;
+  mainroute: string;
+  routes: routetype[];
+  bgColor: string;
+  image: string;
+};
 
 export type Quadrant = 1 | 2 | 3 | 4;
 
@@ -649,20 +671,19 @@ export type CalculatorType =
 
 // --- NUEVOS Componentes de Gráficos ---
 
-
-  export interface ChartInstance {
-    ctx: CanvasRenderingContext2D;
-    data: {
-      datasets: Array<{
-        drawArrow?: boolean;
-        arrowColor?: string;
-        borderColor?: string;
-        lineWidth?: number;
-      }>;
-    };
-    getDatasetMeta: (index: number) => {
-      data: Array<{
-        getProps: (props: string[], final: boolean) => { x: number; y: number };
-      }>;
-    };
-  }
+export interface ChartInstance {
+  ctx: CanvasRenderingContext2D;
+  data: {
+    datasets: Array<{
+      drawArrow?: boolean;
+      arrowColor?: string;
+      borderColor?: string;
+      lineWidth?: number;
+    }>;
+  };
+  getDatasetMeta: (index: number) => {
+    data: Array<{
+      getProps: (props: string[], final: boolean) => { x: number; y: number };
+    }>;
+  };
+}

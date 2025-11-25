@@ -2,9 +2,10 @@
 import SubTitleCards from "@/components/SubTitleCards";
 import TitleCourse from "@/components/TitleCourse";
 import { AlgoritmoSlugs } from "@/utils/data/routes";
-import React from "react";
 
 const Algoritmos = () => {
+
+
   return (
     <section className="flex flex-col gap-2  min-h-screen bg-gray-100 p-4">
       <TitleCourse course="Algoritmos" />
